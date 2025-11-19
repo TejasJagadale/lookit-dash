@@ -203,12 +203,12 @@ const Dashboard = () => {
                       }}
                     />
                   </div>
-                  <div className="card-contentdash">
+                  {/* <div className="card-contentdash">
                     <h4 className="post-titledash">{limitText(post.title, 30)}</h4>
                     <div className="post-metadash">
                       <span className="datedash">{formatDate(post.created_at)}</span>
                     </div>
-                  </div>
+                  </div> */}
                 </div>
               ))}
             </div>
