@@ -179,9 +179,9 @@ const Dashboard = () => {
                 <span className="title-icondash">🔥</span>
                 <h2>Trending Content</h2>
               </div>
-              <div className="section-badgedash">
+              {/* <div className="section-badgedash">
                 {posts.trending.length} posts
-              </div>
+              </div> */}
             </div>
             <div className="trending-griddash">
               {posts.trending.map((post, index) => (
