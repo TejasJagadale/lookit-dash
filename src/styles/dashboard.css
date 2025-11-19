@@ -170,7 +170,7 @@
 
 .section-titledash h2 {
   font-size: 1.5rem;
-  font-weight: 600;
+  font-weight: bolder;
   color: #333;
   margin: 0;
 }
@@ -221,22 +221,22 @@
 }
 
 .card-imagedash {
-  width: 100%;
+  /* width: 100%; */
   height: 160px;
   border-radius: 12px;
   overflow: hidden;
-  margin-bottom: 15px;
+  /* margin-bottom: 15px; */
 }
 
 .card-imagedash img {
-  width: 100%;
+  /* width: 100%; */
   height: 100%;
   object-fit: cover;
   transition: transform 0.3s ease;
 }
 
 .card-contentdash {
-  width: 70%;
+  width: 100%;
 }
 
 .card-contentdash h4 {
@@ -249,7 +249,7 @@
   /* -webkit-line-clamp: 2; */
   -webkit-box-orient: vertical;
   overflow: hidden;
-  width: 170px;
+  width: fit-content;
 }
 
 /* Categories Grid */
@@ -267,7 +267,9 @@
 .category-infodash {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 15px;
+  width: 100%;
 }
 
 .category-avatardash {
@@ -280,7 +282,7 @@
 
 .category-infodash h3 {
   font-size: 1.3rem;
-  font-weight: 600;
+  font-weight: bolder;
   color: #333;
   /* margin: 0 0 4px 0; */
 }
@@ -405,6 +407,10 @@
   height: 100vh;
 }
 
+.category-infodash1 {
+  text-align: right;
+}
+
 .loading-spinnerdash {
   width: 50px;
   height: 50px;
@@ -429,32 +435,48 @@
   .categories-griddash {
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 10px;
+    padding: 10px 0;
   }
 
   .dashboard-headerdash {
-    flex-direction: column;
-    text-align: center;
+    /* flex-direction: column; */
+    text-align: left;
     gap: 20px;
   }
 }
 
 @media (max-width: 768px) {
+
   .icon-postdash {
     height: 45px;
   }
 
+  .post-metadash{
+    display: none;
+  }
+
   .card-contentdash h4 {
-    font-size: 0.8rem;
+    font-size: 0.4rem;
+    width: auto;
+    margin: 0px;
+  }
+
+  .datedash {
+    color: #2d3748;
+    font-size: 0.5rem;
+    line-height: 0.1px;
   }
 
   .trending-carddash {
     background-color: #f5f5f5 !important;
     display: flex;
+    flex-direction: column;
     justify-content: space-between;
     align-items: center;
-    gap: 5px;
+    /* gap: 5px; */
     border-radius: 15px;
-    padding: 10px;
+    padding: 5px;
+    width: 100%;
   }
 
   .professional-dashboarddash {
@@ -462,13 +484,14 @@
   }
 
   .stats-griddash {
-    grid-template-columns: 1fr;
-    gap: 5px;
-    margin-bottom: 5px;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 7px;
   }
 
   .trending-griddash {
-    grid-template-columns: 1fr;
+    display: flex;
+    gap: 5px;
   }
 
   .section-carddash {
@@ -477,10 +500,16 @@
 
   .stat-carddash {
     padding: 10px;
+    width: -webkit-fill-available;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 0px;
   }
 
   .header-contentdash h1 {
-    font-size: 1.8rem;
+    font-size: 1.5rem;
+    line-height: 30px;
   }
 
   .category-infodash {
@@ -494,7 +523,18 @@
     text-align: right;
   }
 
+  .card-imagedash {
+    width: 100%;
+    height: 60px;
+    object-fit: contain;
+    border-radius: 12px;
+    overflow: hidden;
+    /* margin-bottom: 15px; */
+  }
+
   .card-imagedash img {
+    width: 100%;
+    height: 100%;
     object-fit: contain;
     transition: transform 0.3s ease;
   }
@@ -569,8 +609,16 @@
     margin: 0;
   }
 
+  .stat-infodash {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
   .stat-infodash p {
-    font-size: 0.9rem;
+    font-size: 0.7rem;
+    text-align: center;
   }
 
   .stat-infodash h3 {
@@ -591,7 +639,7 @@
   .category-postsdash {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 10px;
     width: 100%;
   }
 
