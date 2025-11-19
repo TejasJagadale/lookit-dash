@@ -40,7 +40,7 @@ const Dashboard = () => {
           post.status === "request" &&
           post.isActive === "yes"
         )
-        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at)) // Datewise latest first
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
         .slice(0, 6)
     }
 
@@ -57,23 +57,13 @@ const Dashboard = () => {
             post.status === "request" &&
             post.isActive === "yes"
           )
-          .sort((a, b) => new Date(b.created_at) - new Date(a.created_at)) // Datewise latest first
-          .slice(0, 3) // Limit to 3 posts per category
-      })).filter(category => category.posts.length > 0); // Only include categories with posts
+          .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+          .slice(0, 3)
+      })).filter(category => category.posts.length > 0);
     }
 
     return result;
   };
-
-  // Function to get content type badge
-  // const getContentTypeBadge = (contentType) => {
-  //   const types = {
-  //     video: { text: "Video", class: "video" },
-  //     article: { text: "Article", class: "article" }
-  //   };
-
-  //   return types[contentType] || { text: "Content", class: "default" };
-  // };
 
   // Function to format date
   const formatDate = (dateString) => {
@@ -90,166 +80,200 @@ const Dashboard = () => {
     navigate(`/post/${post.id}`, { state: { post } });
   };
 
+  // Handle view all for categories
+  const handleViewAll = (category) => {
+    navigate(`/category/${category.id}`, {
+      state: {
+        category: {
+          ...category,
+          posts: category.posts // Pass the current posts to avoid immediate API call
+        }
+      }
+    });
+  };
+
   useEffect(() => {
     fetchPosts();
-  });
+  }, []);
 
   const totalPosts = posts.trending.length + posts.categories.reduce((sum, cat) => sum + cat.posts.length, 0);
   const totalCategories = posts.categories.length;
 
+  if (loading) {
+    return (
+      <div className="dashboard-loading">
+        <div className="loading-spinner"></div>
+        <p>Loading dashboard...</p>
+      </div>
+    );
+  }
+
   return (
-    <>
-      <div className="dashboard-container1">
-        <h2>Content Dashboard</h2>
-        {/* Statistics Overview */}
-        <div className="stats-grid">
-          <div className="stat-card total">
-            <h3>Total Posts</h3>
-            <p>{totalPosts}</p>
-          </div>
-
-          <div className="stat-card active">
-            <h3>Trending Posts</h3>
-            <p>{posts.trending.length}</p>
-          </div>
-
-          <div className="stat-card categories">
-            <h3>Active Categories</h3>
-            <p>{totalCategories}</p>
+    <div className="professional-dashboarddash">
+      {/* Header Section */}
+      <div className="dashboard-headerdash">
+        <div className="header-contentdash">
+          <h1>Content Dashboard</h1>
+          <p>Manage and monitor your content performance</p>
+        </div>
+        <div className="header-statsdash">
+          <div className="stat-badgedash">
+            <span className="stat-numberdash">{totalPosts}</span>
+            <span className="stat-labeldash">Total Posts</span>
           </div>
         </div>
       </div>
-      {/* Trending Posts Section */}
-      {posts.trending.length > 0 && (
-        <div className="trendsection">
-          <h3>🔥 Trending Posts</h3>
-          <div className="posts-grid1">
-            {posts.trending.map((post, index) => {
-              // const contentType = getContentTypeBadge(post.content_type);
-              return (
-                <div
-                  key={`trending-${post.id}`}
-                  className="post-card-trend trending"
-                  onClick={() => handlePostClick(post)}
-                >
-                  {post.app_thumbnail && post.app_thumbnail !== "nil" && (
-                    <img
-                      src={post.app_thumbnail || post.web_thumbnail || "/assets/lookit.webp"}
-                      className="post-image-trend"
-                      alt="post-image"
-                      onError={(e) => {
-                        e.target.onerror = null; // prevent infinite loop
-                        e.target.src = "/assets/lookit.webp"; // fallback local image
-                      }}
-                    />
-                  )}
 
-                  <div className="post-header">
-                    <span className="post-title">{post.title}</span>
-                    {/* <span className={`content-type ${contentType.class}`}>
-                            {contentType.text}
-                          </span> */}
-                  </div>
+      {/* Main Dashboard Grid */}
+      <div className="dashboard-maindash">
+        {/* Statistics Overview */}
+        <div className="stats-sectiondash">
+          <div className="stats-griddash">
+            <div className="stat-carddash">
+              <div className="stat-icondash total">
+                <i className="icon-postdash">📄</i>
+              </div>
+              <div className="stat-infodash">
+                <h3>{totalPosts}</h3>
+                <p>Total Posts</p>
+              </div>
+            </div>
 
-                  <div className="post-meta">
-                    <span className="date">{formatDate(post.created_at)}</span>
-                    {/* <span className="category">{post.category?.name}</span>
-                          <span className="likes">❤️ {post.likes_count}</span> */}
-                  </div>
-                  {/* <p className="post-description">
-                        {post.description.length > 150
-                          ? `${post.description.substring(0, 150)}...`
-                          : post.description
-                        }
-                      </p> */}
-                  {/* <div className="post-footer">
-                          {post.youtube_url && post.youtube_url !== "nil" && (
-                            <span className="youtube-link">🎥 YouTube</span>
-                          )}
-                        </div> */}
-                </div>
-              );
-            })}
+            <div className="stat-carddash">
+              <div className="stat-icondash trending">
+                <i className="icon-trendingdash">🔥</i>
+              </div>
+              <div className="stat-infodash">
+                <h3>{posts.trending.length}</h3>
+                <p>Trending Posts</p>
+              </div>
+            </div>
+
+            <div className="stat-carddash">
+              <div className="stat-icon categoriesdash">
+                <i className="icon-categorydash">📂</i>
+              </div>
+              <div className="stat-infodash">
+                <h3>{totalCategories}</h3>
+                <p>Active Categories</p>
+              </div>
+            </div>
           </div>
         </div>
-      )}
-      <div className="dashboard-container">
-        {loading ? (
-          <p>Loading content data...</p>
-        ) : (
-          <>
-            {/* Categories Section */}
-            {posts.categories.map(category => (
-              <div key={`category-${category.id}`} className="section">
-                <div className="category-header">
-                  <h3>{category.name}</h3>
+
+        {/* Trending Posts Section */}
+        {posts.trending.length > 0 && (
+          <div className="section-carddash trending-sectiondash">
+            <div className="section-headerdash">
+              <div className="section-titledash">
+                <span className="title-icondash">🔥</span>
+                <h2>Trending Content</h2>
+              </div>
+              <div className="section-badgedash">
+                {posts.trending.length} posts
+              </div>
+            </div>
+            <div className="trending-griddash">
+              {posts.trending.map((post, index) => (
+                <div
+                  key={`trending-${post.id}`}
+                  className="trending-carddash"
+                  onClick={() => handlePostClick(post)}
+                >
+                  <div className="card-headerdash">
+                    <span className="trending-badgedash">Trending #{index + 1}</span>
+                  </div>
+                  <div className="card-imagedash">
+                    <img
+                      src={post.app_thumbnail || post.web_thumbnail || "/assets/lookit.webp"}
+                      alt={post.title}
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = "/assets/lookit.webp";
+                      }}
+                    />
+                  </div>
+                  <div className="card-contentdash">
+                    <h4 className="post-titledash">{post.title}</h4>
+                    <div className="post-metadash">
+                      <span className="datedash">{formatDate(post.created_at)}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Categories Grid */}
+        <div className="categories-griddash">
+          {posts.categories.map(category => (
+            <div key={`category-${category.id}`} className="section-carddash category-sectiondash">
+              <div className="section-headerdash">
+                <div className="category-infodash">
                   {category.image && (
                     <img
                       src={category.image || "/assets/lookit.webp"}
                       alt={category.name}
-                      className="category-icon"
+                      className="category-avatardash"
                       onError={(e) => {
-                        e.target.onerror = null; // prevent infinite loop
-                        e.target.src = "/assets/lookit.webp"; // fallback local image
+                        e.target.onerror = null;
+                        e.target.src = "/assets/lookit.webp";
                       }}
                     />
                   )}
+                  <div className="category-infodash1">
+                    <h3>{category.name}</h3>
+                    <span className="posts-countdash">{category.posts.length} posts</span>
+                  </div>
                 </div>
+                <button
+                  className="view-all-btndash"
+                  onClick={() => handleViewAll(category)}
+                >
+                  View All
+                </button>
+              </div>
 
-                <div className="posts-grid">
-                  {category.posts.map((post, index) => {
-                    // const contentType = getContentTypeBadge(post.content_type);
-                    return (
-                      <div
-                        key={`${category.id}-${post.id}`}
-                        className="post-card"
-                        onClick={() => handlePostClick(post)}
-                      >
-                        {post.app_thumbnail && post.app_thumbnail !== "nil" && (
-                          <img
-                            src={post.app_thumbnail || post.web_thumbnail || "/assets/lookit.webp"}
-                            alt={post.title}
-                            className="post-image"
-                            onError={(e) => {
-                              e.target.onerror = null; // prevent infinite loop
-                              e.target.src = "/assets/lookit.webp"; // fallback local image
-                            }}
-                          />
-                        )}
-                        <div className="post-header">
-                          <span className="post-title">{post.title}</span>
-                          {/* <span className={`content-type ${contentType.class}`}>
-                            {contentType.text}
-                          </span> */}
-                        </div>
-
-                        {/* <p className="post-description">
-                          {post.description.length > 120
-                            ? `${post.description.substring(0, 120)}...`
-                            : post.description
-                          }
-                        </p> */}
-
-                        <div className="post-footer">
-                          <span className="date">{formatDate(post.created_at)}</span>
-                          {/* <span className="likes">❤️ {post.likes_count}</span> */}
-                        </div>
+              <div className="category-postsdash">
+                {category.posts.map((post) => (
+                  <div
+                    key={`${category.id}-${post.id}`}
+                    className="post-carddash"
+                    onClick={() => handlePostClick(post)}
+                  >
+                    <div className="post-imagedash">
+                      <img
+                        src={post.app_thumbnail || post.web_thumbnail || "/assets/lookit.webp"}
+                        alt={post.title}
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = "/assets/lookit.webp";
+                        }}
+                      />
+                    </div>
+                    <div className="post-contentdash">
+                      <h4 className="post-titledash">{post.title}</h4>
+                      <div className="post-footerdash">
+                        <span className="datedash">{formatDate(post.created_at)}</span>
                       </div>
-                    );
-                  })}
-                </div>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
+          ))}
+        </div>
 
-            {totalPosts === 0 && (
-              <div className="no-data">
-                <p>No content available at the moment.</p>
-              </div>
-            )}
-          </>
+        {totalPosts === 0 && (
+          <div className="empty-statedash">
+            <div className="empty-icondash">📝</div>
+            <h3>No Content Available</h3>
+            <p>There's no content to display at the moment.</p>
+          </div>
         )}
       </div>
-    </>
+    </div>
   );
 };
 

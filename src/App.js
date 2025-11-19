@@ -7,6 +7,7 @@ import Schedule from "./components/ScheduleForm";
 import PostDetail from "./components/PostDetail";
 import "./index.css";
 import MainCategory from "./components/MainCategory.js";
+import CategoryPage from "./components/CategoryPage.js";
 
 function App() {
   return (
@@ -17,8 +18,9 @@ function App() {
           <Route path="/" element={<Dashboard />} />
           <Route path="/notifications" element={<NotificationList />} />
           <Route path="/schedule" element={<Schedule />} />
-          <Route path="/maincategory" element={<MainCategory />} />
+          <Route path="/Sub-Category" element={<MainCategory />} />
           <Route path="/post/:id" element={<PostDetail />} />
+          <Route path="/category/:categoryId" element={<CategoryPage />} />
         </Routes>
       </div>
     </Router>

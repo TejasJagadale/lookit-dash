@@ -26,16 +26,16 @@ const Navbar = () => {
       {/* Navigation Links */}
       <ul className={`nav-links ${menuOpen ? "open" : ""}`}>
         <li
-          className={location.pathname === "/maincategory" ? "active" : ""}
-          onClick={closeMenu}
-        >
-          <Link to="/maincategory">Main-Category</Link>
-        </li>
-        <li
           className={location.pathname === "/" ? "active" : ""}
           onClick={closeMenu}
         >
-          <Link to="/">Sub-Category</Link>
+          <Link to="/">Main-Category</Link>
+        </li>
+        <li
+          className={location.pathname === "/Sub-Category" ? "active" : ""}
+          onClick={closeMenu}
+        >
+          <Link to="/Sub-Category">Sub-Category</Link>
         </li>
         <li
           className={location.pathname === "/notifications" ? "active" : ""}

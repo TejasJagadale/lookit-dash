@@ -143,7 +143,7 @@ body {
   /* box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); */
   transition: all 0.3s ease;
   position: relative;
-  height: 415px;
+  height: auto;
 }
 
 .post-cardm:hover {
@@ -206,7 +206,7 @@ body {
 }
 
 .post-titlem {
-  font-size: 1.1rem;
+  font-size: 0.8rem;
   font-weight: 700;
   color: #2d3748;
   /* margin-bottom: 0.75rem; */
@@ -318,7 +318,7 @@ body {
 
 .category-title-wrapper {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   width: 100%;
 }
@@ -335,6 +335,10 @@ body {
 
 /* Responsive Design */
 @media (max-width: 768px) {
+  .category-section {
+    width: 100%;
+  }
+
   .categories-container {
     display: grid;
     grid-template-columns: auto;

@@ -178,24 +178,6 @@ function MainCategory() {
             <div className="category-headerm">
                 <div className="category-title-wrapper">
                     <h2 className="category-title">{categoryData.name}</h2>
-                    {categoryData.image ? (
-                        <img
-                            src={categoryData.image}
-                            alt={imageee}
-                            className="category-icon"
-                            onError={(e) => {
-                                e.target.onerror = null; // Prevent infinite loop
-                                e.target.src = "/assets/default.png"; // <-- fallback local image
-                            }}
-                        />
-                    ) : (
-                        <img
-                            src="/assets/default.png"   // <-- when image is empty/null
-                            alt="default"
-                            className="category-icon"
-                        />
-                    )}
-
                 </div>
                 {/* <span className="post-count">{categoryData.posts.length} posts</span> */}
             </div>
