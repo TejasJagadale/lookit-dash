@@ -1,12 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/MainCategory.css';
 import imageee from "../assets/lookit.webp"
+import animationData from "../animation/lottie.json";
+import Lottie from "lottie-react";
 
 function MainCategory() {
     const [categories, setCategories] = useState({});
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [apiResponse, setApiResponse] = useState(null);
+
+    const limitText = (text, max = 50) => {
+        if (!text) return "";
+        return text.length > max ? text.substring(0, max) + "..." : text;
+    };
 
     // Manual category title mapping
     const categoryTitles = {
@@ -118,17 +125,17 @@ function MainCategory() {
                 />
             </div>
 
-            <div className="post-headerm">
+            {/* <div className="post-headerm">
                 <span className="category-tag">
                     {post.category?.name || 'Uncategorized'}
                 </span>
-                {/* <span className="likes-count">
+                <span className="likes-count">
                     ❤️ {post.likes_count || 0}
-                </span> */}
-            </div>
+                </span>
+            </div> */}
 
             <div className="post-contentm">
-                <h3 className="post-titlem">{post.title}</h3>
+                <h3 className="post-titlem">{limitText(post.title, 25)}</h3>
 
                 {/* <p className="post-description">
                     {post.description && post.description.length > 150
@@ -192,9 +199,8 @@ function MainCategory() {
 
     if (loading) {
         return (
-            <div className="loading">
-                <div className="spinner"></div>
-                <p>Loading posts...</p>
+            <div className="dashboard-loadingdash">
+                <Lottie className="dashboard-loadingdash" animationData={animationData} loop={true} />
             </div>
         );
     }
@@ -242,10 +248,6 @@ function MainCategory() {
                     </div>
                 )}
             </main>
-
-            <footer className="app-footer">
-                <p>&copy; 2024 TN Readers. All rights reserved.</p>
-            </footer>
         </div>
     );
 }

@@ -91,9 +91,13 @@ const PostDetail = () => {
                 {(post.FullImgPath && post.FullImgPath !== "https://tnreaders.in/images/post/news-detail/7d7702b1-54d2-40.jpg") && (
                     <div className="featured-image">
                         <img
-                            src={post.FullImgPath}
+                            src={post.FullImgPath || "/assets/lookit.webp"}
                             alt={post.title}
                             className="main-image"
+                            onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.src = "/assets/lookit.webp";
+                            }}
                         />
                     </div>
                 )}
@@ -102,13 +106,19 @@ const PostDetail = () => {
                 <div className="thumbnail-images">
                     {post.app_thumbnail && post.app_thumbnail !== "nil" && (
                         <div className="thumbnail">
-                            <img src={post.app_thumbnail} alt="App Thumbnail" />
+                            <img src={post.app_thumbnail || "/assets/lookit.webp"} alt="App Thumbnail" onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.src = "/assets/lookit.webp";
+                            }} />
                             <span>App Thumbnail</span>
                         </div>
                     )}
                     {post.web_thumbnail && post.web_thumbnail !== "nil" && (
                         <div className="thumbnail">
-                            <img src={post.web_thumbnail} alt="Web Thumbnail" />
+                            <img src={post.web_thumbnail || "/assets/lookit.webp"} alt="Web Thumbnail" onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.src = "/assets/lookit.webp";
+                            }} />
                             <span>Web Thumbnail</span>
                         </div>
                     )}

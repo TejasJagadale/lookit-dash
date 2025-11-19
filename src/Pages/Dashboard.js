@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import animationData from "../animation/lottie.json";
 import "../styles/dashboard.css";
+import Lottie from "lottie-react";
 
 const Dashboard = () => {
   const [posts, setPosts] = useState({
@@ -96,14 +98,19 @@ const Dashboard = () => {
     fetchPosts();
   }, []);
 
+  // Limit text to specific characters
+  const limitText = (text, max = 50) => {
+    if (!text) return "";
+    return text.length > max ? text.substring(0, max) + "..." : text;
+  };
+
   const totalPosts = posts.trending.length + posts.categories.reduce((sum, cat) => sum + cat.posts.length, 0);
   const totalCategories = posts.categories.length;
 
   if (loading) {
     return (
-      <div className="dashboard-loading">
-        <div className="loading-spinner"></div>
-        <p>Loading dashboard...</p>
+      <div className="dashboard-loadingdash">
+        <Lottie className="dashboard-loadingdash" animationData={animationData} loop={true} />
       </div>
     );
   }
@@ -130,8 +137,9 @@ const Dashboard = () => {
         <div className="stats-sectiondash">
           <div className="stats-griddash">
             <div className="stat-carddash">
-              <div className="stat-icondash total">
-                <i className="icon-postdash">📄</i>
+              <div className="stat-icondash totaldash">
+                {/* <i className="icon-postdash">📄</i> */}
+                <img className="icon-postdash" src="/svg/post.svg" alt="" />
               </div>
               <div className="stat-infodash">
                 <h3>{totalPosts}</h3>
@@ -140,8 +148,9 @@ const Dashboard = () => {
             </div>
 
             <div className="stat-carddash">
-              <div className="stat-icondash trending">
-                <i className="icon-trendingdash">🔥</i>
+              <div className="stat-icondash trendingdash">
+                {/* <i className="icon-trendingdash">🔥</i> */}
+                <img className="icon-postdash" src="/svg/trend.svg" alt="" />
               </div>
               <div className="stat-infodash">
                 <h3>{posts.trending.length}</h3>
@@ -150,8 +159,9 @@ const Dashboard = () => {
             </div>
 
             <div className="stat-carddash">
-              <div className="stat-icon categoriesdash">
-                <i className="icon-categorydash">📂</i>
+              <div className="stat-icondash categoriesdash">
+                {/* <i className="icon-categorydash">📂</i> */}
+                <img className="icon-postdash" src="/svg/category.svg" alt="" />
               </div>
               <div className="stat-infodash">
                 <h3>{totalCategories}</h3>
@@ -180,9 +190,9 @@ const Dashboard = () => {
                   className="trending-carddash"
                   onClick={() => handlePostClick(post)}
                 >
-                  <div className="card-headerdash">
+                  {/* <div className="card-headerdash">
                     <span className="trending-badgedash">Trending #{index + 1}</span>
-                  </div>
+                  </div> */}
                   <div className="card-imagedash">
                     <img
                       src={post.app_thumbnail || post.web_thumbnail || "/assets/lookit.webp"}
@@ -194,7 +204,7 @@ const Dashboard = () => {
                     />
                   </div>
                   <div className="card-contentdash">
-                    <h4 className="post-titledash">{post.title}</h4>
+                    <h4 className="post-titledash">{limitText(post.title, 30)}</h4>
                     <div className="post-metadash">
                       <span className="datedash">{formatDate(post.created_at)}</span>
                     </div>
@@ -227,12 +237,12 @@ const Dashboard = () => {
                     <span className="posts-countdash">{category.posts.length} posts</span>
                   </div>
                 </div>
-                <button
+                {/* <button
                   className="view-all-btndash"
                   onClick={() => handleViewAll(category)}
                 >
                   View All
-                </button>
+                </button> */}
               </div>
 
               <div className="category-postsdash">
@@ -253,7 +263,7 @@ const Dashboard = () => {
                       />
                     </div>
                     <div className="post-contentdash">
-                      <h4 className="post-titledash">{post.title}</h4>
+                      <h4 className="post-titledash">{limitText(post.title, 35)}</h4>
                       <div className="post-footerdash">
                         <span className="datedash">{formatDate(post.created_at)}</span>
                       </div>

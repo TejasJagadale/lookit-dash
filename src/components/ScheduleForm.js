@@ -22,11 +22,11 @@ const ScheduleForm = ({ editMode = false, editData = null, onClose }) => {
     }
   }, [editMode, editData]);
 
-  const generateUniqueCode = () => {
-    const timestamp = Date.now();
-    const randomPart = Math.floor(Math.random() * 1000000);
-    return `TYPE-${timestamp}-${randomPart}`;
-  };
+  // const generateUniqueCode = () => {
+  //   const timestamp = Date.now();
+  //   const randomPart = Math.floor(Math.random() * 1000000);
+  //   return `TYPE-${timestamp}-${randomPart}`;
+  // };
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];

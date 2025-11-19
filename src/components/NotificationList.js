@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
 import "../styles/notifications.css";
-import ScheduleForm from "./ScheduleForm"; // <-- Import the same form for editing
+import ScheduleForm from "./ScheduleForm";
+import animationData from "../animation/lottie.json";
+import Lottie from "lottie-react";
 
 const NotificationList = () => {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
-
   // State for editing modal
   const [editingData, setEditingData] = useState(null);
 
@@ -14,7 +15,7 @@ const NotificationList = () => {
       const res = await fetch("https://users.mpdatahub.com/api/notifications/list");
       const data = await res.json();
       console.log(data);
-      
+
       setNotifications(data.data || []);
     } catch (error) {
       console.error("Error fetching notifications:", error);
@@ -110,7 +111,9 @@ const NotificationList = () => {
 
 
       {loading ? (
-        <p>Loading...</p>
+        <div className="dashboard-loadingdash">
+          <Lottie className="dashboard-loadingdash" animationData={animationData} loop={true} />
+        </div>
       ) : notifications.length === 0 ? (
         <p>No notifications found.</p>
       ) : (
