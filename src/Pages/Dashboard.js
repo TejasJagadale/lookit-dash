@@ -234,7 +234,7 @@ const Dashboard = () => {
                   )}
                   <div className="category-infodash1">
                     <h3>{category.name}</h3>
-                    <span className="posts-countdash">{category.posts.length} posts</span>
+                    {/* <span className="posts-countdash">{category.posts.length} posts</span> */}
                   </div>
                 </div>
                 {/* <button
