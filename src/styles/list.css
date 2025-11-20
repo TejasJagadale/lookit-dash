@@ -15,10 +15,13 @@
   gap: 12px;
   padding-bottom: 10px;
   width: 15%;
+  padding: 10px;
 }
 
 .verticaltabs {
-  width: 83%;
+  width: 84%;
+  padding: 10px;
+  border-left: 2px solid rgb(200, 200, 200);
 }
 
 .h-tab {
@@ -28,6 +31,12 @@
   cursor: pointer;
   font-weight: 600;
   flex-shrink: 0;
+  transition: 0.5s;
+  border: 1px solid rgb(200, 200, 200);
+}
+
+.h-tab:hover {
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
 }
 
 .h-tab.active {
@@ -42,7 +51,7 @@
   scrollbar-width: none;
   gap: 15px;
   border-bottom: 2px solid rgb(200, 200, 200);
-  padding-bottom: 10px;
+  padding: 10px;
 }
 
 .sub-card {
@@ -53,9 +62,9 @@
   align-items: center;
   text-align: center;
   background: #fff;
+  border: 1px solid rgb(200, 200, 200);
   border-radius: 10px;
   padding: 10px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
   cursor: pointer;
   transition: 0.5s;
 }
@@ -90,7 +99,6 @@
   border-radius: 12px;
   /* margin-bottom: 15px; */
   padding: 10px;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
 }
 
 .post-card img {
@@ -148,22 +156,27 @@
   .post-card .info {
     padding-left: 0;
     margin-top: 10px;
+    text-align: left;
   }
 
   .list-container {
     flex-direction: column;
     display: flex;
     justify-content: space-between;
+    padding: 0px;
   }
 
   .horizontal-tabs {
     display: flex;
     flex-direction: row;
     width: 100%;
+    padding: 7px;
+    border-bottom: 2px solid rgb(200, 200, 200);
   }
 
   .verticaltabs {
     width: 100%;
+    border-left: none;
   }
 
   .sub-card {
@@ -182,6 +195,23 @@
     overflow-x: scroll;
     scrollbar-width: none;
     gap: 5px;
-    padding: 10px;
+    padding: 0px;
+    padding-bottom: 10px;
+  }
+
+  .h-tab.active {
+    background: #3182ce;
+    color: #fff;
+  }
+
+  .h-tab {
+    padding: 5px 9px;
+    background: #edf2f7;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: 600;
+    flex-shrink: 0;
+    transition: 0.5s;
+    border: 1px solid rgb(200, 200, 200);
   }
 }
