@@ -38,6 +38,12 @@ const Navbar = () => {
           <Link to="/Sub-Category">Sub-Category</Link>
         </li>
         <li
+          className={location.pathname === "/Lists" ? "active" : ""}
+          onClick={closeMenu}
+        >
+          <Link to="/Lists">Lists</Link>
+        </li>
+        <li
           className={location.pathname === "/notifications" ? "active" : ""}
           onClick={closeMenu}
         >

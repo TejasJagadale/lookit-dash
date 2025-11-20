@@ -19,6 +19,8 @@ const Dashboard = () => {
       const data = await res.json();
       // Process the data according to requirements
       const processedData = processApiData(data);
+      console.log(processedData);
+
       setPosts(processedData);
     } catch (err) {
       console.error("Error fetching posts:", err);
@@ -118,7 +120,7 @@ const Dashboard = () => {
   return (
     <div className="professional-dashboarddash">
       {/* Header Section */}
-      <div className="dashboard-headerdash">
+      {/* <div className="dashboard-headerdash">
         <div className="header-contentdash">
           <h1>Content Dashboard</h1>
           <p>Manage and monitor your content performance</p>
@@ -129,48 +131,10 @@ const Dashboard = () => {
             <span className="stat-labeldash">Total Posts</span>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Main Dashboard Grid */}
       <div className="dashboard-maindash">
-        {/* Statistics Overview */}
-        <div className="stats-sectiondash">
-          <div className="stats-griddash">
-            <div className="stat-carddash">
-              <div className="stat-icondash totaldash">
-                {/* <i className="icon-postdash">📄</i> */}
-                <img className="icon-postdash" src="/svg/post.svg" alt="" />
-              </div>
-              <div className="stat-infodash">
-                <h3>{totalPosts}</h3>
-                <p>Total Posts</p>
-              </div>
-            </div>
-
-            <div className="stat-carddash">
-              <div className="stat-icondash trendingdash">
-                {/* <i className="icon-trendingdash">🔥</i> */}
-                <img className="icon-postdash" src="/svg/trend.svg" alt="" />
-              </div>
-              <div className="stat-infodash">
-                <h3>{posts.trending.length}</h3>
-                <p>Trending Posts</p>
-              </div>
-            </div>
-
-            <div className="stat-carddash">
-              <div className="stat-icondash categoriesdash">
-                {/* <i className="icon-categorydash">📂</i> */}
-                <img className="icon-postdash" src="/svg/category.svg" alt="" />
-              </div>
-              <div className="stat-infodash">
-                <h3>{totalCategories}</h3>
-                <p>Active Categories</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
         {/* Trending Posts Section */}
         {posts.trending.length > 0 && (
           <div className="section-carddash trending-sectiondash">
@@ -214,6 +178,44 @@ const Dashboard = () => {
             </div>
           </div>
         )}
+
+        {/* Statistics Overview */}
+        <div className="stats-sectiondash">
+          <div className="stats-griddash">
+            <div className="stat-carddash">
+              <div className="stat-icondash totaldash">
+                {/* <i className="icon-postdash">📄</i> */}
+                <img className="icon-postdash" src="/svg/post.svg" alt="" />
+              </div>
+              <div className="stat-infodash">
+                <h3>{totalPosts}</h3>
+                <p>Total Posts</p>
+              </div>
+            </div>
+
+            <div className="stat-carddash">
+              <div className="stat-icondash trendingdash">
+                {/* <i className="icon-trendingdash">🔥</i> */}
+                <img className="icon-postdash" src="/svg/trend.svg" alt="" />
+              </div>
+              <div className="stat-infodash">
+                <h3>{posts.trending.length}</h3>
+                <p>Trending Posts</p>
+              </div>
+            </div>
+
+            <div className="stat-carddash">
+              <div className="stat-icondash categoriesdash">
+                {/* <i className="icon-categorydash">📂</i> */}
+                <img className="icon-postdash" src="/svg/category.svg" alt="" />
+              </div>
+              <div className="stat-infodash">
+                <h3>{totalCategories}</h3>
+                <p>Active Categories</p>
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* Categories Grid */}
         <div className="categories-griddash">
