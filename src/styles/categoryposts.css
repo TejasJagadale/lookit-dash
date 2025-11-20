@@ -40,6 +40,7 @@
     padding: 12px;
     border-radius: 12px;
     transition: 0.3s ease;
+    border: 1px solid #c8c8c8;
 }
 
 .post-card:hover {

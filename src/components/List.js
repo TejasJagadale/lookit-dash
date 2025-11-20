@@ -37,6 +37,13 @@ const List = () => {
             .catch(console.log);
     }, [selectedId]);
 
+    // 🔥 AUTO-LOAD FIRST SUBCATEGORY POSTS
+    useEffect(() => {
+        if (subCategories.length > 0) {
+            loadPosts(subCategories[0].id);
+        }
+    }, [subCategories]);
+
     // Fetch posts when clicking subcategory
     const loadPosts = (subcategoryId) => {
         setLoadingPosts(true);
@@ -50,7 +57,7 @@ const List = () => {
                 const all = [...trending, ...homepage];
 
                 console.log(all);
-                
+
 
                 const matched = all.filter(
                     (p) => p.category?.id == subcategoryId
