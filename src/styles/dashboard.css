@@ -403,13 +403,25 @@
 
 /* Loading State */
 .dashboard-loadingdash {
+  gap: 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 20px;
   height: 100vh;
+  /* FULL PAGE HEIGHT */
+  /* width: 100%; */
+  /* FULL WIDTH */
+  margin: 0;
+  /* REMOVE AUTO MARGIN */
 }
+
+.dashboard-loadingdash1 {
+  height: 250px;
+  /* You can change this size if needed */
+  width: 250px;
+}
+
 
 .category-infodash1 {
   text-align: right;

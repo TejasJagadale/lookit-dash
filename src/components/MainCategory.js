@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/MainCategory.css';
 import imageee from "../assets/lookit.webp"
-import animationData from "../animation/lottie.json";
+import animationData from "../animation/Car.json";
 import Lottie from "lottie-react";
 
 function MainCategory() {

@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
 import "../styles/list.css";
+import animationData from "../animation/Car.json";
+import "../styles/dashboard.css";
+import Lottie from "lottie-react";
 
 const List = () => {
     const [mainCategories, setMainCategories] = useState([]);
     const [selectedId, setSelectedId] = useState(null);
-
     const [subCategories, setSubCategories] = useState([]);
     const [posts, setPosts] = useState([]);
     const [loadingPosts, setLoadingPosts] = useState(false);
@@ -118,7 +120,9 @@ const List = () => {
                 {/* POSTS LIST */}
                 <div className="posts-section">
 
-                    {loadingPosts && <p className="loading">Loading posts...</p>}
+                    {loadingPosts && <div className="dashboard-loadingdash">
+                        <Lottie className="dashboard-loadingdash1" animationData={animationData} loop={true} />
+                    </div>}
 
                     {!loadingPosts && posts.length === 0 && (
                         <p className="no-posts">Tap a subcategory to view posts</p>

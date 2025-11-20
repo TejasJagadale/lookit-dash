@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "../styles/notifications.css";
 import ScheduleForm from "./ScheduleForm";
-import animationData from "../animation/lottie.json";
+import animationData from "../animation/Car.json";
 import Lottie from "lottie-react";
 
 const NotificationList = () => {

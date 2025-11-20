@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import animationData from "../animation/lottie.json";
+import animationData from "../animation/Car.json";
 import "../styles/dashboard.css";
 import Lottie from "lottie-react";
 
@@ -112,7 +112,7 @@ const Dashboard = () => {
   if (loading) {
     return (
       <div className="dashboard-loadingdash">
-        <Lottie className="dashboard-loadingdash" animationData={animationData} loop={true} />
+        <Lottie className="dashboard-loadingdash1" animationData={animationData} loop={true} />
       </div>
     );
   }
