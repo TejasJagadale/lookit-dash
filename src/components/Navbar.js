@@ -5,9 +5,15 @@ import "../styles/navbar.css";
 const Navbar = () => {
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const toggleMenu = () => setMenuOpen(!menuOpen);
-  const closeMenu = () => setMenuOpen(false);
+  const closeMenu = () => {
+    setMenuOpen(false);
+    setDropdownOpen(false);
+  };
+
+  const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
 
   return (
     <nav className="navbar">
@@ -31,24 +37,40 @@ const Navbar = () => {
         >
           <Link to="/">Main-Category</Link>
         </li>
+
         <li
           className={location.pathname === "/Sub-Category" ? "active" : ""}
           onClick={closeMenu}
         >
           <Link to="/Sub-Category">Sub-Category</Link>
         </li>
-        <li
-          className={location.pathname === "/Lists" ? "active" : ""}
-          onClick={closeMenu}
-        >
-          <Link to="/Lists">Lists</Link>
+
+        {/* DROPDOWN MENU */}
+        <li className="dropdown">
+          <div className="dropdown-btn" onClick={toggleDropdown}>
+            Article ▼
+          </div>
+
+          <ul className={`dropdown-menu ${dropdownOpen ? "show" : ""}`}>
+            <li onClick={closeMenu}>
+              <Link to="/upload-article">Add Article</Link>
+            </li>
+            <li onClick={closeMenu}>
+              <Link to="/Lists">List</Link>
+            </li>
+            <li onClick={closeMenu}>
+              <Link to="/list-all">List & Edit Articles</Link>
+            </li>
+          </ul>
         </li>
+
         <li
           className={location.pathname === "/notifications" ? "active" : ""}
           onClick={closeMenu}
         >
           <Link to="/notifications">Notifications</Link>
         </li>
+
         <li
           className={location.pathname === "/schedule" ? "active" : ""}
           onClick={closeMenu}

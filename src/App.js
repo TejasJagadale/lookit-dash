@@ -10,6 +10,8 @@ import MainCategory from "./components/MainCategory.js";
 import CategoryPage from "./components/CategoryPage.js";
 import List from "./components/List.js";
 import CategoryPosts from "./components/CategoryPosts.jsx";
+import Uploadarticles from "./components/Uploadarticles.js";
+import Listarticle from "./components/Listarticle.js";
 
 function App() {
   return (
@@ -21,6 +23,8 @@ function App() {
           <Route path="/notifications" element={<NotificationList />} />
           <Route path="/schedule" element={<Schedule />} />
           <Route path="/Lists" element={<List />} />
+          <Route path="/list-all" element={<Listarticle />} />
+          <Route path="/upload-article" element={<Uploadarticles />} />
           <Route path="/" element={<MainCategory />} />
           <Route path="/post/:id" element={<PostDetail />} />
           <Route path="/category/:categoryId" element={<CategoryPage />} />

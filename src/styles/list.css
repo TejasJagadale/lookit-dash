@@ -141,6 +141,19 @@
   font-weight: 500;
 }
 
+@media (max-width: 900px) {
+  .horizontal-tabs {
+    display: flex;
+    flex-direction: column;
+    overflow-x: auto;
+    white-space: nowrap;
+    gap: 12px;
+    padding-bottom: 10px;
+    width: auto;
+    padding: 10px;
+  }
+}
+
 /* MOBILE RESPONSIVE */
 @media (max-width: 600px) {
   .post-card {

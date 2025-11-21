@@ -49,6 +49,8 @@ function MainCategory() {
 
             const data = await response.json();
             setApiResponse(data);
+            console.log(data);
+
 
             // Process categories from the API response
             const processedCategories = {};
