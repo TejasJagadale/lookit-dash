@@ -837,7 +837,7 @@ body {
 
     .filters-grid {
         grid-template-columns: 1fr;
-        gap: 15px;
+        gap: 5px;
     }
 
     .post-meta {
