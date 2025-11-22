@@ -14,16 +14,15 @@
 .notification-container {
   /* width: 90%; */
   /* margin: 40px auto; */
-  background: #fff; 
 }
 
 .notification-card {
   border-radius: 8px;
-  padding: 10px;
+  padding: 20px;
   margin-bottom: 15px;
-  background-color: #ededed;
+  background-color: #fff;
   transition: 0.3s;
-  width: 320px;
+  width: auto;
 }
 
 .notification-card:hover {
