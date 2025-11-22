@@ -56,16 +56,11 @@ body {
   align-items: center;
   justify-content: center;
   height: 100vh;
-  /* FULL PAGE HEIGHT */
-  /* width: 100%; */
-  /* FULL WIDTH */
   margin: 0;
-  /* REMOVE AUTO MARGIN */
 }
 
 .dashboard-loadingdash1 {
   height: 250px;
-  /* You can change this size if needed */
   width: 250px;
 }
 
@@ -92,7 +87,6 @@ body {
   0% {
     transform: rotate(0deg);
   }
-
   100% {
     transform: rotate(360deg);
   }
@@ -162,7 +156,6 @@ body {
   background: white;
   border-radius: 20px;
   overflow: hidden;
-  /* box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); */
   transition: all 0.3s ease;
   position: relative;
   height: auto;
@@ -249,7 +242,6 @@ body {
   margin-bottom: 1rem;
   line-height: 1.5;
   display: -webkit-box;
-  /* -webkit-line-clamp: 3; */
   -webkit-box-orient: vertical;
   overflow: hidden;
 }

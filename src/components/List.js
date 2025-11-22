@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import "../styles/list.css";
-import animationData from "../animation/Car.json";
-import "../styles/dashboard.css";
-import Lottie from "lottie-react";
+// import animationData from "../animation/Car.json";
+// import "../styles/dashboard.css";
+// import Lottie from "lottie-react";
 
 const List = () => {
     const [mainCategories, setMainCategories] = useState([]);
@@ -121,7 +121,7 @@ const List = () => {
                 <div className="posts-section">
 
                     {loadingPosts && <div className="dashboard-loadingdash">
-                        <Lottie className="dashboard-loadingdash1" animationData={animationData} loop={true} />
+                        {/* <Lottie className="dashboard-loadingdash1" animationData={animationData} loop={true} /> */}
                     </div>}
 
                     {!loadingPosts && posts.length === 0 && (

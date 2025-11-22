@@ -16,7 +16,7 @@ const Listarticle = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [totalPosts, setTotalPosts] = useState(0);
-    const postsPerPage = 50;
+    // const postsPerPage = 50;
     const [selectedMain, setSelectedMain] = useState("");
     const [selectedSub, setSelectedSub] = useState("");
     const [title, setTitle] = useState("");
@@ -29,6 +29,7 @@ const Listarticle = () => {
     const [isSubCategoriesLoaded, setIsSubCategoriesLoaded] = useState(false);
     const [contentType, setContentType] = useState("");
     const [isEditLoading, setIsEditLoading] = useState(false);
+    const [postsPerPage, setPostsPerPage] = useState("20")
     const [filters, setFilters] = useState({
         category: "",
         status: "",
@@ -47,7 +48,7 @@ const Listarticle = () => {
         setIsLoading(true);
 
         axios
-            .get(`https://tnreaders.in/mobile/view-post-sub?currentPage=1&perPage=20`)
+            .get(`https://tnreaders.in/mobile/view-post-sub?currentPage=1&perPage=200`)
             .then((response) => {
                 setAllPosts(response.data.data || []);
                 setIsLoading(false);
@@ -133,6 +134,11 @@ const Listarticle = () => {
             setSelectedSub(editingPost.category_id.toString() || "");
         }
     }, [isSubCategoriesLoaded, editingPost]);
+
+    // Reset to page 1 when filters change
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [filters]);
 
     // Handle image upload for App Thumbnail
     const handleImageOneChange = (e) => {
@@ -388,14 +394,80 @@ const Listarticle = () => {
         </div>
     );
 
+    // Pagination functions
+    const goToPage = (pageNumber) => {
+        setCurrentPage(pageNumber);
+    };
+
+    const goToNextPage = () => {
+        if (currentPage < totalPages) {
+            setCurrentPage(currentPage + 1);
+        }
+    };
+
+    const goToPrevPage = () => {
+        if (currentPage > 1) {
+            setCurrentPage(currentPage - 1);
+        }
+    };
+
+    const goToFirstPage = () => {
+        setCurrentPage(1);
+    };
+
+    const goToLastPage = () => {
+        setCurrentPage(totalPages);
+    };
+
+    // Generate page numbers for pagination
+    const getPageNumbers = () => {
+        const pageNumbers = [];
+        const maxVisiblePages = 5;
+
+        if (totalPages <= maxVisiblePages) {
+            // Show all pages if total pages are less than max visible
+            for (let i = 1; i <= totalPages; i++) {
+                pageNumbers.push(i);
+            }
+        } else {
+            // Show pages with ellipsis
+            if (currentPage <= 3) {
+                // Near the start
+                for (let i = 1; i <= 4; i++) {
+                    pageNumbers.push(i);
+                }
+                pageNumbers.push('...');
+                pageNumbers.push(totalPages);
+            } else if (currentPage >= totalPages - 2) {
+                // Near the end
+                pageNumbers.push(1);
+                pageNumbers.push('...');
+                for (let i = totalPages - 3; i <= totalPages; i++) {
+                    pageNumbers.push(i);
+                }
+            } else {
+                // In the middle
+                pageNumbers.push(1);
+                pageNumbers.push('...');
+                for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+                    pageNumbers.push(i);
+                }
+                pageNumbers.push('...');
+                pageNumbers.push(totalPages);
+            }
+        }
+
+        return pageNumbers;
+    };
+
     return (
         <div className="articles-container">
             {isLoading ? (
                 <Loader />
             ) : !editingPost && !viewingPost ? (
                 <>
-                    <h2 className="articles-header">Latest Posts</h2>
-                    <div className="actions-bar">
+                    {/* <h2 className="articles-header">Latest Posts</h2> */}
+                    {/* <div className="actions-bar">
                         <Link to="/" className="home-link">
                             Home
                         </Link>
@@ -405,7 +477,7 @@ const Listarticle = () => {
                         >
                             Add Articles
                         </button>
-                    </div>
+                    </div> */}
                     <div className="filters-section">
                         <div className="filters-grid">
                             <div className="filter-group">
@@ -574,65 +646,72 @@ const Listarticle = () => {
                     </div>
 
                     {/* Pagination Controls */}
+                    {/* Enhanced Pagination Controls */}
                     {totalPages > 1 && (
                         <div className="pagination-section">
                             <nav aria-label="Page navigation">
                                 <ul className="pagination">
-                                    <li
-                                        className={`pagination-item ${currentPage === 1 ? "disabled" : ""
-                                            }`}
-                                    >
+                                    {/* First Page */}
+                                    <li className={`pagination-item ${currentPage === 1 ? "disabled" : ""}`}>
                                         <button
-                                            className="pagination-link"
-                                            onClick={() =>
-                                                setCurrentPage((prev) => Math.max(prev - 1, 1))
-                                            }
+                                            className="pagination-link pagination-first"
+                                            onClick={goToFirstPage}
+                                            disabled={currentPage === 1}
+                                        >
+                                            First
+                                        </button>
+                                    </li>
+
+                                    {/* Previous Page */}
+                                    <li className={`pagination-item ${currentPage === 1 ? "disabled" : ""}`}>
+                                        <button
+                                            className="pagination-link pagination-prev"
+                                            onClick={goToPrevPage}
                                             disabled={currentPage === 1}
                                         >
                                             Previous
                                         </button>
                                     </li>
 
-                                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                                        let pageNum;
-                                        if (totalPages <= 5) {
-                                            pageNum = i + 1;
-                                        } else if (currentPage <= 3) {
-                                            pageNum = i + 1;
-                                        } else if (currentPage >= totalPages - 2) {
-                                            pageNum = totalPages - 4 + i;
-                                        } else {
-                                            pageNum = currentPage - 2 + i;
-                                        }
-
-                                        return (
-                                            <li
-                                                key={pageNum}
-                                                className={`pagination-item ${currentPage === pageNum ? "active" : ""
-                                                    }`}
-                                            >
+                                    {/* Page Numbers */}
+                                    {getPageNumbers().map((pageNum, index) => (
+                                        <li
+                                            key={index}
+                                            className={`pagination-item ${pageNum === '...' ? 'pagination-ellipsis' : ''} ${currentPage === pageNum ? "active" : ""
+                                                }`}
+                                        >
+                                            {pageNum === '...' ? (
+                                                <span className="pagination-ellipsis">...</span>
+                                            ) : (
                                                 <button
                                                     className="pagination-link"
-                                                    onClick={() => setCurrentPage(pageNum)}
+                                                    onClick={() => goToPage(pageNum)}
                                                 >
                                                     {pageNum}
                                                 </button>
-                                            </li>
-                                        );
-                                    })}
+                                            )}
+                                        </li>
+                                    ))}
 
-                                    <li
-                                        className={`pagination-item ${currentPage === totalPages ? "disabled" : ""
-                                            }`}
-                                    >
+                                    {/* Next Page */}
+                                    <li className={`pagination-item ${currentPage === totalPages ? "disabled" : ""}`}>
                                         <button
-                                            className="pagination-link"
-                                            onClick={() =>
-                                                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-                                            }
+                                            className="pagination-link pagination-next"
+                                            onClick={goToNextPage}
                                             disabled={currentPage === totalPages}
                                         >
                                             Next
+                                        </button>
+                                    </li>
+
+                                    {/* Last Page */}
+                                    <li className={`pagination-item ${currentPage === totalPages ? "disabled" : ""}`}>
+                                        <button
+                                            className="pagination-link pagination-last"
+                                            onClick={goToLastPage}
+                                            disabled={currentPage === totalPages}
+                                        >
+                                            Last
                                         </button>
                                     </li>
                                 </ul>

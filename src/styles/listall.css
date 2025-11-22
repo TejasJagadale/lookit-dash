@@ -9,7 +9,7 @@
     --accent-light: #ffd54f;
     --accent-dark: #ffb300;
     --text-dark: #333333;
-    --text-light: #666666;
+    --text-light: #5b5b5b;
     --bg-light: #f8f9fa;
     --bg-white: #ffffff;
     --border-light: #e9ecef;
@@ -87,7 +87,6 @@ body {
     padding: 20px;
     background: var(--bg-white);
     border-radius: var(--border-radius);
-    box-shadow: var(--shadow);
 }
 
 .home-link {
@@ -133,7 +132,6 @@ body {
     background: var(--bg-white);
     padding: 25px;
     border-radius: var(--border-radius);
-    box-shadow: var(--shadow);
     margin-bottom: 30px;
 }
 
@@ -202,14 +200,12 @@ body {
     border-radius: var(--border-radius);
     overflow: hidden;
     transition: var(--transition);
-    box-shadow: var(--shadow);
     height: 100%;
     display: flex;
     flex-direction: column;
 }
 
 .post-cardss:hover {
-    transform: translateY(-5px);
     box-shadow: var(--shadow-hover);
 }
 
@@ -218,10 +214,6 @@ body {
     width: 100%;
     object-fit: cover;
     transition: var(--transition);
-}
-
-.post-cardss:hover .post-image {
-    transform: scale(1.05);
 }
 
 .post-contentss {
@@ -242,13 +234,6 @@ body {
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
-
-/* .post-divider {
-  height: 2px;
-  background: linear-gradient(90deg, var(--primary), transparent);
-  margin: 15px 0;
-  border: none;
-} */
 
 .post-meta {
     display: flex;
@@ -306,8 +291,7 @@ body {
 }
 
 .edit-btn:hover {
-    background: linear-gradient(135deg, var(--primary-dark), var(--primary));
-    transform: translateY(-2px);
+    box-shadow: 4px 4px #bd83ff;
 }
 
 .view-btn {
@@ -323,8 +307,7 @@ body {
 }
 
 .view-btn:hover {
-    background: linear-gradient(135deg, #138496, #117a8b);
-    transform: translateY(-2px);
+    box-shadow: 4px 4px #6be5f8;
 }
 
 .status-controls {
@@ -351,6 +334,7 @@ body {
     height: 1.4em;
     margin-right: 0px;
     accent-color: var(--primary);
+    cursor: pointer;
 }
 
 .toggle-label {
@@ -371,7 +355,6 @@ body {
 }
 
 .post-author {
-    background: var(--bg-light);
     border-top: 1px solid var(--border-light);
     padding: 15px 20px;
     font-size: 0.9rem;
@@ -405,6 +388,7 @@ body {
     font-weight: 500;
     transition: var(--transition);
     background: var(--bg-white);
+    cursor: pointer;
 }
 
 .pagination-link:hover {
@@ -768,6 +752,21 @@ body {
     font-weight: 500;
 }
 
+.dm1 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.dm1 img {
+    height: 50px;
+    width: 40%;
+    object-fit: contain;
+    background-color: rgba(255, 255, 255, 0.6);
+    filter: invert();
+    padding: 10px;
+    border-radius: 10px;
+}
 
 @keyframes spin {
     0% {
@@ -890,6 +889,10 @@ body {
         width: 100%;
         text-align: center;
     }
+
+    .form-group {
+        margin-bottom: 10px;
+    }
 }
 
 @media (max-width: 576px) {
@@ -907,6 +910,7 @@ body {
 
     .form-title {
         font-size: 1.5rem;
+        margin-bottom: 10px;
     }
 
     .post-detail-container {

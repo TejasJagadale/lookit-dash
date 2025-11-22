@@ -1,37 +1,70 @@
-import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Navbar from "./components/Navbar";
-import Dashboard from "./Pages/Dashboard";
-import NotificationList from "./components/NotificationList";
-import Schedule from "./components/ScheduleForm";
-import PostDetail from "./components/PostDetail";
-import "./index.css";
-import MainCategory from "./components/MainCategory.js";
-import CategoryPage from "./components/CategoryPage.js";
-import List from "./components/List.js";
-import CategoryPosts from "./components/CategoryPosts.jsx";
-import Uploadarticles from "./components/Uploadarticles.js";
-import Listarticle from "./components/Listarticle.js";
+import React, { useState } from 'react';
+import './App.css';
+import Sidebar from './components/Sidebar';
+import Navbar from './components/Navbar';
+import MainContent from './components/MainContent';
+import AuthModal from './components/AuthModal';
 
 function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [activeMenu, setActiveMenu] = useState('Dashboard');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const handleLogin = (userData) => {
+    setIsLoggedIn(true);
+    setCurrentUser(userData);
+    setShowAuthModal(false);
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setCurrentUser(null);
+  };
+
+  const handleSignUp = (userData) => {
+    setIsLoggedIn(true);
+    setCurrentUser(userData);
+    setShowAuthModal(false);
+  };
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
   return (
-    <Router>
-      <Navbar />
-      <div className="page-container">
-        <Routes>
-          <Route path="/Sub-Category" element={<Dashboard />} />
-          <Route path="/notifications" element={<NotificationList />} />
-          <Route path="/schedule" element={<Schedule />} />
-          <Route path="/Lists" element={<List />} />
-          <Route path="/list-all" element={<Listarticle />} />
-          <Route path="/upload-article" element={<Uploadarticles />} />
-          <Route path="/" element={<MainCategory />} />
-          <Route path="/post/:id" element={<PostDetail />} />
-          <Route path="/category/:categoryId" element={<CategoryPage />} />
-          <Route path="/category-posts/:parentId" element={<CategoryPosts />} />
-        </Routes>
+    <div className="App">
+      <Navbar
+        isLoggedIn={isLoggedIn}
+        currentUser={currentUser}
+        onLoginClick={() => setShowAuthModal(true)}
+        onLogout={handleLogout}
+        onMenuToggle={toggleSidebar}
+      />
+
+      <div className="dashboard-container">
+        <Sidebar
+          isLoggedIn={isLoggedIn}
+          onLoginClick={() => setShowAuthModal(true)}
+          onLogout={handleLogout}
+          activeMenu={activeMenu}
+          setActiveMenu={setActiveMenu}
+          isOpen={isSidebarOpen}
+          onClose={() => setIsSidebarOpen(false)}
+        />
+
+        <MainContent activeMenu={activeMenu} />
       </div>
-    </Router>
+
+      {showAuthModal && (
+        <AuthModal
+          onClose={() => setShowAuthModal(false)}
+          onLogin={handleLogin}
+          onSignUp={handleSignUp}
+        />
+      )}
+    </div>
   );
 }
 

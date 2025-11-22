@@ -1,83 +1,51 @@
-import React, { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-import "../styles/navbar.css";
+import React, { useState } from 'react';
 
-const Navbar = () => {
-  const location = useLocation();
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-
-  const toggleMenu = () => setMenuOpen(!menuOpen);
-  const closeMenu = () => {
-    setMenuOpen(false);
-    setDropdownOpen(false);
-  };
-
-  const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
+const Navbar = ({ isLoggedIn, currentUser, onLoginClick, onLogout, onMenuToggle }) => {
+  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
 
   return (
     <nav className="navbar">
-      <div className="nav-logo">Lookit</div>
-
-      {/* Hamburger Icon */}
-      <div
-        className={`hamburger ${menuOpen ? "active" : ""}`}
-        onClick={toggleMenu}
-      >
-        <span></span>
-        <span></span>
-        <span></span>
+      <div className="navbar-left">
+        <button className="menu-toggle" onClick={onMenuToggle}>
+          ☰
+        </button>
+        <div className="logo">LookIt</div>
       </div>
 
-      {/* Navigation Links */}
-      <ul className={`nav-links ${menuOpen ? "open" : ""}`}>
-        <li
-          className={location.pathname === "/" ? "active" : ""}
-          onClick={closeMenu}
-        >
-          <Link to="/">Main-Category</Link>
-        </li>
+      <div className="navbar-right">
+        {isLoggedIn ? (
+          <div className="profile-section">
+            <button 
+              className="profile-button"
+              onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+            >
+              <img 
+                src={currentUser?.image || '/api/placeholder/40/40'} 
+                alt="Profile" 
+                className="profile-image"
+              />
+              <span>{currentUser?.name || 'User'}</span>
+            </button>
 
-        <li
-          className={location.pathname === "/Sub-Category" ? "active" : ""}
-          onClick={closeMenu}
-        >
-          <Link to="/Sub-Category">Sub-Category</Link>
-        </li>
-
-        {/* DROPDOWN MENU */}
-        <li className="dropdown">
-          <div className="dropdown-btn" onClick={toggleDropdown}>
-            Article ▼
+            {showProfileDropdown && (
+              <div className="profile-dropdown">
+                <div className="user-info">
+                  <strong>{currentUser?.name || 'User'}</strong>
+                  <br />
+                  <small>{currentUser?.email || 'user@example.com'}</small>
+                </div>
+                <button className="logout-btn" onClick={onLogout}>
+                  Logout
+                </button>
+              </div>
+            )}
           </div>
-
-          <ul className={`dropdown-menu ${dropdownOpen ? "show" : ""}`}>
-            <li onClick={closeMenu}>
-              <Link to="/upload-article">Add Article</Link>
-            </li>
-            <li onClick={closeMenu}>
-              <Link to="/Lists">List</Link>
-            </li>
-            <li onClick={closeMenu}>
-              <Link to="/list-all">List & Edit Articles</Link>
-            </li>
-          </ul>
-        </li>
-
-        <li
-          className={location.pathname === "/notifications" ? "active" : ""}
-          onClick={closeMenu}
-        >
-          <Link to="/notifications">Notifications</Link>
-        </li>
-
-        <li
-          className={location.pathname === "/schedule" ? "active" : ""}
-          onClick={closeMenu}
-        >
-          <Link to="/schedule">Schedule</Link>
-        </li>
-      </ul>
+        ) : (
+          <button className="login-btn" onClick={onLoginClick}>
+            Login
+          </button>
+        )}
+      </div>
     </nav>
   );
 };
