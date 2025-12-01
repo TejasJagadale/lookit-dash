@@ -65,41 +65,6 @@ const MainContent = ({ activeMenu }) => {
     );
   };
 
-  // Progress circle component
-  const ProgressCircle = ({ percentage, size = 60, strokeWidth = 6, color = '#667eea' }) => {
-    const radius = (size - strokeWidth) / 2;
-    const circumference = radius * 2 * Math.PI;
-    const strokeDashoffset = circumference - (percentage / 100) * circumference;
-
-    return (
-      <div className="progress-circle" style={{ width: size, height: size }}>
-        <svg width={size} height={size}>
-          <circle
-            cx={size / 2}
-            cy={size / 2}
-            r={radius}
-            stroke="#e2e8f0"
-            strokeWidth={strokeWidth}
-            fill="none"
-          />
-          <circle
-            cx={size / 2}
-            cy={size / 2}
-            r={radius}
-            stroke={color}
-            strokeWidth={strokeWidth}
-            fill="none"
-            strokeDasharray={circumference}
-            strokeDashoffset={strokeDashoffset}
-            strokeLinecap="round"
-            transform={`rotate(-90 ${size / 2} ${size / 2})`}
-          />
-        </svg>
-        <span className="progress-text">{percentage}%</span>
-      </div>
-    );
-  };
-
   // Stat card component
   const StatCard = ({ title, value, change, icon, color }) => (
     <div className="stat-card">

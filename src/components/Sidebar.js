@@ -68,7 +68,7 @@ const Sidebar = ({ isLoggedIn, onLoginClick, onLogout, activeMenu, setActiveMenu
         <div className="sidebar-header">
           {!isCollapsed && (
             <div className="sidebar-brand">
-              <span className="brand-icon"><img className='sideicon' src='/assets/dashboard.png' /></span>
+              <span className="brand-icon"><img alt='' className='sideicon' src='/assets/dashboard.png' /></span>
               <span className="brand-text">Dashboard</span>
             </div>
           )}
@@ -80,7 +80,7 @@ const Sidebar = ({ isLoggedIn, onLoginClick, onLogout, activeMenu, setActiveMenu
                 onClick={toggleSidebar}
                 title="Collapse sidebar"
               >
-                <img src='/assets/menu.png' className='sideicon' />
+                <img alt='' src='/assets/left.png' className='sideicon' />
               </button>
             </div>
           )}
@@ -90,7 +90,7 @@ const Sidebar = ({ isLoggedIn, onLoginClick, onLogout, activeMenu, setActiveMenu
         <div className="sidebar-auth">
           {!isLoggedIn ? (
             <button className="auth-btn login-btn" onClick={onLoginClick}>
-              <span className="auth-icon"><img className='sideicon' src='/assets/man.png' /></span>
+              <span className="auth-icon"><img alt='' className='sideicon' src='/assets/man.png' /></span>
               {!isCollapsed && <span>Sign Up / Login</span>}
             </button>
           ) : (
@@ -117,7 +117,7 @@ const Sidebar = ({ isLoggedIn, onLoginClick, onLogout, activeMenu, setActiveMenu
                   }}
                 >
                   <div className="menu-content">
-                    <span className="menu-icon"> <img className='sideicon' src={item.icon} /> </span>
+                    <span className="menu-icon"> <img alt='' className='sideicon' src={item.icon} /> </span>
                     <span className="menu-text">{item.name}</span>
                     {item.submenus && item.submenus.length > 0 && (
                       <span className="menu-arrow">
@@ -126,11 +126,11 @@ const Sidebar = ({ isLoggedIn, onLoginClick, onLogout, activeMenu, setActiveMenu
                     )}
                   </div>
 
-                  {item.submenus && item.submenus.length > 0 && (
+                  {/* {item.submenus && item.submenus.length > 0 && (
                     <span className="submenu-toggle">
                       {openSubmenus[item.name] ? '−' : '+'}
                     </span>
-                  )}
+                  )} */}
                 </div>
 
                 {/* Submenu */}
@@ -175,7 +175,7 @@ const Sidebar = ({ isLoggedIn, onLoginClick, onLogout, activeMenu, setActiveMenu
                   }}
                   title={item.submenus && item.submenus.length > 0 ? `${item.name} (Has submenus)` : item.name}
                 >
-                  <span className="icon"><img className='sideicon' src={item.icon} /> </span>
+                  <span className="icon"><img alt='' className='sideicon' src={item.icon} /> </span>
                   {item.submenus && item.submenus.length > 0 && (
                     <span className="submenu-indicator">•</span>
                   )}
@@ -185,7 +185,7 @@ const Sidebar = ({ isLoggedIn, onLoginClick, onLogout, activeMenu, setActiveMenu
                 {hoveredMenu === item.name && item.submenus && item.submenus.length > 0 && (
                   <div className="submenu-popout">
                     <div className="popout-header">
-                      <span className="popout-icon"><img className='sideicon' src={item.icon} /> </span>
+                      <span className="popout-icon"><img alt='' className='sideicon' src={item.icon} /> </span>
                       <span className="popout-title">{item.name}</span>
                     </div>
                     <div className="popout-items">
@@ -214,7 +214,7 @@ const Sidebar = ({ isLoggedIn, onLoginClick, onLogout, activeMenu, setActiveMenu
               onClick={toggleSidebar}
               title="Expand sidebar"
             >
-              <img src='/assets/menu.png' className='sideicon' />
+              <img alt='' src='/assets/right.png' className='sideicon' />
             </button>
           </div>
         )}
