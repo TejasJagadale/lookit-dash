@@ -293,10 +293,10 @@ const MainContent = ({ activeMenu }) => {
             <p>Here's what's happening with your content today</p>
           </div>
           <div className="welcome-actions">
-            <button className="btn-primary" onClick={() => window.location.hash = '#Add Article'}>
+            {/* <button className="btn-primary" onClick={() => window.location.hash = 'Add Article'}>
               Create New Post
             </button>
-            <button className="btn-secondary">View Analytics</button>
+            <button className="btn-secondary">View Analytics</button> */}
           </div>
         </div>
 
