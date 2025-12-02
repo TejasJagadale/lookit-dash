@@ -385,9 +385,9 @@ const MainContent = ({ activeMenu }) => {
           <div className="activities-card">
             <div className="card-header">
               <h3>Recent Activities</h3>
-              <button className="view-all-btn" onClick={() => window.location.hash = '#List & Edit Articles'}>
+              {/* <button className="view-all-btn" onClick={() => window.location.hash = '#List & Edit Articles'}>
                 View All
-              </button>
+              </button> */}
             </div>
             <div className="activities-list">
               {dashboardData.last_three_posts?.map((post, index) => (
@@ -400,9 +400,9 @@ const MainContent = ({ activeMenu }) => {
           <div className="top-posts-card">
             <div className="card-header">
               <h3>Recent Posts</h3>
-              <button className="view-all-btn" onClick={() => window.location.hash = '#List & Edit Articles'}>
+              {/* <button className="view-all-btn" onClick={() => window.location.hash = '#List & Edit Articles'}>
                 View All
-              </button>
+              </button> */}
             </div>
             <div className="top-posts-list">
               {dashboardData.last_three_posts?.map((post) => (
