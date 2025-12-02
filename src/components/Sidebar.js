@@ -125,12 +125,6 @@ const Sidebar = ({ isLoggedIn, onLoginClick, onLogout, activeMenu, setActiveMenu
                       </span>
                     )}
                   </div>
-
-                  {/* {item.submenus && item.submenus.length > 0 && (
-                    <span className="submenu-toggle">
-                      {openSubmenus[item.name] ? '−' : '+'}
-                    </span>
-                  )} */}
                 </div>
 
                 {/* Submenu */}
