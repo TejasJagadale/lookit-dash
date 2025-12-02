@@ -130,7 +130,7 @@
 /* Analytics Section */
 .analytics-section {
   display: grid;
-  grid-template-columns: 2fr 1fr;
+  grid-template-columns: auto;
   gap: 1.5rem;
   margin-bottom: 2rem;
 }

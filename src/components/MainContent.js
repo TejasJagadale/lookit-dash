@@ -1,52 +1,49 @@
 import React from 'react';
-// import '../styles/MainCategory.css';
 import '../styles/dashboard.css';
 import '../styles/SubCategory.css';
-// import imageee from "../assets/lookit.webp";
-// import animationData from "../animation/Car.json";
-// import Lottie from "lottie-react";
-import SubCategory from './SubCategory'; // Import your SubCategory component
+import SubCategory from './SubCategory';
 import AddArticle from './AddArticle';
 import Listarticle from './Listarticle';
 import List from './List';
 import NotificationList from './NotificationList';
 import ScheduleForm from './ScheduleForm';
 
-// Mock data for charts and statistics
-const dashboardData = {
-  stats: {
-    totalViews: 12457,
-    totalPosts: 342,
-    activeUsers: 892,
-    engagementRate: 68
-  },
-  chartData: {
-    views: [1200, 1900, 1500, 2100, 1800, 2400, 1900],
-    posts: [45, 52, 38, 65, 72, 58, 49],
-    categories: ['Tech', 'Health', 'Sports', 'Education', 'Lifestyle']
-  },
-  recentActivities: [
-    { id: 1, action: 'New Article Published', user: 'John Doe', time: '2 mins ago', type: 'success' },
-    { id: 2, action: 'User Registered', user: 'Sarah Wilson', time: '5 mins ago', type: 'info' },
-    { id: 3, action: 'Article Updated', user: 'Mike Johnson', time: '10 mins ago', type: 'warning' },
-    { id: 4, action: 'Comment Reported', user: 'Admin', time: '15 mins ago', type: 'error' }
-  ],
-  topPosts: [
-    { id: 1, title: 'The Future of AI in Healthcare', views: 2450, likes: 189, category: 'Tech' },
-    { id: 2, title: '10 Tips for Better Sleep', views: 1890, likes: 156, category: 'Health' },
-    { id: 3, title: 'React Best Practices 2024', views: 1670, likes: 142, category: 'Education' }
-  ]
-};
-
-
 const MainContent = ({ activeMenu }) => {
   const [categories, setCategories] = React.useState({});
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState(null);
   const [apiResponse, setApiResponse] = React.useState(null);
+  const [dashboardData, setDashboardData] = React.useState(null);
+  const [dashboardLoading, setDashboardLoading] = React.useState(false);
+
+  // Fetch dashboard data
+  const fetchDashboardData = async () => {
+    try {
+      setDashboardLoading(true);
+      const response = await fetch('https://tnreaders.in/api/dashboard');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      if (data.success) {
+        console.log(data);
+        setDashboardData(data.data);
+      } else {
+        throw new Error(data.message || 'Failed to fetch dashboard data');
+      }
+      setDashboardLoading(false);
+    } catch (err) {
+      console.error('Dashboard fetch error:', err);
+      setDashboardLoading(false);
+    }
+  };
 
   // Simple bar chart component
   const BarChart = ({ data, color, height = 40 }) => {
+    if (!data || data.length === 0) {
+      return <div className="bar-chart" style={{ height: `${height}px` }}>No data</div>;
+    }
+
     const maxValue = Math.max(...data);
     return (
       <div className="bar-chart" style={{ height: `${height}px` }}>
@@ -72,9 +69,9 @@ const MainContent = ({ activeMenu }) => {
         {icon}
       </div>
       <div className="stat-content">
-        <h3>{value.toLocaleString()}</h3>
+        <h3>{typeof value === 'number' ? value.toLocaleString() : value}</h3>
         <p>{title}</p>
-        {change && (
+        {change !== undefined && (
           <span className={`change ${change >= 0 ? 'positive' : 'negative'}`}>
             {change >= 0 ? '↗' : '↘'} {Math.abs(change)}%
           </span>
@@ -83,19 +80,16 @@ const MainContent = ({ activeMenu }) => {
     </div>
   );
 
-  // Activity item component
+  // Activity item component (using last three posts as recent activities)
   const ActivityItem = ({ activity }) => (
-    <div className={`activity-item ${activity.type}`}>
+    <div className="activity-item info">
       <div className="activity-icon">
-        {activity.type === 'success' && '📝'}
-        {activity.type === 'info' && '👤'}
-        {activity.type === 'warning' && '✏️'}
-        {activity.type === 'error' && '⚠️'}
+        📝
       </div>
       <div className="activity-content">
-        <p className="activity-action">{activity.action}</p>
+        <p className="activity-action">New Post Published</p>
         <p className="activity-meta">
-          by {activity.user} • {activity.time}
+          {activity.title?.substring(0, 30)}...
         </p>
       </div>
     </div>
@@ -105,17 +99,21 @@ const MainContent = ({ activeMenu }) => {
   const TopPostCard = ({ post }) => (
     <div className="top-post-card">
       <div className="post-header">
-        <h4>{post.title}</h4>
-        <span className="post-category">{post.category}</span>
+        <h4 title={post.title}>{post.title?.substring(0, 40)}...</h4>
+        <span className="post-category">{post.category?.name}</span>
       </div>
       <div className="post-stats">
         <div className="stat">
           <span className="stat-icon">👁️</span>
-          <span>{post.views.toLocaleString()}</span>
+          <span>{post.view_count || 0}</span>
         </div>
         <div className="stat">
           <span className="stat-icon">❤️</span>
-          <span>{post.likes}</span>
+          <span>{post.likes_count || 0}</span>
+        </div>
+        <div className="stat">
+          <span className="stat-icon">💬</span>
+          <span>{post.comment_count || 0}</span>
         </div>
       </div>
     </div>
@@ -146,6 +144,8 @@ const MainContent = ({ activeMenu }) => {
   React.useEffect(() => {
     if (activeMenu === 'Main-Category') {
       fetchPosts();
+    } else if (activeMenu === 'Dashboard') {
+      fetchDashboardData();
     }
   }, [activeMenu]);
 
@@ -216,12 +216,13 @@ const MainContent = ({ activeMenu }) => {
           src={
             post.web_thumbnail ||
             post.FullImgPath ||
-            post.img
+            post.img ||
+            "/assets/lookit.webp"
           }
           alt="post-image"
           onError={(e) => {
-            e.target.onerror = null; // prevent infinite loop
-            e.target.src = "/assets/lookit.webp"; // fallback local image
+            e.target.onerror = null;
+            e.target.src = "/assets/lookit.webp";
           }}
         />
       </div>
@@ -262,153 +263,193 @@ const MainContent = ({ activeMenu }) => {
     </section>
   );
 
-  const renderDashboard = () => (
-    <div className="dashboard-container1">
-      {/* Welcome Header */}
-      <div className="welcome-header">
-        <div className="welcome-content">
-          <h1>Welcome to LookIt Dashboard! 🎉</h1>
-          <p>Here's what's happening with your content today</p>
+  const renderDashboard = () => {
+    if (dashboardLoading) {
+      return (
+        <div className="dashboard-loadingdash">
+          Loading dashboard data...
         </div>
-        <div className="welcome-actions">
-          <button className="btn-primary">Create New Post</button>
-          <button className="btn-secondary">View Analytics</button>
+      );
+    }
+
+    if (!dashboardData) {
+      return (
+        <div className="error">
+          <h2>Error Loading Dashboard</h2>
+          <p>Unable to load dashboard data</p>
+          <button onClick={fetchDashboardData} className="retry-btn">Try Again</button>
         </div>
-      </div>
+      );
+    }
 
-      {/* Statistics Grid */}
-      <div className="stats-grid">
-        <StatCard
-          title="Total Views"
-          value={dashboardData.stats.totalViews}
-          change={12.5}
-          icon="👁️"
-          color="#667eea"
-        />
-        <StatCard
-          title="Total Posts"
-          value={dashboardData.stats.totalPosts}
-          change={8.2}
-          icon="📝"
-          color="#764ba2"
-        />
-        <StatCard
-          title="Active Users"
-          value={dashboardData.stats.activeUsers}
-          change={15.3}
-          icon="👥"
-          color="#f093fb"
-        />
-        <StatCard
-          title="Engagement Rate"
-          value={dashboardData.stats.engagementRate}
-          change={3.7}
-          icon="💫"
-          color="#4ecdc4"
-        />
-      </div>
+    // Generate mock weekly data for charts based on actual data
+    const generateWeeklyData = (baseValue) => {
+      return Array(7).fill(0).map(() =>
+        Math.floor(baseValue / 7) + Math.floor(Math.random() * (baseValue / 14))
+      );
+    };
 
-      {/* Charts and Analytics Section */}
-      <div className="analytics-section">
-        <div className="chart-card">
-          <div className="chart-header">
-            <h3>Weekly Views Overview</h3>
-            <select className="time-filter">
-              <option>Last 7 Days</option>
-              <option>Last 30 Days</option>
-              <option>Last 90 Days</option>
-            </select>
+    const weeklyViews = generateWeeklyData(parseInt(dashboardData.total_views) || 100);
+    const weeklyPosts = generateWeeklyData(dashboardData.total_posts || 0);
+
+    return (
+      <div className="dashboard-container1">
+        {/* Welcome Header */}
+        <div className="welcome-header">
+          <div className="welcome-content">
+            <h1>Welcome to LookIt Dashboard! 🎉</h1>
+            <p>Here's what's happening with your content today</p>
           </div>
-          <BarChart data={dashboardData.chartData.views} color="#667eea" height={120} />
-          <div className="chart-labels">
-            {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, index) => (
-              <span key={day} className="chart-label">{day}</span>
-            ))}
+          <div className="welcome-actions">
+            <button className="btn-primary" onClick={() => window.location.hash = '#Add Article'}>
+              Create New Post
+            </button>
+            <button className="btn-secondary">View Analytics</button>
           </div>
         </div>
 
-        <div className="chart-card">
-          <div className="chart-header">
-            <h3>Content Distribution</h3>
+        {/* Statistics Grid */}
+        <div className="stats-grid">
+          <StatCard
+            title="Total Views"
+            value={parseInt(dashboardData.total_views) || 0}
+            change={12.5}
+            icon="👁️"
+            color="#667eea"
+          />
+          <StatCard
+            title="Total Posts"
+            value={dashboardData.total_posts || 0}
+            change={8.2}
+            icon="📝"
+            color="#764ba2"
+          />
+          <StatCard
+            title="Active Users"
+            value={dashboardData.active_users || 0}
+            change={15.3}
+            icon="👥"
+            color="#f093fb"
+          />
+          <StatCard
+            title="Engagement Rate"
+            value={Math.round((dashboardData.active_users / (dashboardData.total_posts || 1)) * 100) || 0}
+            change={3.7}
+            icon="💫"
+            color="#4ecdc4"
+          />
+        </div>
+
+        {/* Charts and Analytics Section */}
+        <div className="analytics-section">
+          <div className="chart-card">
+            <div className="chart-header">
+              <h3>Weekly Views Overview</h3>
+              <select className="time-filter">
+                <option>Last 7 Days</option>
+                <option>Last 30 Days</option>
+                <option>Last 90 Days</option>
+              </select>
+            </div>
+            <BarChart data={weeklyViews} color="#667eea" height={120} />
+            <div className="chart-labels">
+              {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, index) => (
+                <span key={day} className="chart-label">{day}</span>
+              ))}
+            </div>
           </div>
-          <div className="category-distribution">
-            {dashboardData.chartData.categories.map((category, index) => (
-              <div key={category} className="category-item">
-                <div className="category-info">
-                  <span className="category-name">{category}</span>
-                  <span className="category-percentage">{20 + index * 15}%</span>
+
+          <div className="chart-card">
+            <div className="chart-header">
+              <h3>Content Distribution</h3>
+            </div>
+            <div className="category-distribution">
+              {dashboardData.category_wise_post_count?.map((category, index) => (
+                <div key={category.category_id} className="category-item">
+                  <div className="category-info">
+                    <span className="category-name">{category.name}</span>
+                    <span className="category-percentage">
+                      {category.post_count}
+                    </span>
+                  </div>
+                  <div className="category-bar">
+                    <div
+                      className="category-fill"
+                      style={{
+                        width: `${((category.post_count))}%`,
+                        backgroundColor: ['#667eea', '#764ba2', '#f093fb', '#4ecdc4', '#ff6b6b'][index % 5]
+                      }}
+                    />
+                  </div>
                 </div>
-                <div className="category-bar">
-                  <div
-                    className="category-fill"
-                    style={{
-                      width: `${20 + index * 15}%`,
-                      backgroundColor: ['#667eea', '#764ba2', '#f093fb', '#4ecdc4', '#ff6b6b'][index]
-                    }}
-                  />
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom Section */}
+        <div className="bottom-section">
+          {/* Recent Activities - Using last three posts */}
+          <div className="activities-card">
+            <div className="card-header">
+              <h3>Recent Activities</h3>
+              <button className="view-all-btn" onClick={() => window.location.hash = '#List & Edit Articles'}>
+                View All
+              </button>
+            </div>
+            <div className="activities-list">
+              {dashboardData.last_three_posts?.map((post, index) => (
+                <ActivityItem key={post.id || index} activity={post} />
+              ))}
+            </div>
+          </div>
+
+          {/* Top Performing Posts */}
+          <div className="top-posts-card">
+            <div className="card-header">
+              <h3>Recent Posts</h3>
+              <button className="view-all-btn" onClick={() => window.location.hash = '#List & Edit Articles'}>
+                View All
+              </button>
+            </div>
+            <div className="top-posts-list">
+              {dashboardData.last_three_posts?.map((post) => (
+                <TopPostCard key={post.id} post={post} />
+              ))}
+            </div>
+          </div>
+
+          {/* Quick Actions */}
+          <div className="quick-actions-card">
+            <div className="card-header">
+              <h3>Quick Actions</h3>
+            </div>
+            <div className="quick-actions">
+              <button
+                className="quick-action-btn"
+                onClick={() => window.location.hash = '#Add Article'}
+              >
+                <span className="action-icon">📝</span>
+                <span>Write Article</span>
+              </button>
+              <button className="quick-action-btn">
+                <span className="action-icon">📊</span>
+                <span>View Analytics</span>
+              </button>
+              <button className="quick-action-btn">
+                <span className="action-icon">👥</span>
+                <span>Manage Users</span>
+              </button>
+              <button className="quick-action-btn">
+                <span className="action-icon">⚙️</span>
+                <span>Settings</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
-
-      {/* Bottom Section */}
-      <div className="bottom-section">
-        {/* Recent Activities */}
-        <div className="activities-card">
-          <div className="card-header">
-            <h3>Recent Activities</h3>
-            <button className="view-all-btn">View All</button>
-          </div>
-          <div className="activities-list">
-            {dashboardData.recentActivities.map(activity => (
-              <ActivityItem key={activity.id} activity={activity} />
-            ))}
-          </div>
-        </div>
-
-        {/* Top Performing Posts */}
-        <div className="top-posts-card">
-          <div className="card-header">
-            <h3>Top Performing Posts</h3>
-            <button className="view-all-btn">View All</button>
-          </div>
-          <div className="top-posts-list">
-            {dashboardData.topPosts.map(post => (
-              <TopPostCard key={post.id} post={post} />
-            ))}
-          </div>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="quick-actions-card">
-          <div className="card-header">
-            <h3>Quick Actions</h3>
-          </div>
-          <div className="quick-actions">
-            <button className="quick-action-btn">
-              <span className="action-icon">📝</span>
-              <span>Write Article</span>
-            </button>
-            <button className="quick-action-btn">
-              <span className="action-icon">📊</span>
-              <span>View Analytics</span>
-            </button>
-            <button className="quick-action-btn">
-              <span className="action-icon">👥</span>
-              <span>Manage Users</span>
-            </button>
-            <button className="quick-action-btn">
-              <span className="action-icon">⚙️</span>
-              <span>Settings</span>
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
+    );
+  };
 
   const renderContent = () => {
     switch (activeMenu) {
@@ -419,7 +460,7 @@ const MainContent = ({ activeMenu }) => {
         if (loading) {
           return (
             <div className="dashboard-loadingdash">
-              {/* <Lottie className="dashboard-loadingdash" animationData={animationData} loop={true} /> */}
+              Loading content...
             </div>
           );
         }
@@ -437,7 +478,6 @@ const MainContent = ({ activeMenu }) => {
 
         return (
           <div className="main-category-content">
-
             {Object.keys(categories).length === 0 ? (
               <div className="no-posts">
                 <h2>No Posts Available</h2>
@@ -460,7 +500,7 @@ const MainContent = ({ activeMenu }) => {
         );
 
       case 'sub-Category':
-        return <SubCategory />; // Render your SubCategory component
+        return <SubCategory />;
 
       case 'Article':
         return <h2>Article Management</h2>;
