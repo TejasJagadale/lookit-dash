@@ -465,6 +465,7 @@
 }
 
 @media (max-width: 768px) {
+
   .welcome-header {
     flex-direction: column;
     gap: 1rem;
@@ -496,8 +497,8 @@
   }
   
   .stat-card {
-    flex-direction: column;
-    text-align: center;
+    text-align: left;
+    justify-content: space-between;
   }
   
   .quick-actions {

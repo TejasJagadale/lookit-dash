@@ -42,6 +42,11 @@ const Sidebar = ({ isLoggedIn, onLoginClick, onLogout, activeMenu, setActiveMenu
       name: 'Schedule',
       submenus: [],
       icon: '/assets/calendar.png'
+    },
+    {
+      name: 'RasiForm',
+      submenus: [],
+      icon: '/assets/rasi.jpg'
     }
   ];
 

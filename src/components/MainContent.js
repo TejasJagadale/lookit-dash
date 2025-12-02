@@ -7,6 +7,7 @@ import Listarticle from './Listarticle';
 import List from './List';
 import NotificationList from './NotificationList';
 import ScheduleForm from './ScheduleForm';
+import RasiForm from './RasiForm';
 
 const MainContent = ({ activeMenu }) => {
   const [categories, setCategories] = React.useState({});
@@ -26,10 +27,6 @@ const MainContent = ({ activeMenu }) => {
       }
       const data = await response.json();
       if (data.success) {
-<<<<<<< HEAD
-=======
-        console.log(data);
->>>>>>> 3edd9570da23c403ae9e057b317747097478b396
         setDashboardData(data.data);
       } else {
         throw new Error(data.message || 'Failed to fetch dashboard data');
@@ -107,16 +104,8 @@ const MainContent = ({ activeMenu }) => {
       </div>
       <div className="post-stats">
         <div className="stat">
-          <span className="stat-icon">👁️</span>
-          <span>{post.view_count || 0}</span>
-        </div>
-        <div className="stat">
           <span className="stat-icon">❤️</span>
           <span>{post.likes_count || 0}</span>
-        </div>
-        <div className="stat">
-          <span className="stat-icon">💬</span>
-          <span>{post.comment_count || 0}</span>
         </div>
       </div>
     </div>
@@ -372,22 +361,14 @@ const MainContent = ({ activeMenu }) => {
                   <div className="category-info">
                     <span className="category-name">{category.name}</span>
                     <span className="category-percentage">
-<<<<<<< HEAD
-                      {((category.post_count))}
-=======
                       {category.post_count}
->>>>>>> 3edd9570da23c403ae9e057b317747097478b396
                     </span>
                   </div>
                   <div className="category-bar">
                     <div
                       className="category-fill"
                       style={{
-<<<<<<< HEAD
-                        width: `${category.post_count}%`,
-=======
                         width: `${((category.post_count))}%`,
->>>>>>> 3edd9570da23c403ae9e057b317747097478b396
                         backgroundColor: ['#667eea', '#764ba2', '#f093fb', '#4ecdc4', '#ff6b6b'][index % 5]
                       }}
                     />
@@ -525,6 +506,8 @@ const MainContent = ({ activeMenu }) => {
         return <NotificationList />;
       case 'Schedule':
         return <ScheduleForm />;
+      case 'RasiForm':
+        return <RasiForm />;
       default:
         return <h2>{activeMenu} Content</h2>;
     }

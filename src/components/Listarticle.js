@@ -92,6 +92,8 @@ const Listarticle = () => {
         const paginatedPosts = filtered.slice(startIndex, endIndex);
 
         setPosts(paginatedPosts);
+        console.log(posts);
+
         setTotalPosts(filtered.length);
         setTotalPages(Math.ceil(filtered.length / postsPerPage));
     }, [allPosts, currentPage, filters]);
@@ -336,14 +338,14 @@ const Listarticle = () => {
                 "Updating trending status for post:",
                 postId,
                 "to:",
-                payloadStatus
+                newTrendingStatus
             );
 
             const response = await axios.post(
-                "https://tnreaders.in/mobile/update-trending",
+                "https://tnreaders.in/mobile/update-new-trending",
                 {
                     postId: postId,
-                    isActive: payloadStatus
+                    istrending: newTrendingStatus
                 },
                 {
                     headers: {
@@ -459,6 +461,9 @@ const Listarticle = () => {
 
         return pageNumbers;
     };
+
+    console.log(viewingPost);
+
 
     return (
         <div className="articles-container">
