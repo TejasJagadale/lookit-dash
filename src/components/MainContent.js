@@ -419,7 +419,7 @@ const MainContent = ({ activeMenu }) => {
 
         {/* Charts and Analytics Section */}
         <div className="analytics-section">
-          <div className="chart-card">
+          {/*<div className="chart-card">
             <div className="chart-header">
               <h3>Weekly Views Overview</h3>
               <select className="time-filter">
@@ -434,7 +434,7 @@ const MainContent = ({ activeMenu }) => {
                 <span key={day} className="chart-label">{day}</span>
               ))}
             </div>
-          </div>
+          </div>*/}
 
           <div className="chart-card">
             <div className="chart-header">
