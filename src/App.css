@@ -552,6 +552,7 @@ body {
 
   .menu-toggle {
     display: block;
+    margin: 0;
   }
 
   .main-content {
@@ -568,7 +569,7 @@ body {
   }
 
   .dashboard-container {
-    margin-top: 56px;
+    /* margin-top: 56px; */
   }
 
   .professional-dashboarddash .content-header p {

@@ -163,7 +163,7 @@ const MainContent = ({ activeMenu }) => {
           <h4>{title}</h4>
           <span className="post-category">{category}</span>
         </div>
-        <div className="post-stats">
+        {/*  <div className="post-stats">
           <div className="stat">
             <span className="stat-icon">👁️</span>
             <span>{Number(views).toLocaleString()}</span>
@@ -172,7 +172,7 @@ const MainContent = ({ activeMenu }) => {
             <span className="stat-icon">❤️</span>
             <span>{Number(likes).toLocaleString()}</span>
           </div>
-        </div>
+        </div> */}
       </div>
     );
   };
