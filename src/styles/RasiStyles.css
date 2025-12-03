@@ -299,7 +299,7 @@ input:checked+.slider:before {
 }
 
 h3 {
-    color: white;
+    color: #333;
     font-size: 12px;
     /* text-align: center; */
 }
