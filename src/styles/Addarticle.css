@@ -256,6 +256,66 @@
 }
 
 /* (Your existing CSS remains unchanged) */
+/* ----------------------- TOAST UI ----------------------- */
+
+.toast-box {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-20px);
+  background: #333;
+  color: white;
+  padding: 14px 25px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  z-index: 9999;
+  opacity: 0;
+  animation: toastSlide 0.4s forwards;
+}
+
+.toast-box.success {
+  background: #4caf50;
+}
+
+.toast-box.error {
+  background: #ff4c4c;
+}
+
+@keyframes toastSlide {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* ----------------------- PROGRESS BAR ----------------------- */
+
+.progress-container {
+  width: 100%;
+  background: #ddd;
+  border-radius: 10px;
+  margin-bottom: 15px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 20px;
+  background: #00bcd4;
+  color: white;
+  text-align: center;
+  font-size: 13px;
+  font-weight: bold;
+  line-height: 20px;
+  transition: width 0.3s ease;
+}
+
+/* (Your existing CSS remains unchanged) */
 
 
 @media only screen and (max-width: 768px) {
