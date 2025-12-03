@@ -177,6 +177,7 @@
         display: flex;
         justify-content: space-between;
         padding: 0px;
+        margin-top: 20PX;
     }
 
     .horizontal-tabs {
@@ -229,23 +230,27 @@
     }
 }
 
-@media (max-width: 426px) {
+@media (max-width: 556px) {
     .horizontal-tabs {
         display: flex;
         flex-direction: row;
-        width: 425px;
+        /* width: 425px; */
         padding: 7px;
         border-bottom: 2px solid rgb(200, 200, 200);
     }
 }
 
-@media (max-width: 376px) {
+@media (max-width: 490px) {
     .horizontal-tabs {
         display: flex;
         flex-direction: row;
         width: 375px;
         padding: 7px;
         border-bottom: 2px solid rgb(200, 200, 200);
+    }
+
+    .list-container {
+        margin-top: 10px;
     }
 }
 
