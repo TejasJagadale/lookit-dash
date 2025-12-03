@@ -4,11 +4,11 @@
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     box-shadow: 2px 0 20px rgba(0, 0, 0, 0.1);
     padding: 1rem 0;
-    height: 100vh;
+    height: 100%;
     position: fixed;
     left: 0;
-    top: 70px;
-    overflow-y: auto;
+    top: 77px;
+    overflow-y: scroll;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 1000;
 }
@@ -19,9 +19,9 @@
 }
 
 .sidebar-header {
-    padding: 0 1.5rem 1.5rem;
+    padding: 0 1.5rem 0.5rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    margin-bottom: 1rem;
+    margin-bottom: 0rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -172,6 +172,7 @@
 .menu-icon {
     font-size: 1.2rem;
     text-align: center;
+    display: flex;
 }
 
 .sideicon {

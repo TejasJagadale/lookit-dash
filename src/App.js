@@ -32,7 +32,7 @@ function App() {
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
-
+   
   return (
     <div className="App">
       <Navbar
@@ -64,7 +64,10 @@ function App() {
           onSignUp={handleSignUp}
         />
       )}
+
     </div>
+
+    
   );
 }
 

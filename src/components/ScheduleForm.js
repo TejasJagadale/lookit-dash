@@ -103,7 +103,6 @@ const ScheduleForm = ({ editMode = false, editData = null, onClose }) => {
 
   return (
     <div className="schedule-container">
-      <h1>Schedule a Notification</h1>
       <form onSubmit={handleSubmit}>
         <div className="form-group">
           <label>Title</label>

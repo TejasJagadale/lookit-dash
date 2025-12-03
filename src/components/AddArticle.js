@@ -1,72 +1,49 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import "../styles/Addarticle.css";
 
 const AddArticle = () => {
+    const navigate = useNavigate();
+
     const [mainCategories, setMainCategories] = useState([]);
     const [subCategories, setSubCategories] = useState([]);
-
     const [selectedMain, setSelectedMain] = useState("");
     const [selectedSub, setSelectedSub] = useState("");
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [youtubeURL, setYoutubeURL] = useState("");
-    const [imageone, setImageone] = useState(null);
-    const [imagetwo, setImagetwo] = useState(null);
+    const [imageone, setImageone] = useState(null);       // FILE
+    const [imagetwo, setImagetwo] = useState(null);       // FILE
     const [contentType, setContentType] = useState("");
 
-    const [loading, setLoading] = useState(false);
-    const [progress, setProgress] = useState(0);
-
-    // Toast state
-    const [toast, setToast] = useState({ show: false, message: "", type: "" });
-
-    const showToast = (message, type = "success") => {
-        setToast({ show: true, message, type });
-        setTimeout(() => setToast({ show: false, message: "", type: "" }), 3000);
-    };
-
-    // Reset form after success
-    const resetForm = () => {
-        setSelectedMain("");
-        setSelectedSub("");
-        setTitle("");
-        setDescription("");
-        setYoutubeURL("");
-        setImageone(null);
-        setImagetwo(null);
-        setContentType("");
-        setProgress(0);
-    };
-
-    // Fetch main category
+    // Fetch Main Categories
     useEffect(() => {
         axios
             .get("https://tnreaders.in/mobile/main-category")
             .then((res) => {
-                const allowed = (res.data || []).filter((cat) => cat.status === "allow");
+                const allowed = (res.data || []).filter(
+                    (cat) => cat.status === "allow"
+                );
                 setMainCategories(allowed);
             })
-            .catch(() => showToast("Failed to load main categories", "error"));
+            .catch((err) => console.error("Main category error", err));
     }, []);
 
-    // Fetch sub category
+    // Fetch Sub Categories
     useEffect(() => {
         if (selectedMain) {
             axios
                 .get(`https://tnreaders.in/mobile/sub-category?id=${selectedMain}`)
                 .then((res) => setSubCategories(res.data || []))
-                .catch(() => showToast("Failed to load sub categories", "error"));
+                .catch((err) => console.error("Sub category error", err));
         }
     }, [selectedMain]);
 
+    // Handle Submit
     const handleSubmit = async () => {
-        if (!title || !description || !selectedSub || !contentType) {
-            showToast("Please fill all required fields!", "error");
-            return;
-        }
-
         const formData = new FormData();
+
         formData.append("title", title);
         formData.append("user_id", "84");
         formData.append("message", description);
@@ -74,50 +51,43 @@ const AddArticle = () => {
         formData.append("youtube_url", youtubeURL);
         formData.append("content_type", contentType);
 
+        // FILES
         if (imageone) formData.append("app_thumbnail", imageone);
         if (imagetwo) formData.append("web_thumbnail", imagetwo);
 
-        try {
-            setLoading(true);
+        console.log(formData);
 
+
+        try {
             await axios.post(
                 "https://tnreaders.in/mobile/store-new-post",
                 formData,
                 {
-                    headers: { "Content-Type": "multipart/form-data" },
-                    onUploadProgress: (progressEvent) => {
-                        const percent = Math.round(
-                            (progressEvent.loaded / progressEvent.total) * 100
-                        );
-                        setProgress(percent);
-                    },
+                    headers: { "Content-Type": "multipart/form-data" }
                 }
             );
 
-            showToast("Post submitted successfully!", "success");
-            resetForm();
+            alert("Post submitted successfully!");
+            navigate("/list-all");
 
         } catch (err) {
-            console.error(err);
-            showToast("Submission failed!", "error");
-        } finally {
-            setLoading(false);
+            console.error("Submission error", err);
+            alert("Error submitting post.");
         }
     };
 
     return (
         <div className="alignthem">
-
-            {/* TOAST UI */}
-            {toast.show && (
-                <div className={`toast-box ${toast.type}`}>
-                    {toast.message}
-                </div>
-            )}
-
             <div className="add-post-container">
-
-                <h2 className="form-title">Add Articles</h2>
+                <div className="d-flex justify-content-between align-items-center">
+                    <h2 className="form-title">Add Articles</h2>
+                    {/* <button
+                        className="btn btn-secondary"
+                        onClick={() => navigate("/list-all")}
+                    >
+                        Back to List Articles
+                    </button> */}
+                </div>
 
                 {/* Content Type */}
                 <div className="form-group">
@@ -139,7 +109,7 @@ const AddArticle = () => {
                     </div>
                 </div>
 
-                {/* Category Row */}
+                {/* Main & Sub Category */}
                 <div className="form-row">
                     <div className="form-group">
                         <label className="form-label">Main Category</label>
@@ -195,7 +165,7 @@ const AddArticle = () => {
                     />
                 </div>
 
-                {/* Youtube */}
+                {/* YouTube URL */}
                 <div className="form-group">
                     <label className="form-label">YouTube URL</label>
                     <input
@@ -206,7 +176,7 @@ const AddArticle = () => {
                     />
                 </div>
 
-                {/* Images */}
+                {/* File Upload - App Thumbnail */}
                 <div className="form-group">
                     <label className="form-label">App Thumbnail</label>
                     <input
@@ -217,6 +187,7 @@ const AddArticle = () => {
                     />
                 </div>
 
+                {/* File Upload - Web Thumbnail */}
                 <div className="form-group">
                     <label className="form-label">Web Thumbnail</label>
                     <input
@@ -227,19 +198,9 @@ const AddArticle = () => {
                     />
                 </div>
 
-                {/* Upload progress */}
-                {loading && (
-                    <div className="progress-container">
-                        <div className="progress-bar" style={{ width: `${progress}%` }}>
-                            {progress}%
-                        </div>
-                    </div>
-                )}
-
-                <button className="submit-button" onClick={handleSubmit} disabled={loading}>
-                    {loading ? "Uploading..." : "சமர்ப்பிக்கவும்"}
+                <button className="submit-button" onClick={handleSubmit}>
+                    சமர்ப்பிக்கவும்
                 </button>
-
             </div>
         </div>
     );
