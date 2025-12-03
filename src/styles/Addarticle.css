@@ -131,6 +131,133 @@
   color: red;
 }
 
+/* existing styles kept above... */
+
+/* Loading overlay for full-screen loader */
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(13, 27, 42, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+/* Re-use your loader animation (tweaked size for overlay) */
+.loading-overlay .loader {
+  border: 6px solid #f3f3f3;
+  border-top: 6px solid #3498db;
+  border-radius: 50%;
+  width: 64px;
+  height: 64px;
+  animation: spin 1s linear infinite;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+}
+
+/* Disabled submit button look */
+.submit-button[disabled],
+.submit-button[aria-disabled="true"] {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Inline field error styling */
+.field-error {
+  color: #c0392b;
+  font-size: 0.9rem;
+  margin-top: 6px;
+}
+
+/* server / global messages */
+.server-message {
+  background: #fff3cd;
+  color: #856404;
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* small image preview style */
+.image-preview {
+  margin-top: 8px;
+  display: inline-block;
+}
+
+.image-preview img {
+  max-width: 140px;
+  max-height: 100px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  object-fit: cover;
+  display: block;
+}
+
+/* keep your @media rules — overlay will still be full-screen */
+/* ----------------------- TOAST UI ----------------------- */
+
+.toast-box {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-20px);
+  background: #333;
+  color: white;
+  padding: 14px 25px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  z-index: 9999;
+  opacity: 0;
+  animation: toastSlide 0.4s forwards;
+}
+
+.toast-box.success {
+  background: #4caf50;
+}
+
+.toast-box.error {
+  background: #ff4c4c;
+}
+
+@keyframes toastSlide {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* ----------------------- PROGRESS BAR ----------------------- */
+
+.progress-container {
+  width: 100%;
+  background: #ddd;
+  border-radius: 10px;
+  margin-bottom: 15px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 20px;
+  background: #00bcd4;
+  color: white;
+  text-align: center;
+  font-size: 13px;
+  font-weight: bold;
+  line-height: 20px;
+  transition: width 0.3s ease;
+}
+
+/* (Your existing CSS remains unchanged) */
+
+
 @media only screen and (max-width: 768px) {
   .add-post-container {
     font-family: sans-serif;
