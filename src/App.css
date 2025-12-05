@@ -562,15 +562,11 @@ body {
   }
 
   .content-body {
-    padding: 0.6rem;
+    padding: 0rem;
   }
 
   .navbar {
     padding: 1rem;
-  }
-
-  .dashboard-container {
-    /* margin-top: 56px; */
   }
 
   .professional-dashboarddash .content-header p {
