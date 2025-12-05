@@ -121,6 +121,7 @@
     background: rgba(239, 68, 68, 0.8);
     color: white;
     border: 1px solid rgba(239, 68, 68, 0.6);
+    width: auto;
 }
 
 .logout-btn:hover {
@@ -434,12 +435,27 @@
 /* Mobile Responsive */
 @media (max-width: 768px) {
     .sidebar-header {
-        padding: 1.5rem;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        margin-bottom: 0rem;
+        display: none;
+    }
+
+    .banner-dashboard {
         display: flex;
-        justify-content: center;
-        align-items: center;
+        flex-direction: column;
+        gap: 10px;
+        padding: 10px;
+    }
+
+    .menu-title {
+        padding: 0.5rem 1.5rem;
+    }
+
+    .menu-text {
+        font-size: 14px;
+    }
+
+    .logout-btn {
+        padding: 0.5rem;
+        width: auto;
     }
 
     .sidebar {
@@ -504,7 +520,7 @@
 @media (max-width: 480px) {
     .sidebar {
         width: 100%;
-        top: auto;
+        top: 63px;
         /* max-width: 300px; */
     }
 

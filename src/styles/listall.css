@@ -886,7 +886,8 @@ body {
 
     .back-btn,
     .edit-detail-btn {
-        width: 100%;
+        width: auto;
+        padding: 6px 20px;
         text-align: center;
     }
 

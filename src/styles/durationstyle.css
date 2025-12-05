@@ -435,7 +435,7 @@
 /* Responsive design */
 @media (max-width: 768px) {
     .main {
-        padding: 20px 15px;
+        padding: 0px;
     }
 
     .main::before {
@@ -451,7 +451,7 @@
 
     .form h1 {
         font-size: 30px;
-        margin-bottom: 20px;
+        margin-bottom: 0px;
     }
 
     .design,

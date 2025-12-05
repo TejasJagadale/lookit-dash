@@ -45,7 +45,12 @@ const Sidebar = ({ isLoggedIn, onLoginClick, onLogout, activeMenu, setActiveMenu
     },
     {
       name: 'Astrology',
-      submenus: ['Rasi Upload Form','RasiList'],
+      submenus: ['Rasi Upload Form', 'RasiList'],
+      icon: '/assets/astrology.png'
+    },
+        {
+      name: 'Banner',
+      submenus: [],
       icon: '/assets/astrology.png'
     }
   ];
@@ -91,20 +96,18 @@ const Sidebar = ({ isLoggedIn, onLoginClick, onLogout, activeMenu, setActiveMenu
           )}
         </div>
 
-        {/* Auth Section */}
-        <div className="sidebar-auth">
-          {!isLoggedIn ? (
-            <button className="auth-btn login-btn" onClick={onLoginClick}>
-              <span className="auth-icon"><img alt='' className='sideicon' src='/assets/man.png' /></span>
-              {!isCollapsed && <span>Sign Up / Login</span>}
+        {/* Expand button when collapsed */}
+        {isCollapsed && (
+          <div className="expand-section">
+            <button
+              className="expand-btn"
+              onClick={toggleSidebar}
+              title="Expand sidebar"
+            >
+              <img alt='' src='/assets/right.png' className='sideicon' />
             </button>
-          ) : (
-            <button className="auth-btn logout-btn" onClick={onLogout}>
-              <span className="auth-icon">🚪</span>
-              {!isCollapsed && <span>Logout</span>}
-            </button>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Navigation Menu - Show full menu when not collapsed */}
         {!isCollapsed ? (
@@ -211,18 +214,20 @@ const Sidebar = ({ isLoggedIn, onLoginClick, onLogout, activeMenu, setActiveMenu
           </div>
         )}
 
-        {/* Expand button when collapsed */}
-        {isCollapsed && (
-          <div className="expand-section">
-            <button
-              className="expand-btn"
-              onClick={toggleSidebar}
-              title="Expand sidebar"
-            >
-              <img alt='' src='/assets/right.png' className='sideicon' />
+        {/* Auth Section */}
+        <div className="sidebar-auth">
+          {!isLoggedIn ? (
+            <button className="auth-btn login-btn" onClick={onLoginClick}>
+              <span className="auth-icon"><img alt='' className='sideicon' src='/assets/man.png' /></span>
+              {!isCollapsed && <span>Sign Up / Login</span>}
             </button>
-          </div>
-        )}
+          ) : (
+            <button className="auth-btn logout-btn" onClick={onLogout}>
+              <span className="auth-icon">🚪</span>
+              {!isCollapsed && <span>Logout</span>}
+            </button>
+          )}
+        </div>
       </div>
     </>
   );

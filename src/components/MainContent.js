@@ -1,11 +1,7 @@
 import React from 'react';
-// import '../styles/MainCategory.css';
 import '../styles/dashboard.css';
 import '../styles/SubCategory.css';
-import imageee from "../assets/lookit.webp";
-import animationData from "../animation/Car.json";
-import Lottie from "lottie-react";
-import SubCategory from './SubCategory'; // Import your SubCategory component
+import SubCategory from './SubCategory';
 import AddArticle from './AddArticle';
 import Listarticle from './Listarticle';
 import List from './List';
@@ -13,32 +9,7 @@ import NotificationList from './NotificationList';
 import ScheduleForm from './ScheduleForm';
 import AppRouter from "../CalendarList/AppRouter";
 import Form from "../CalendarList/duration";
-
-// Mock data for charts and statistics
-const dashboardData = {
-  stats: {
-    totalViews: 12457,
-    totalPosts: 342,
-    activeUsers: 892,
-    engagementRate: 68
-  },
-  chartData: {
-    views: [1200, 1900, 1500, 2100, 1800, 2400, 1900],
-    posts: [45, 52, 38, 65, 72, 58, 49],
-    categories: ['Tech', 'Health', 'Sports', 'Education', 'Lifestyle']
-  },
-  recentActivities: [
-    { id: 1, action: 'New Article Published', user: 'John Doe', time: '2 mins ago', type: 'success' },
-    { id: 2, action: 'User Registered', user: 'Sarah Wilson', time: '5 mins ago', type: 'info' },
-    { id: 3, action: 'Article Updated', user: 'Mike Johnson', time: '10 mins ago', type: 'warning' },
-    { id: 4, action: 'Comment Reported', user: 'Admin', time: '15 mins ago', type: 'error' }
-  ],
-  topPosts: [
-    { id: 1, title: 'The Future of AI in Healthcare', views: 2450, likes: 189, category: 'Tech' },
-    { id: 2, title: '10 Tips for Better Sleep', views: 1890, likes: 156, category: 'Health' },
-    { id: 3, title: 'React Best Practices 2024', views: 1670, likes: 142, category: 'Education' }
-  ]
-};
+import Banner from '../CalendarList/Banner';
 
 const MainContent = ({ activeMenu }) => {
   const [categories, setCategories] = React.useState({});
@@ -76,26 +47,6 @@ const MainContent = ({ activeMenu }) => {
       fetchDashboardData();
     }
   }, [activeMenu]);
-
-  // Simple bar chart component
-  const BarChart = ({ data, color, height = 40 }) => {
-    const maxValue = Math.max(...data);
-    return (
-      <div className="bar-chart" style={{ height: `${height}px` }}>
-        {data.map((value, index) => (
-          <div
-            key={index}
-            className="bar"
-            style={{
-              height: `${(value / maxValue) * 100}%`,
-              backgroundColor: color
-            }}
-            title={`Value: ${value}`}
-          />
-        ))}
-      </div>
-    );
-  };
 
   // Stat card component - FIXED
   const StatCard = ({ title, value, change, icon, color }) => {
@@ -163,16 +114,6 @@ const MainContent = ({ activeMenu }) => {
           <h4>{title}</h4>
           <span className="post-category">{category}</span>
         </div>
-        {/*  <div className="post-stats">
-          <div className="stat">
-            <span className="stat-icon">👁️</span>
-            <span>{Number(views).toLocaleString()}</span>
-          </div>
-          <div className="stat">
-            <span className="stat-icon">❤️</span>
-            <span>{Number(likes).toLocaleString()}</span>
-          </div>
-        </div> */}
       </div>
     );
   };
@@ -419,23 +360,6 @@ const MainContent = ({ activeMenu }) => {
 
         {/* Charts and Analytics Section */}
         <div className="analytics-section">
-          {/*<div className="chart-card">
-            <div className="chart-header">
-              <h3>Weekly Views Overview</h3>
-              <select className="time-filter">
-                <option>Last 7 Days</option>
-                <option>Last 30 Days</option>
-                <option>Last 90 Days</option>
-              </select>
-            </div>
-            <BarChart data={weeklyViews} color="#667eea" height={120} />
-            <div className="chart-labels">
-              {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, index) => (
-                <span key={day} className="chart-label">{day}</span>
-              ))}
-            </div>
-          </div>*/}
-
           <div className="chart-card">
             <div className="chart-header">
               <h3>Content Distribution</h3>
@@ -572,7 +496,6 @@ const MainContent = ({ activeMenu }) => {
 
       case 'sub-Category':
         return <SubCategory />;
-
       case 'Article':
         return <h2>Article Management</h2>;
       case 'Add Article':
@@ -589,6 +512,8 @@ const MainContent = ({ activeMenu }) => {
         return <Form />;
       case 'RasiList':
         return <AppRouter />;
+      case 'Banner':
+        return <Banner />;
       default:
         return <h2>{activeMenu} Content</h2>;
     }

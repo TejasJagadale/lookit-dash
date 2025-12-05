@@ -162,12 +162,28 @@ const AuthModal = ({ onClose, onLogin }) => {
         { mobile, otp: otpString }
       );
 
+      console.log("OTP Verify Response:", res);
+
+      const user = res.data; // your real data object
+
       const userData = {
-        name: res.data?.name || "User",
-        mobile,
-        token: res.data?.token,
-        image: `https://ui-avatars.com/api/?name=${mobile}&background=667eea&color=fff`,
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        mobile: user.mobile,
+        token: user.token,
+        role: user.role,
+        onboarding: user.onboarding,
+        referal_code: user.referal_code,
+        dob: user.dob,
+        image: `https://ui-avatars.com/api/?name=${user.name}&background=667eea&color=fff`,
       };
+
+      console.log(userData);
+
+      // ⭐ Save full user data in localStorage
+      localStorage.setItem("mp_user", JSON.stringify(userData));
+      localStorage.setItem("mp_token", user?.token);
 
       showMessage("Verification successful! Welcome back!", "success");
 
@@ -175,12 +191,14 @@ const AuthModal = ({ onClose, onLogin }) => {
         onLogin(userData);
         onClose();
       }, 1000);
+
     } catch (err) {
       showMessage("Invalid OTP. Please try again.", "error");
     } finally {
       setLoading(false);
     }
   };
+
 
   const getPasswordStrengthColor = () => {
     if (passwordStrength >= 75) return "#10b981";

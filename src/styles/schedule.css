@@ -58,7 +58,7 @@ textarea {
   cursor: pointer;
   font-weight: bold;
   transition: 0.3s;
-  margin-left: 10px;
+  /* margin-left: 10px; */
 }
 
 .btn:hover {
