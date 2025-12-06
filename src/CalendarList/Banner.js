@@ -16,12 +16,53 @@ export default function Banner() {
 
   // Modal editing state
   const [editingBanner, setEditingBanner] = useState(null);
+  const [deletingBanner, setDeletingBanner] = useState(null);
+  const [deleteConfirm, setDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const handleEdit = (banner) => {
     setEditingBanner(banner);
     setSelectedCategory(banner.category_id);
     setUrlLink(banner.url_link);
     setPreviewImage(banner.banner_link);
+  };
+
+  const handleDeleteClick = (banner) => {
+    setDeletingBanner(banner);
+    setDeleteConfirm(true);
+  };
+
+  const handleDelete = async () => {
+    if (!deletingBanner) return;
+
+    setDeleting(true);
+    try {
+      console.log(`https://tnreaders.in/mobile/banners-delete/${deletingBanner.id}`);
+
+      const res = await fetch(
+        `https://tnreaders.in/mobile/banners-delete/${deletingBanner.id}`,
+        {
+          method: "POST",
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        }
+      );
+      const json = await res.json();
+
+      if (json.status) {
+        alert("Banner deleted successfully!");
+        setDeleteConfirm(false);
+        setDeletingBanner(null);
+        loadBanners(); // Refresh the banner list
+      } else {
+        alert("Delete failed: " + json.message);
+      }
+    } catch (err) {
+      console.log(err);
+      alert("Something went wrong while deleting!");
+    }
+    setDeleting(false);
   };
 
   const handleUpdate = async (e) => {
@@ -178,7 +219,7 @@ export default function Banner() {
           />
           <label>Upload Banner Image</label>
           <input type="file" accept="image/*" onChange={handleImageChange} />
-          {previewImage && <img src={previewImage} className="preview-img" />}
+          {previewImage && <img src={previewImage} className="preview-img" alt="Preview" />}
           <button type="submit" className="upload-btn" disabled={uploading}>
             {uploading ? "Uploading..." : "Upload Banner"}
           </button>
@@ -208,26 +249,34 @@ export default function Banner() {
 
         {/* ACTIVE BANNERS */}
         <div className="banner-column">
-          <h2 className="section-title active">Active Banners</h2>
+          <h2 className="section-title active">Active Banners ({activeBanners.length})</h2>
           <div className="banner-grid">
             {activeBanners.map((banner) => (
               <div key={banner.id} className="banner-card">
                 <h3>{banner.category}</h3>
-                <a href={banner.url_link} target="_blank">
-                  <img src={banner.banner_link} className="banner-image" />
+                <a href={banner.url_link} target="_blank" rel="noopener noreferrer">
+                  <img src={banner.banner_link} className="banner-image" alt={banner.category} />
                 </a>
-                <button
-                  className="deactivate-btn"
-                  onClick={() => toggleBannerStatus(banner, true)}
-                >
-                  Move to Inactive
-                </button>
-                <button
-                  className="edit-btn"
-                  onClick={() => handleEdit(banner)}
-                >
-                  Edit
-                </button>
+                <div className="button-group">
+                  <button
+                    className="deactivate-btn"
+                    onClick={() => toggleBannerStatus(banner, true)}
+                  >
+                    Move to Inactive
+                  </button>
+                  <button
+                    className="edit-btn"
+                    onClick={() => handleEdit(banner)}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    className="delete-btn"
+                    onClick={() => handleDeleteClick(banner)}
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -235,26 +284,34 @@ export default function Banner() {
 
         {/* INACTIVE BANNERS */}
         <div className="banner-column">
-          <h2 className="section-title inactive">Inactive Banners</h2>
+          <h2 className="section-title inactive">Inactive Banners ({inactiveBanners.length})</h2>
           <div className="banner-grid">
             {inactiveBanners.map((banner) => (
               <div key={banner.id} className="banner-card inactive-card">
                 <h3>{banner.category}</h3>
-                <a href={banner.url_link} target="_blank">
-                  <img src={banner.banner_link} className="banner-image" />
+                <a href={banner.url_link} target="_blank" rel="noopener noreferrer">
+                  <img src={banner.banner_link} className="banner-image" alt={banner.category} />
                 </a>
-                <button
-                  className="activate-btn"
-                  onClick={() => toggleBannerStatus(banner, false)}
-                >
-                  Move to Active
-                </button>
-                <button
-                  className="edit-btn"
-                  onClick={() => handleEdit(banner)}
-                >
-                  Edit
-                </button>
+                <div className="button-group">
+                  <button
+                    className="activate-btn"
+                    onClick={() => toggleBannerStatus(banner, false)}
+                  >
+                    Move to Active
+                  </button>
+                  <button
+                    className="edit-btn"
+                    onClick={() => handleEdit(banner)}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    className="delete-btn"
+                    onClick={() => handleDeleteClick(banner)}
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -295,7 +352,7 @@ export default function Banner() {
                 onChange={handleImageChange}
               />
               {previewImage && (
-                <img src={previewImage} className="preview-img" />
+                <img src={previewImage} className="preview-img" alt="Preview" />
               )}
 
               <div className="modal-buttons">
@@ -311,6 +368,45 @@ export default function Banner() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* DELETE CONFIRMATION MODAL */}
+      {deleteConfirm && deletingBanner && (
+        <div className="modal-overlay">
+          <div className="modal delete-modal">
+            <h2>Confirm Delete</h2>
+            <p>Are you sure you want to delete this banner?</p>
+            <p className="delete-warning">This action cannot be undone.</p>
+
+            {previewImage && (
+              <div className="delete-preview">
+                <img src={deletingBanner.banner_link} className="preview-img" alt="Banner to delete" />
+                <p><strong>Category:</strong> {deletingBanner.category}</p>
+                <p><strong>URL:</strong> {deletingBanner.url_link || "No URL"}</p>
+              </div>
+            )}
+
+            <div className="modal-buttons">
+              <button
+                className="delete-confirm-btn"
+                onClick={handleDelete}
+                disabled={deleting}
+              >
+                {deleting ? "Deleting..." : "Yes, Delete"}
+              </button>
+              <button
+                className="cancel-btn"
+                onClick={() => {
+                  setDeleteConfirm(false);
+                  setDeletingBanner(null);
+                }}
+                disabled={deleting}
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -470,6 +470,90 @@ body {
     transform: translateY(-2px);
 }
 
+/* Delete button styles */
+.delete-btn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    margin: 5px;
+    transition: background-color 0.3s;
+}
+
+.delete-btn:hover {
+    background-color: #c82333;
+}
+
+.delete-btn:disabled {
+    background-color: #e0a7af;
+    cursor: not-allowed;
+}
+
+/* Button group for banner actions */
+.button-group {
+    display: flex;
+    /* flex-wrap: wrap; */
+    gap: 5px;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+/* Delete confirmation modal */
+.delete-modal {
+    max-width: 500px;
+    text-align: center;
+}
+
+.delete-warning {
+    color: #dc3545;
+    font-weight: bold;
+    margin: 10px 0;
+}
+
+.delete-preview {
+    margin: 20px 0;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+}
+
+.delete-preview img {
+    max-width: 100%;
+    max-height: 200px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
+.delete-preview p {
+    margin: 5px 0;
+    text-align: left;
+}
+
+.delete-confirm-btn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    margin: 10px;
+    transition: background-color 0.3s;
+}
+
+.delete-confirm-btn:hover {
+    background-color: #c82333;
+}
+
+.delete-confirm-btn:disabled {
+    background-color: #e0a7af;
+    cursor: not-allowed;
+}
+
 /* ===== RESPONSIVE DESIGN ===== */
 @media (max-width: 768px) {
     body {
