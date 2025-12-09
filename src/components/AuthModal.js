@@ -94,7 +94,7 @@ const AuthModal = ({ onClose, onLogin }) => {
     showMessage("Creating your account...", "info");
 
     try {
-      await axios.post("https://users.mpdatahub.com/api/register", form);
+      await axios.post("https://users.mpdatahub.com/api/mps-bus-sol-register", form);
       showMessage("Account created successfully! Please login.", "success");
       setTimeout(() => {
         setActiveTab("login");
@@ -114,7 +114,7 @@ const AuthModal = ({ onClose, onLogin }) => {
 
     try {
       const response = await axios.post(
-        "https://users.mpdatahub.com/api/login",
+        "https://users.mpdatahub.com/api/mps-bus-sol-login",
         { email, password }
       );
 
@@ -134,7 +134,7 @@ const AuthModal = ({ onClose, onLogin }) => {
 
   const handleSendOtpAPI = async (mobileNumber) => {
     try {
-      await axios.post("https://users.mpdatahub.com/api/sendotp", {
+      await axios.post("https://users.mpdatahub.com/api/mps-bus-sol-sendotp", {
         mobile: mobileNumber,
       });
       setOtpResendTimer(30);

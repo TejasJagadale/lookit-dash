@@ -122,6 +122,8 @@
     color: white;
     border: 1px solid rgba(239, 68, 68, 0.6);
     width: auto;
+    padding: 5px 15px;
+    border-radius: 10px;
 }
 
 .logout-btn:hover {
