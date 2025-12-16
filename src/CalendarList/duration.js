@@ -111,10 +111,10 @@ const Duration = () => {
                 name: e.target.name?.value,
                 kiraganam: e.target.kiraganam?.value,
                 prayers: e.target.prayers?.value,
-                imageFile: e.target.image.files[0],
-                imageURL: e.target.image.files[0]
-                    ? URL.createObjectURL(e.target.image.files[0])
-                    : null,
+                // imageFile: e.target.image.files[0],
+                // imageURL: e.target.image.files[0]
+                //     ? URL.createObjectURL(e.target.image.files[0])
+                //     : null,
             };
         }
 
@@ -317,7 +317,7 @@ const Duration = () => {
                     </>
                 )}
 
-                <label>Upload Image:</label>
+                {/* <label>Upload Image:</label>
                 <input
                     className='design'
                     type='file'
@@ -326,7 +326,7 @@ const Duration = () => {
                     onChange={(e) => e.target.files[0] && setfileName(e.target.files[0].name)}
                     required
                 />
-                <strong>{fileName}</strong>
+                <strong>{fileName}</strong> */}
 
                 <button className='btn' disabled={loading}>
                     {loading ? <CircularIndeterminate /> : "Upload"}
