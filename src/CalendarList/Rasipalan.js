@@ -56,12 +56,9 @@ export default function RasiList() {
       <div className="grid">
         {rasiList.map((rasi) => (
           <button key={rasi.id} onClick={() => openRasi(rasi)} className="buttons">
-
             {rasi.image && (
               <img src={rasi.image} alt={rasi.name} className="rasi-imgs" />
             )}
-
-            {/* <span className="span">{rasi.name}</span> */}
           </button>
         ))}
       </div>

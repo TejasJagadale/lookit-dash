@@ -477,6 +477,7 @@
     .main-content {
         margin-left: 0;
         padding: 0rem;
+        width: 100%;
     }
 
     .sidebar.collapsed~.main-content {

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "../styles/SubCategory.css";
 
-const SubCategory = () => {
+const SubCategoryRm = () => {
     const [posts, setPosts] = useState({
         trending: [],
         categories: []
@@ -131,8 +131,8 @@ const SubCategory = () => {
     return (
         <div className="professional-dashboarddash">
             <div className="content-header">
-                <h1 style={{textAlign: 'center'}}>Sub Categories</h1>
-                <p style={{textAlign: 'center'}}>Browse trending posts and categories</p>
+                <h1>Sub Categories</h1>
+                <p>Browse trending posts and categories</p>
             </div>
 
             {/* Main Dashboard Grid */}
@@ -350,4 +350,4 @@ const SubCategory = () => {
     );
 };
 
-export default SubCategory;
+export default SubCategoryRm;

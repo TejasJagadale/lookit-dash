@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import "../styles/listall.css";
 
-const Listarticle = () => {
+const ListarticleRm = () => {
     const navigate = useNavigate();
     const [posts, setPosts] = useState([]);
     const [mainCategories, setMainCategories] = useState([]);
@@ -43,12 +43,10 @@ const Listarticle = () => {
     useEffect(() => {
         fetchPosts();
     }, []);
-
     const fetchPosts = () => {
         setIsLoading(true);
-
         axios
-            .get(`https://tnreaders.in/mobile/view-post-sub?currentPage=1&perPage=200`)
+            .get(`https://tnreaders.in/mobile/view-readers-new?currentPage=1&perPage=200`)
             .then((response) => {
                 setAllPosts(response.data.data || []);
                 setIsLoading(false);
@@ -101,7 +99,7 @@ const Listarticle = () => {
     // Fetch Main Categories on load
     useEffect(() => {
         axios
-            .get("https://tnreaders.in/mobile/main-category")
+            .get("https://tnreaders.in/mobile/list-main-category-readers")
             .then((res) => {
                 const allowedCategories = (res.data || []).filter(
                     (cat) => cat.status === "allow"
@@ -115,10 +113,8 @@ const Listarticle = () => {
     useEffect(() => {
         if (selectedMain) {
             setIsSubCategoriesLoaded(false);
-            console.log(`https://tnreaders.in/mobile/sub-category?id=${selectedMain}`);
-
             axios
-                .get(`https://tnreaders.in/mobile/sub-category?id=${selectedMain}`)
+                .get(`https://tnreaders.in/mobile/list-sub-readers?id=${selectedMain}`)
                 .then((res) => {
                     const subs = res.data || [];
                     setSubCategories(subs);
@@ -265,8 +261,8 @@ const Listarticle = () => {
 
         // Determine the endpoint based on whether we're editing or creating
         const endpoint = editingPost
-            ? "https://tnreaders.in/mobile/store-new-post"
-            : "https://tnreaders.in/mobile/upload-post";
+            ? "https://tnreaders.in/mobile/store-new-readersmenu"
+            : "https://tnreaders.in/mobile/update-new-readers";
 
         // Add post_id only when editing
         if (editingPost) {
@@ -303,11 +299,10 @@ const Listarticle = () => {
     const togglePostStatus = async (postId, currentStatus) => {
         const newStatus = currentStatus === "yes" ? "no" : "yes";
         setIsProcessing(true);
+        console.log(`https://tnreaders.in/mobile/update-activereaders?postId=${postId}&isActive=${newStatus}`);
+
         try {
-            await axios.post("https://tnreaders.in/mobile/update-status", {
-                postId,
-                isActive: newStatus
-            });
+            await axios.get(`https://tnreaders.in/mobile/update-activereaders?postId=${postId}&isActive=${newStatus}`);
             alert(
                 `Post status updated to ${newStatus === "yes" ? "Active" : "Disabled"}`
             );
@@ -343,7 +338,7 @@ const Listarticle = () => {
             );
 
             const response = await axios.post(
-                "https://tnreaders.in/mobile/update-new-trending",
+                "https://tnreaders.in/mobile/update-trendingreaders",
                 {
                     postId: postId,
                     istrending: newTrendingStatus
@@ -463,7 +458,7 @@ const Listarticle = () => {
         return pageNumbers;
     };
 
-    console.log(viewingPost);
+    // console.log(viewingPost);
 
 
     return (
@@ -472,7 +467,7 @@ const Listarticle = () => {
                 <Loader />
             ) : !editingPost && !viewingPost ? (
                 <>
-                    <h1 style={{ textAlign: 'center', marginBottom: '20px' }}>List & Edit LookIt Articles</h1>
+                <h1 style={{textAlign:'center', marginBottom: '20px'}}>List & Edit ReadersMenu Articles</h1>
                     <div className="filters-section">
                         <div className="filters-grid">
                             <div className="filter-group">
@@ -627,9 +622,9 @@ const Listarticle = () => {
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="post-author">
+                                    {/* <div className="post-author">
                                         <small>By {post.submasteruser.name || "Unknown Author"}</small>
-                                    </div>
+                                    </div> */}
                                 </div>
                             ))
                         ) : (
@@ -1132,4 +1127,4 @@ const Listarticle = () => {
     );
 };
 
-export default Listarticle;
+export default ListarticleRm;

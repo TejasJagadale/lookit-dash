@@ -2,10 +2,9 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "../styles/Addarticle.css";
 
-const AddArticle = () => {
+const AddArticleRm = () => {
     const [mainCategories, setMainCategories] = useState([]);
     const [subCategories, setSubCategories] = useState([]);
-
     const [selectedMain, setSelectedMain] = useState("");
     const [selectedSub, setSelectedSub] = useState("");
     const [title, setTitle] = useState("");
@@ -14,7 +13,6 @@ const AddArticle = () => {
     const [imageone, setImageone] = useState(null);
     const [imagetwo, setImagetwo] = useState(null);
     const [contentType, setContentType] = useState("");
-
     const [loading, setLoading] = useState(false);
     const [progress, setProgress] = useState(0);
 
@@ -67,6 +65,8 @@ const AddArticle = () => {
         }
 
         const formData = new FormData();
+        console.log();
+        
         formData.append("title", title);
         formData.append("user_id", "84");
         formData.append("message", description);
@@ -81,7 +81,7 @@ const AddArticle = () => {
             setLoading(true);
 
             await axios.post(
-                "https://tnreaders.in/mobile/store-new-post",
+                "https://tnreaders.in/mobile/store-new-readersmenu",
                 formData,
                 {
                     headers: { "Content-Type": "multipart/form-data" },
@@ -117,7 +117,7 @@ const AddArticle = () => {
 
             <div className="add-post-container">
 
-                <h2 className="form-title">Add Articles to LookIt</h2>
+                <h2 className="form-title">Add Articles to ReadersMenu</h2>
 
                 {/* Content Type */}
                 <div className="form-group">
@@ -245,4 +245,4 @@ const AddArticle = () => {
     );
 };
 
-export default AddArticle;
+export default AddArticleRm;

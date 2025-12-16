@@ -19,19 +19,24 @@ const Sidebar = ({ isLoggedIn, onLoginClick, onLogout, activeMenu, setActiveMenu
 
   const menuItems = [
     {
-      name: 'Main-Category',
-      submenus: [],
-      icon: '/assets/app.png'
-    },
-    {
-      name: 'sub-Category',
-      submenus: [],
-      icon: '/assets/list.png'
-    },
-    {
-      name: 'Article',
-      submenus: ['Add Article', 'List', 'List & Edit Articles'],
+      name: 'LookIt Categories',
+      submenus: ['Main-Category', 'sub-Category'],
       icon: '/assets/article.png'
+    },
+    {
+      name: 'ReadersMenu Categories',
+      submenus: ['MainCategoryRm'],
+      icon: '/assets/article.png'
+    },
+    {
+      name: 'Lookit Articles',
+      submenus: ['Add Article', 'List & Edit Articles'],
+      icon: '/assets/article.png'
+    },
+    {
+      name: 'ReadersMenu Articles',
+      submenus: ['Add Article', 'List and Edit Articles'],
+      icon: '/assets/article.png' 
     },
     {
       name: 'Notifications',
@@ -48,7 +53,7 @@ const Sidebar = ({ isLoggedIn, onLoginClick, onLogout, activeMenu, setActiveMenu
       submenus: ['Rasi Upload Form', 'RasiList'],
       icon: '/assets/astrology.png'
     },
-        {
+    {
       name: 'Banner',
       submenus: [],
       icon: '/assets/astrology.png'
@@ -133,12 +138,6 @@ const Sidebar = ({ isLoggedIn, onLoginClick, onLogout, activeMenu, setActiveMenu
                       </span>
                     )}
                   </div>
-
-                  {/* {item.submenus && item.submenus.length > 0 && (
-                    <span className="submenu-toggle">
-                      {openSubmenus[item.name] ? '−' : '+'}
-                    </span>
-                  )} */}
                 </div>
 
                 {/* Submenu */}

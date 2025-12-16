@@ -106,10 +106,6 @@ function MainCategory() {
 
     const PostCard = ({ post }) => (
         <article className="post-cardm">
-            {/* {post.istrending === 1 && (
-                <div className="trending-badge">🔥 Trending</div>
-            )} */}
-
             <div className="post-imagem">
                 <img
                     src={
@@ -127,34 +123,13 @@ function MainCategory() {
                 />
             </div>
 
-            {/* <div className="post-headerm">
-                <span className="category-tag">
-                    {post.category?.name || 'Uncategorized'}
-                </span>
-                <span className="likes-count">
-                    ❤️ {post.likes_count || 0}
-                </span>
-            </div> */}
-
             <div className="post-contentm">
                 <h3 className="post-titlem">{limitText(post.title, 25)}</h3>
-
-                {/* <p className="post-description">
-                    {post.description && post.description.length > 150
-                        ? `${post.description.substring(0, 150)}...`
-                        : post.description || 'No description available.'
-                    }
-                </p> */}
 
                 <div className="post-metam">
                     <span className="post-date">
                         {formatDate(post.created_at)}
                     </span>
-                    {/* {post.content_type && (
-                        <span className={`content-type ${post.content_type}`}>
-                            {post.content_type === 'article' ? '📝 Article' : '🎥Article '}
-                        </span>
-                    )} */}
                 </div>
 
                 <div className="post-actions">
@@ -166,37 +141,28 @@ function MainCategory() {
                     >
                         Read More
                     </a>
-
-                    {/* {post.youtube_url && post.youtube_url !== 'nil' && (
-                        <a
-                            href={post.youtube_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="youtube-btn"
-                        >
-                            Video
-                        </a>
-                    )} */}
                 </div>
             </div>
         </article>
     );
 
     const CategorySection = ({ categoryId, categoryData }) => (
-        <section key={categoryId} className="category-section">
-            <div className="category-headerm">
-                <div className="category-title-wrapper">
-                    <h2 className="category-title">{categoryData.name}</h2>
+        <>
+            <h1>LookIt Main Category</h1>
+            <section key={categoryId} className="category-section">
+                <div className="category-headerm">
+                    <div className="category-title-wrapper">
+                        <h2 className="category-title">{categoryData.name}</h2>
+                    </div>
                 </div>
-                {/* <span className="post-count">{categoryData.posts.length} posts</span> */}
-            </div>
 
-            <div className="posts-gridm">
-                {categoryData.posts.map((post, index) => (
-                    <PostCard key={`${post.id}-${index}`} post={post} />
-                ))}
-            </div>
-        </section>
+                <div className="posts-gridm">
+                    {categoryData.posts.map((post, index) => (
+                        <PostCard key={`${post.id}-${index}`} post={post} />
+                    ))}
+                </div>
+            </section>
+        </>
     );
 
     if (loading) {
@@ -220,16 +186,7 @@ function MainCategory() {
 
     return (
         <div className="App">
-            {/* <header className="app-header">
-        <h1>TN Readers</h1>
-        <p>Discover interesting facts and knowledge across all categories</p>
-        <div className="header-stats">
-          <span>📊 {Object.keys(categories).length} Categories</span>
-          <span>📝 {Object.values(categories).reduce((total, cat) => total + cat.posts.length, 0)} Total Posts</span>
-        </div>
-        <button onClick={fetchPosts} className="refresh-btn">Refresh</button>
-      </header> */}
-
+            <h1>LookIt Main Category</h1>
             <main className="main-content">
                 {Object.keys(categories).length === 0 ? (
                     <div className="no-posts">
@@ -240,6 +197,7 @@ function MainCategory() {
                     </div>
                 ) : (
                     <div className="categories-container">
+                        <h1>LookIt Main Category</h1>
                         {Object.keys(categories).map(categoryId => (
                             <CategorySection
                                 key={categoryId}

@@ -10,6 +10,10 @@ import ScheduleForm from './ScheduleForm';
 import AppRouter from "../CalendarList/AppRouter";
 import Form from "../CalendarList/duration";
 import Banner from '../CalendarList/Banner';
+import AddArticleRm from './AddArticleRm';
+import ListarticleRm from './ListarticleRm';
+import MainCategoryRm from './MainCategoryRm';
+import SubCategoryRm from './SubCategoryRm';
 
 const MainContent = ({ activeMenu }) => {
   const [categories, setCategories] = React.useState({});
@@ -482,6 +486,7 @@ const MainContent = ({ activeMenu }) => {
               </div>
             ) : (
               <div className="categories-container">
+                <h2 style={{textAlign: 'center'}}>LookIt Main Category</h2>
                 {Object.keys(categories).map(categoryId => (
                   <CategorySection
                     key={categoryId}
@@ -496,14 +501,22 @@ const MainContent = ({ activeMenu }) => {
 
       case 'sub-Category':
         return <SubCategory />;
+      case 'MainCategoryRm':
+        return <MainCategoryRm />;
+      case 'subCategoryRm':
+        return <SubCategoryRm />;
       case 'Article':
         return <h2>Article Management</h2>;
       case 'Add Article':
         return <AddArticle />;
+      case 'Add Article':
+        return <AddArticleRm />
       case 'List':
         return <List />;
       case 'List & Edit Articles':
         return <Listarticle />;
+      case 'List and Edit Articles':
+        return <ListarticleRm />
       case 'Notifications':
         return <NotificationList />;
       case 'Schedule':

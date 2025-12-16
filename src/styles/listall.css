@@ -270,7 +270,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-top: auto;
+    /* margin-top: auto; */
 }
 
 .action-buttons {

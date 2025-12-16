@@ -2,112 +2,165 @@ import React, { useState } from 'react';
 import BasicDateCalendar from './date';
 import "../styles/durationstyle.css";
 import rasiname from './json/rasipalan.json';
-// import star from '../json/star.json';
 import AntDatePicker from './antdatepicker';
 import Preview from './preview';
 import Errors from './errors';
 import CircularIndeterminate from './loader';
 
 const Duration = () => {
+
     const [values, setValue] = useState(null);
     const [dur, setdur] = useState("Daily");
     const [selectobj, setSelectedObj] = useState("");
-    const [object, setobject] = useState("மேஷம்");
+    const [object, setobject] = useState("");
     const [predata, setpredata] = useState(null);
     const [databool, setdatabool] = useState(false);
     const [loading, setloading] = useState(false);
     const [error, seterror] = useState(null);
-    const [fileName,setfileName] = useState("No File Chosen")
-    // const [nat, setnat] = useState();
-    // const [det, setdet] = useState("");
+    const [fileName, setfileName] = useState("No File Chosen");
 
     const handleChange = (e) => {
         const selectedName = e.target.value;
         const match = rasiname.find(item => item.name === selectedName);
-        if (!match) {
-            setSelectedObj(null);
-            return;
-        }
+        if (!match) return;
         setSelectedObj(match.rasiId);
         setobject(selectedName);
-        console.log("selected rasiId:", selectobj);
-        console.log("selected rasiname:", object);
-
     };
 
-    // const compare = star.find(item => item.name === object);
-    // const natcha = compare.natchathiram;
-    // console.log(compare.natchathiram);
-
-    // useEffect(() => {
-    //     if (natcha) {
-    //         setnat(
-    //             natcha.map((item) => ({
-    //                 ...item,
-    //                 details: det,
-    //             }))
-    //         );
-    //     }
-    // }, [natcha, det]);
-
+    /* ---------------- FORM SUBMIT (PREVIEW DATA) ---------------- */
     const formdatas = (e) => {
         e.preventDefault();
-        const data = {
-            "duration": dur,
-            "date": values,
-            "rasi": e.target.rasi.value,
-            "summary": e.target.summary.value,
-            "luckyColor": e.target.lucky_color.value,
-            "luckyNumber": e.target.luckyNumbers.value,
-            "luckyDirection": e.target.lucky_dr.value,
-            "imageFile": e.target.image.files[0],      // file
-            "imageURL": e.target.image.files[0] ? URL.createObjectURL(e.target.image.files[0]) : null, // preview image
-        };
+
+        let data = {};
+
+        /* ---------- DAILY ---------- */
+        if (dur === "Daily") {
+            data = {
+                date: values,
+                duration: dur,
+                rasiId: selectobj,
+                name: e.target.name?.value,
+                summary: e.target.summary?.value,
+                luckyNumbers: e.target.luckyNumbers?.value,
+                lucky_dr: e.target.lucky_dr?.value,
+                lucky_color: e.target.lucky_color?.value,
+                // imageFile: e.target.image.files[0],
+                // imageURL: e.target.image.files[0]
+                //     ? URL.createObjectURL(e.target.image.files[0])
+                //     : null,
+            };
+        }
+        /* ---------- WEEKLY ---------- */
+        else if (dur === "Weekly") {
+            data = {
+                date: values,
+                rasi: e.target.rasi.value,
+                name: e.target.name?.value,
+                kiraganam: e.target.kiraganam?.value,
+                weekly_kiraganam: e.target.weekly_kiraganam?.value,
+                advantages: e.target.advantages?.value,
+                prayers: e.target.prayers?.value,
+                mon_lan: e.target.mon_lan?.value,
+                imageFile: e.target.image.files[0],
+                imageURL: e.target.image.files[0]
+                    ? URL.createObjectURL(e.target.image.files[0])
+                    : null,
+            };
+        }
+        /* ---------- MONTHLY ---------- */
+        else if (dur === "Monthly") {
+            data = {
+                mon_lan: e.target.mon_lan?.value,
+                date: values,
+                rasi: e.target.rasi.value,
+                name: e.target.name?.value,
+                kiraganam: e.target.kiraganam?.value,
+                prayers: e.target.prayers?.value,
+                imageFile: e.target.image.files[0],
+                imageURL: e.target.image.files[0]
+                    ? URL.createObjectURL(e.target.image.files[0])
+                    : null,
+            };
+        }
+
         setpredata(data);
         setdatabool(true);
+    };
 
-    }
-
+    /* ---------------- API CALL ---------------- */
     const xchange = async () => {
         setloading(true);
         const formdata = new FormData();
-        formdata.append("date", values)
-        formdata.append("rasiId", selectobj)
-        formdata.append("name", predata.rasi)
-        formdata.append("summary", predata.summary)
-        formdata.append("luckyNumbers", predata.luckyNumber)
-        formdata.append("lucky_dr", predata.luckyDirection)
-        formdata.append("lucky_color", predata.luckyColor)
-        formdata.append("duration", dur)
-        formdata.append("image", predata.imageFile)
-        // formdata.append("natchathiram",nat)
+        let API_URL = "";
 
-        console.log(formdata)
+        /* ---------- DAILY ---------- */
+        if (dur === "Daily") {
+            API_URL = "https://tnreaders.in/mobile/rasi-daily-store";
 
-        await fetch("https://tnreaders.in/mobile/rasi-daily-store", {
-            method: "POST",
-            body: formdata
-        })
-            .then((res) => res.json())
-            .then((data) => {
-                if (!data.success) {
-                    seterror(data.message)
-                }
-                seterror(data.message);
-                // setTimeout(window.location.reload(),2000);
-                setloading(false);
-                console.log(data)
+            formdata.append("date", predata.date);
+            formdata.append("duration", predata.duration);
+            formdata.append("rasiId", predata.rasiId);
+            formdata.append("name", predata.name);
+            formdata.append("summary", predata.summary);
+            formdata.append("luckyNumbers", predata.luckyNumbers);
+            formdata.append("lucky_dr", predata.lucky_dr);
+            formdata.append("lucky_color", predata.lucky_color);
+            if (predata.imageFile) {
+                formdata.append("image", predata.imageFile);
+            }
+        }
+        /* ---------- WEEKLY ---------- */
+        else if (dur === "Weekly") {
+            API_URL = "https://tnreaders.in/mobile/storeweekly";
+
+            formdata.append("date", predata.date);
+            formdata.append("rasi", predata.rasi);
+            formdata.append("name", predata.name);
+            formdata.append("kiraganam", predata.kiraganam);
+            formdata.append("weekly_kiraganam", predata.weekly_kiraganam);
+            formdata.append("advantages", predata.advantages);
+            formdata.append("prayers", predata.prayers);
+            if (predata.imageFile) {
+                formdata.append("image", predata.imageFile);
+            }
+        }
+        /* ---------- MONTHLY ---------- */
+        else if (dur === "Monthly") {
+            API_URL = "https://tnreaders.in/mobile/storemonthly";
+
+            formdata.append("mon_lan", predata.mon_lan);
+            formdata.append("date", predata.date);
+            formdata.append("rasi", predata.rasi);
+            formdata.append("name", predata.name);
+            formdata.append("kiraganam", predata.kiraganam);
+            formdata.append("prayers", predata.prayers);
+            if (predata.imageFile) {
+                formdata.append("image", predata.imageFile);
+            }
+        }
+
+        try {
+            const res = await fetch(API_URL, {
+                method: "POST",
+                body: formdata
             });
-    }
-
+            const data = await res.json();
+            seterror(data.message || "Uploaded successfully");
+        } catch (err) {
+            seterror("Upload failed");
+        } finally {
+            setloading(false);
+        }
+    };
 
     return (
         <div className='main'>
             <form className='form' onSubmit={formdatas} encType="multipart/form-data">
-                <h1>Upload-Form</h1>
+
+                <h1>Upload Form</h1>
 
                 <label>கால அளவைத் தேர்வு செய்க:</label>
-                <select className='design' onChange={(e) => { setdur(e.target.value); }} required>
+                <select className='design' onChange={(e) => setdur(e.target.value)} required>
                     <option>Daily</option>
                     <option>Weekly</option>
                     <option>Monthly</option>
@@ -115,20 +168,25 @@ const Duration = () => {
                 </select>
 
                 <label>தேதி:</label>
-                {dur === "Daily" &&
-                    <BasicDateCalendar onformat={"YYYY-MM-DD"} onDate={setValue} />}
-                {dur === "Weekly" &&
-                    <div className="custom-week-picker">
-                        <AntDatePicker onDate={setValue} />
-                    </div>}
+                {dur === "Daily" && (
+                    <BasicDateCalendar
+                        onformat={"YYYY-MM-DD"}
+                        onDate={setValue}
+                    />
+                )}
+                {dur === "Weekly" && <AntDatePicker onDate={setValue} />}
                 {dur === "Monthly" &&
-                    <BasicDateCalendar onformat={"MMM-YYYY"} onDate={setValue} onview={["year", "month"]} onopen={"month"} />}
-                {dur === "Yearly" &&
-                    <BasicDateCalendar onformat={"YYYY"} onDate={setValue} onview={["year"]} onopen={"year"} />}
+                    <BasicDateCalendar
+                        onformat={"MMM YYYY"}
+                        onDate={setValue}
+                        onview={["year", "month"]}
+                        onopen={"month"}
+                    />
+                }
 
                 <label>ராசி பெயர்:</label>
                 <select className='design' name="rasi" onChange={handleChange} required>
-                    <option></option>
+                    <option value="">Select Rasi</option>
                     {rasiname.map((item) => (
                         <option key={item.rasiId} value={item.name}>
                             {item.name}
@@ -136,41 +194,98 @@ const Duration = () => {
                     ))}
                 </select>
 
-                {/* {
-                    natcha.map((key, index) => {
-                        return (
-                            <>
-                                <select className='design' key={index}>
-                                    <option key={index}>{key.star}</option>
-                                </select>
-                                <input className='design' type='text' name='details' placeholder='விவரங்கள்/விபரங்கள்' onChange={(e) => setdet(e.target.value)} required />
-                            </>);
-                    })
-                } */}
+                <label>Name:</label>
+                <input className='design' type="text" name="name" required />
 
-                <label>சுருக்கம்:</label>
-                <textarea className='tadesign' type='text' name='summary' placeholder='சுருக்கம்' required />
-                <label>அதிர்ஷ்ட எண்:</label>
-                <input className='design' type='text' name='luckyNumbers' placeholder='அதிர்ஷ்ட எண்' required />
-                <label>அதிர்ஷ்ட நிறம்:</label>
-                <input className='design' type='text' name='lucky_color' placeholder='அதிர்ஷ்ட நிறம்' required />
-                <label>அதிர்ஷ்ட திசை:</label>
-                <input className='design' type='text' name='lucky_dr' placeholder='அதிர்ஷ்ட திசை' required />
-                <label>Upload Image:</label>
-                <input className='design' type='file' name='image' accept="image/*" placeholder='Upload Image only' onChange={(e) => { const file = e.target.files[0]; if (file) { setfileName(file.name); } }} required />
-                <strong>{fileName}</strong>
-                <button className='btn' disabled={loading}>{
-                    loading ? <CircularIndeterminate /> : "Upload"
-                }</button>
+                {/* DAILY FIELDS */}
+                {dur === "Daily" && (
+                    <>
+                        <label>Summary:</label>
+                        <textarea className='tadesign' name="summary" required />
+
+                        <label>Lucky Numbers:</label>
+                        <input className='design' type="text" name="luckyNumbers" placeholder="e.g., 7, 14, 21" required />
+
+                        <label>Lucky Direction:</label>
+                        <input className='design' type="text" name="lucky_dr" placeholder="e.g., North, East" required />
+
+                        <label>Lucky Color:</label>
+                        <input className='design' type="text" name="lucky_color" placeholder="e.g., Red, Blue" required />
+                    </>
+                )}
+
+                {/* WEEKLY FIELDS */}
+                {dur === "Weekly" && (
+                    <>
+                        <label>Kiraganam:</label>
+                        <textarea className='tadesign' name="kiraganam" required />
+
+                        <label>Weekly Kiraganam:</label>
+                        <textarea className='tadesign' name="weekly_kiraganam" required />
+
+                        <label>Advantages:</label>
+                        <textarea className='tadesign' name="advantages" required />
+
+                        <label>Prayers:</label>
+                        <textarea className='tadesign' name="prayers" required />
+                    </>
+                )}
+
+                {/* MONTHLY FIELDS */}
+                {dur === "Monthly" && (
+                    <>
+                        <label>Kiraganam:</label>
+                        <textarea className='tadesign' name="kiraganam" required />
+
+                        <label>Language:</label>
+                        <select className='design' name="mon_lan" required>
+                            <option value="tamil">Tamil</option>
+                            <option value="english">English</option>
+                        </select>
+
+                        <label>Prayers:</label>
+                        <textarea className='tadesign' name="prayers" required />
+                    </>
+                )}
+
+                {/* PRAYERS FIELD FOR DAILY - Only show if not already shown above */}
+                {/* {dur === "Daily" && (
+                    <>
+                        <label>Prayers:</label>
+                        <textarea className='tadesign' name="prayers" required />
+                    </>
+                )} */}
+
+                {/* COMMON FIELD FOR KIRAGANAM FOR MONTHLY AND WEEKLY */}
+                {(dur === "Monthly" || dur === "Weekly") && (
+                    <>
+                        <label>Prayers:</label>
+                        <textarea className='tadesign' name="prayers" required />
+                    </>
+                )}
+
+                {/* <label>Upload Image:</label>
+                <input
+                    className='design'
+                    type='file'
+                    name='image'
+                    accept="image/*"
+                    onChange={(e) => e.target.files[0] && setfileName(e.target.files[0].name)}
+                    required
+                />
+                <strong>{fileName}</strong> */}
+
+                <button className='btn' disabled={loading}>
+                    {loading ? <CircularIndeterminate /> : "Upload"}
+                </button>
+
             </form>
-            {
-                databool === true && <Preview onbool={setdatabool} onupload={xchange} ondata={predata} />
-            }
-            {
-                error && <Errors onbool={seterror} onerror={error} />
-            }
-        </div >
-    )
-}
 
-export default Duration
+            {databool && <Preview onbool={setdatabool} onupload={xchange} ondata={predata} />}
+            {error && <Errors onbool={seterror} onerror={error} />}
+
+        </div>
+    );
+};
+
+export default Duration;

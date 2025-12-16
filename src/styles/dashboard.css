@@ -249,7 +249,7 @@
 
 .activities-card, .top-posts-card, .quick-actions-card {
   background: white;
-  padding: 1.5rem;
+  padding: 0.5rem;
   border-radius: 12px;
   box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
 }

@@ -15,18 +15,18 @@ import img11 from "./Assets/kumbam.jpg";
 import img12 from "./Assets/meenam.jpg";
 
 const rasiList = [
-  { id: 1, name: "மேஷம்", image: img1 },
-  { id: 2, name: "ரிஷபம்", image: img2 },
-  { id: 3, name: "மிதுனம்", image: img3 },
-  { id: 4, name: "கடகம்", image: img4 },
-  { id: 5, name: "சிம்மம்", image: img5 },
-  { id: 6, name: "கன்னி", image: img6 },
-  { id: 7, name: "துலாம்", image: img7 },
-  { id: 8, name: "விருச்சிகம்", image: img8 },
-  { id: 9, name: "தனுசு", image: img9 },
-  { id: 10, name: "மகரம்", image: img10 },
-  { id: 11, name: "கும்பம்", image: img11 },
-  { id: 12, name: "மீனம்", image: img12 }
+  { id: 1, name: "மேஷம்", image: img1, apiName: "Mesham" },
+  { id: 2, name: "ரிஷபம்", image: img2, apiName: "Rishabam" },
+  { id: 3, name: "மிதுனம்", image: img3, apiName: "Midhunam" },
+  { id: 4, name: "கடகம்", image: img4, apiName: "Kadagam" },
+  { id: 5, name: "சிம்மம்", image: img5, apiName: "Simmam" },
+  { id: 6, name: "கன்னி", image: img6, apiName: "Kanni" },
+  { id: 7, name: "துலாம்", image: img7, apiName: "Thulam" },
+  { id: 8, name: "விருச்சிகம்", image: img8, apiName: "Viruchigam" },
+  { id: 9, name: "தனுசு", image: img9, apiName: "Dhanusu" },
+  { id: 10, name: "மகரம்", image: img10, apiName: "Magaram" },
+  { id: 11, name: "கும்பம்", image: img11, apiName: "Kumbam" },
+  { id: 12, name: "மீனம்", image: img12, apiName: "Meenam" }
 ];
 
 const durationMap = {
@@ -36,306 +36,622 @@ const durationMap = {
   yearly: "வருட"
 };
 
-export default function SelectDuration() {
-  // STEP: 1 = duration, 2 = rasi grid, 3 = details
-  const [step, setStep] = useState(1);
+// Function to find matching rasi from API response
+function findMatchingRasi(rasiArray, rasiName) {
+  if (!rasiArray || !rasiName) return null;
 
+  // Try exact match first
+  let match = rasiArray.find(r => {
+    const rName = r.name?.trim();
+    const searchName = rasiName.trim();
+
+    // Direct match
+    if (rName === searchName) return true;
+
+    // Match with Tamil name mapping
+    const tamilToEnglish = {
+      "மேஷம்": "Mesham",
+      "ரிஷபம்": "Rishabam",
+      "மிதுனம்": "Midhunam",
+      "கடகம்": "Kadagam",
+      "சிம்மம்": "Simmam",
+      "கன்னி": "Kanni",
+      "துலாம்": "Thulam",
+      "விருச்சிகம்": "Viruchigam",
+      "தனுசு": "Dhanusu",
+      "மகரம்": "Magaram",
+      "கும்பம்": "Kumbam",
+      "மீனம்": "Meenam"
+    };
+
+    const englishToTamil = Object.fromEntries(
+      Object.entries(tamilToEnglish).map(([t, e]) => [e, t])
+    );
+
+    // Check if searchName is Tamil and rName is English
+    if (tamilToEnglish[searchName] === rName) return true;
+
+    // Check if searchName is English and rName is Tamil
+    if (englishToTamil[searchName] === rName) return true;
+
+    // Check for partial matches
+    if (rName && searchName) {
+      if (rName.includes(searchName) || searchName.includes(rName)) return true;
+    }
+
+    return false;
+  });
+
+  return match;
+}
+
+// Function to parse date range for weekly
+function parseWeeklyDate(dateStr) {
+  if (!dateStr) return { start: "", end: "", formatted: "" };
+
+  const parts = dateStr.split('/');
+  if (parts.length === 2) {
+    const start = new Date(parts[0]);
+    const end = new Date(parts[1]);
+
+    // Format: DD/MM/YYYY - DD/MM/YYYY
+    const formatDate = (date) => {
+      const day = date.getDate().toString().padStart(2, '0');
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const year = date.getFullYear();
+      return `${day}/${month}/${year}`;
+    };
+
+    return {
+      start: parts[0],
+      end: parts[1],
+      formatted: `${formatDate(start)} - ${formatDate(end)}`
+    };
+  }
+
+  return { start: dateStr, end: dateStr, formatted: dateStr };
+}
+
+// Function to parse monthly date
+function parseMonthlyDate(dateStr) {
+  if (!dateStr) return { month: "", year: "", formatted: "" };
+
+  // Assuming format like "mar 2026"
+  const parts = dateStr.split(' ');
+  if (parts.length === 2) {
+    const month = parts[0];
+    const year = parts[1];
+
+    const monthNames = {
+      'jan': 'ஜனவரி', 'feb': 'பிப்ரவரி', 'mar': 'மார்ச்',
+      'apr': 'ஏப்ரல்', 'may': 'மே', 'jun': 'ஜூன்',
+      'jul': 'ஜூலை', 'aug': 'ஆகஸ்ட்', 'sep': 'செப்டம்பர்',
+      'oct': 'அக்டோபர்', 'nov': 'நவம்பர்', 'dec': 'டிசம்பர்'
+    };
+
+    const tamilMonth = monthNames[month.toLowerCase()] || month;
+
+    return {
+      month: month,
+      year: year,
+      formatted: `${tamilMonth} ${year}`
+    };
+  }
+
+  return { month: "", year: "", formatted: dateStr };
+}
+
+export default function SelectDuration() {
+  const [step, setStep] = useState(1);
   const [duration, setDuration] = useState("daily");
   const [selectedRasi, setSelectedRasi] = useState("");
-
+  const [selectedRasiApiName, setSelectedRasiApiName] = useState("");
   const today = new Date().toISOString().split("T")[0];
-
   const [selectedDate, setSelectedDate] = useState(today);
   const [weekStart, setWeekStart] = useState("");
   const [weekEnd, setWeekEnd] = useState("");
-
   const [data, setData] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(false);
   const [error, setError] = useState("");
+  const [allWeeklyData, setAllWeeklyData] = useState([]);
+  const [allMonthlyData, setAllMonthlyData] = useState([]);
 
-  // compute week end automatically when start chosen
+  /* ---------- AUTO CALC WEEK END ---------- */
   useEffect(() => {
-    if (!weekStart) {
-      setWeekEnd("");
-      return;
-    }
+    if (!weekStart) return;
     const start = new Date(weekStart);
-    // end is 6 days after start (one-week inclusive)
     const end = new Date(start);
     end.setDate(start.getDate() + 6);
-    const y = end.getFullYear();
-    const m = String(end.getMonth() + 1).padStart(2, "0");
-    const d = String(end.getDate()).padStart(2, "0");
-    setWeekEnd(`${y}-${m}-${d}`);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    setWeekEnd(end.toISOString().split("T")[0]);
   }, [weekStart]);
 
   function goToRasiList(type) {
     setDuration(type);
     setStep(2);
     setData([]);
+    setFilteredData([]);
     setError("");
-    // if daily, preset selectedDate to today to auto-fetch on view
     if (type === "daily") setSelectedDate(today);
   }
 
-  function openRasi(rasi) {
+  async function openRasi(rasi) {
     setSelectedRasi(rasi.name);
+    setSelectedRasiApiName(rasi.apiName);
     setStep(3);
-    // auto-fetch for daily with today's date
-    if (duration === "daily") fetchRasi("daily", today, rasi.name);
+    setData([]);
+    setFilteredData([]);
+    setError("");
+
+    if (duration === "daily") {
+      await fetchRasi("daily");
+    } else if (duration === "weekly") {
+      await fetchAllWeeklyData(rasi.apiName);
+    } else if (duration === "monthly") {
+      await fetchAllMonthlyData(rasi.apiName);
+    }
   }
 
-  // fetchRasi: normalized dateValue depends on duration
-  async function fetchRasi(type, rawDateValue = "", rasiNameOverride = null) {
-    const selectedName = rasiNameOverride ?? selectedRasi;
-    if (!selectedName) {
-      setError("Please select a ராசி first.");
-      return;
-    }
+  /* ================= FETCH ALL WEEKLY DATA ================= */
+  async function fetchAllWeeklyData(rasiApiName) {
+    if (!rasiApiName) return;
 
-    let dateValue = rawDateValue;
-    if (!dateValue) {
-      if (type === "daily") dateValue = today;
-      else if (type === "monthly") dateValue = selectedDate; // month input value (YYYY-MM)
-      else if (type === "yearly") dateValue = selectedDate || String(new Date().getFullYear());
-      else if (type === "weekly") dateValue = weekStart ? `${weekStart}/${weekEnd}` : "";
-    }
+    setFetching(true);
+    setError("");
+    setAllWeeklyData([]);
+    setData([]);
+    setFilteredData([]);
 
-    if (!dateValue) {
-      setError("Please choose a date or range.");
+    try {
+      const response = await fetch("https://tnreaders.in/mobile/listWeekly");
+      const json = await response.json();
+
+      if (json.success && json.data) {
+        const allData = [];
+
+        json.data.forEach(item => {
+          if (item.rasi && Array.isArray(item.rasi)) {
+            const matchedRasi = findMatchingRasi(item.rasi, rasiApiName);
+            if (matchedRasi) {
+              const dateRange = parseWeeklyDate(item.date);
+              allData.push({
+                date: item.date,
+                dateRange: dateRange,
+                rasiData: matchedRasi,
+                fullItem: item
+              });
+            }
+          }
+        });
+
+        setAllWeeklyData(allData);
+        setData(allData); // Display all data initially
+        setFilteredData(allData);
+
+        if (allData.length === 0) {
+          setError("No weekly data found for this rasi.");
+        }
+      } else {
+        setError("Failed to fetch weekly data.");
+      }
+    } catch (err) {
+      console.error("Weekly fetch error:", err);
+      setError("Something went wrong while fetching weekly data.");
+    } finally {
+      setFetching(false);
+    }
+  }
+
+  /* ================= FETCH ALL MONTHLY DATA ================= */
+  async function fetchAllMonthlyData(rasiApiName) {
+    if (!rasiApiName) return;
+
+    setFetching(true);
+    setError("");
+    setAllMonthlyData([]);
+    setData([]);
+    setFilteredData([]);
+
+    try {
+      const response = await fetch("https://tnreaders.in/mobile/listemonthly");
+      const json = await response.json();
+
+      if (json.success && json.data) {
+        const allData = [];
+
+        json.data.forEach(item => {
+          if (item.rasi && Array.isArray(item.rasi)) {
+            const matchedRasi = findMatchingRasi(item.rasi, rasiApiName);
+            if (matchedRasi) {
+              const monthInfo = parseMonthlyDate(item.date);
+              allData.push({
+                date: item.date,
+                monthInfo: monthInfo,
+                rasiData: matchedRasi,
+                fullItem: item
+              });
+            }
+          }
+        });
+
+        setAllMonthlyData(allData);
+        setData(allData); // Display all data initially
+        setFilteredData(allData);
+
+        if (allData.length === 0) {
+          setError("No monthly data found for this rasi.");
+        }
+      } else {
+        setError("Failed to fetch monthly data.");
+      }
+    } catch (err) {
+      console.error("Monthly fetch error:", err);
+      setError("Something went wrong while fetching monthly data.");
+    } finally {
+      setFetching(false);
+    }
+  }
+
+  /* ================= FETCH DAILY DATA ================= */
+  async function fetchRasi(type, dateOverride = "") {
+    const rasiName = selectedRasi;
+    const apiName = selectedRasiApiName;
+
+    if (!rasiName || !apiName) {
+      setError("Please select a rasi first");
       return;
     }
 
     setLoading(true);
     setError("");
     setData([]);
+    setFilteredData([]);
 
     try {
-      const url = new URL("https://tnreaders.in/mobile/rasi-daily-date");
-      const params = new URLSearchParams();
+      let result = [];
 
       if (type === "daily") {
-        params.append("duration", "daily");
-        params.append("date", dateValue);
-      } else if (type === "weekly") {
-        params.append("duration", "weekly");
-        params.append("date", dateValue); // format start/end already
-      } else if (type === "monthly") {
-        const [year, month] = dateValue.split("-");
-        const months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
-        const monthName = months[Number(month) - 1];
-        params.append("duration", "monthly");
-        params.append("date", `${monthName}-${year}`);
-      } else if (type === "yearly") {
-        const yearOnly = dateValue.split("-")[0] || dateValue;
-        params.append("duration", "yearly");
-        params.append("date", yearOnly);
+        const url = "https://tnreaders.in/mobile/rasi-daily-date";
+        const response = await fetch(url);
+        const json = await response.json();
+
+        json.forEach(item => {
+          if (item.data && Array.isArray(item.data)) {
+            const matchedRasi = findMatchingRasi(item.data, apiName);
+            if (matchedRasi) {
+              result.push({
+                date: item.date || "Today",
+                rasiData: matchedRasi,
+                type: "daily"
+              });
+            }
+          }
+        });
+
+        setData(result);
+        setFilteredData(result);
       }
 
-      url.search = params.toString();
-      const res = await fetch(url.toString());
-      const json = await res.json();
-
-      // filter for selected rasi name
-      const filteredData = json
-        .map((item) => ({
-          ...item,
-          data: item.data.filter((rasi) => rasi.name.trim() === selectedName.trim())
-        }))
-        .filter((item) => item.data.length > 0);
-
-      if (filteredData.length === 0) {
-        setError("No data found for " + selectedName);
-        setData([]);
-      } else {
-        setError("");
-        setData(filteredData);
+      if (result.length === 0) {
+        setError(`No ${type} data found for ${rasiName}`);
       }
+
     } catch (err) {
-      console.error(err);
-      setError("Something went wrong while fetching.");
+      console.error("Fetch error:", err);
+      setError("Something went wrong while fetching data.");
     } finally {
       setLoading(false);
     }
   }
 
-  // small helper for human friendly week range display
-  function formatRange(start, end) {
-    if (!start || !end) return "";
-    const s = new Date(start);
-    const e = new Date(end);
-    return `${s.getDate()}/${s.getMonth() + 1}/${s.getFullYear()} – ${e.getDate()}/${e.getMonth() + 1}/${e.getFullYear()}`;
+  /* ================= FILTER WEEKLY DATA BY DATE ================= */
+  function filterWeeklyData() {
+    if (!weekStart) {
+      setFilteredData(data); // Show all if no filter
+      return;
+    }
+
+    const filtered = allWeeklyData.filter(item => {
+      // Check if weekStart falls within the date range
+      const dateRange = item.dateRange;
+      if (!dateRange.start || !dateRange.end) return false;
+
+      const filterDate = new Date(weekStart);
+      const startDate = new Date(dateRange.start);
+      const endDate = new Date(dateRange.end);
+
+      return filterDate >= startDate && filterDate <= endDate;
+    });
+
+    setFilteredData(filtered);
+
+    if (filtered.length === 0) {
+      setError("No data found for the selected week.");
+    } else {
+      setError("");
+    }
   }
 
-  // Optimized step components (render inline)
+  /* ================= FILTER MONTHLY DATA BY DATE ================= */
+  function filterMonthlyData() {
+    if (!selectedDate) {
+      setFilteredData(data); // Show all if no filter
+      return;
+    }
+
+    const [year, month] = selectedDate.split('-');
+    const monthNumber = parseInt(month);
+
+    const monthNames = ['jan', 'feb', 'mar', 'apr', 'may', 'jun',
+      'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+
+    const monthStr = monthNames[monthNumber - 1];
+    const searchStr = `${monthStr} ${year}`.toLowerCase();
+    const filtered = allMonthlyData.filter(item => {
+      console.log(item.date);
+      console.log(searchStr);
+      return item.date.toLowerCase() === searchStr;
+    });
+
+    setFilteredData(filtered);
+
+    if (filtered.length === 0) {
+      setError("No data found for the selected month.");
+    } else {
+      setError("");
+    }
+  }
+
+  /* ================= RESET FILTERS ================= */
+  function resetFilters() {
+    setFilteredData(data);
+    setWeekStart("");
+    setSelectedDate("");
+    setError("");
+  }
+
+  /* ================= UI ================= */
   return (
     <div className="rasi-app">
-      <div className={`panel ${step === 1 ? "in" : "out-left"}`} style={{ display: step === 1 ? "block" : "none" }}>
-        <div className="hero">
-          <h1 className="title">ராசிபலன்</h1>
 
+      {/* STEP 1 */}
+      {step === 1 && (
+        <div className="panel in">
+          <h1 className="title">ராசிபலன்</h1>
           <div className="duration-row">
-            <button className="btn primary" onClick={() => goToRasiList("daily")}>Daily</button>
-            <button className="btn" onClick={() => goToRasiList("weekly")}>Weekly</button>
-            <button className="btn" onClick={() => goToRasiList("monthly")}>Monthly</button>
-            <button className="btn" onClick={() => goToRasiList("yearly")}>Yearly</button>
+            <div className="dursec">
+              <img src="/assets/dailycal.png" alt="Daily" />
+              <button onClick={() => goToRasiList("daily")}>Daily</button>
+            </div>
+            <div className="dursec">
+              <img src="/assets/weeklycal.png" alt="Weekly" />
+              <button onClick={() => goToRasiList("weekly")}>Weekly</button>
+            </div>
+            <div className="dursec">
+              <img src="/assets/monthlycal.png" alt="Monthly" />
+              <button onClick={() => goToRasiList("monthly")}>Monthly</button>
+            </div>
+            <div className="dursec">
+              <img src="/assets/yearlycal.png" alt="Yearly" />
+              <button onClick={() => goToRasiList("yearly")}>Yearly</button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
-      <div className={`panel ${step === 2 ? "in" : step === 1 ? "out-right" : "out-left"}`} style={{ display: step === 2 ? "block" : "none" }}>
-        <header className="list-header">
-          <button className="back small" onClick={() => setStep(1)}>←</button>
-          <h2>{durationMap[duration]} ராசிபலன்</h2>
-          <div className="pill">{rasiList.length} ராசிகள்</div>
-        </header>
+      {/* STEP 2 */}
+      {step === 2 && (
+        <div className="panel in">
+          <button className="panelbtn" onClick={() => setStep(1)}>←</button>
+          <h2 className="paneltitle">{durationMap[duration]} ராசிபலன்</h2>
 
-        <div className="grid cards">
-          {rasiList.map((rasi) => (
-            <button
-              key={rasi.id}
-              className="card"
-              onClick={() => openRasi(rasi)}
-              aria-label={rasi.name}
-            >
-              <div className="card-media">
+          <div className="grid cards">
+            {rasiList.map(rasi => (
+              <button key={rasi.id} className="card" onClick={() => openRasi(rasi)}>
                 <img src={rasi.image} alt={rasi.name} />
-              </div>
-              <div className="card-body">
-                <div className="rasi-name">{rasi.name}</div>
-                <div className="rasi-meta">Click to view</div>
-              </div>
-            </button>
-          ))}
+                <div className="cardtitle">{rasi.name}</div>
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
-      <div className={`panel ${step === 3 ? "in" : "out-right"}`} style={{ display: step === 3 ? "block" : "none" }}>
-        <div className="detail-header">
-          <button className="back" onClick={() => setStep(2)}>← Back</button>
-          <h3 className="detail-title">{selectedRasi} ராசி</h3>
-        </div>
+      {/* STEP 3 */}
+      {step === 3 && (
+        <div className="panel in">
+          <button className="panelbtn" onClick={() => setStep(2)}>← Back</button>
+          <h3 className="paneltitle1">{selectedRasi} ராசி - {durationMap[duration]} பலன்</h3>
 
-        <div className="controls">
-          <label className="control-label">Duration:</label>
-          <select
-            value={duration}
-            onChange={(e) => {
-              setDuration(e.target.value);
-              setData([]);
-            }}
-            className="select"
-          >
-            <option value="daily">Daily</option>
-            <option value="weekly">Weekly</option>
-            <option value="monthly">Monthly</option>
-            <option value="yearly">Yearly</option>
-          </select>
-
-          {duration === "weekly" ? (
-            <div className="week-picker">
-              <div className="week-inputs">
-                <div>
-                  <label>Start</label>
-                  <input type="date" value={weekStart} onChange={(e) => setWeekStart(e.target.value)} />
+          {/* Date Selection Controls */}
+          <div className="date-controls">
+            {duration === "weekly" ? (
+              <div className="date-input-group">
+                <label>வாரம் தேர்ந்தெடு (வார தொடக்கம்):</label>
+                <input
+                  type="date"
+                  value={weekStart}
+                  onChange={e => setWeekStart(e.target.value)}
+                  className="date-input"
+                />
+                <div className="button-group">
+                  <button
+                    onClick={filterWeeklyData}
+                    className="fetch-btn"
+                    disabled={fetching}
+                  >
+                    வாரத்திற்கு படி
+                  </button>
+                  <button
+                    onClick={resetFilters}
+                    className="reset-btn"
+                  >
+                    அனைத்தும்
+                  </button>
                 </div>
-                <div>
-                  <label>End</label>
-                  <input type="date" value={weekEnd} readOnly />
+                {weekStart && (
+                  <div className="date-info">
+                    தேர்ந்தெடுத்த வாரம்: {weekStart} முதல் {weekEnd} வரை
+                  </div>
+                )}
+              </div>
+            ) : duration === "monthly" ? (
+              <div className="date-input-group">
+                <label>மாதம் தேர்ந்தெடு:</label>
+                <input
+                  type="month"
+                  value={selectedDate}
+                  onChange={e => setSelectedDate(e.target.value)}
+                  className="date-input"
+                />
+                <div className="button-group">
+                  <button
+                    onClick={filterMonthlyData}
+                    className="fetch-btn"
+                    disabled={fetching}
+                  >
+                    மாதத்திற்கு படி
+                  </button>
+                  <button
+                    onClick={resetFilters}
+                    className="reset-btn"
+                  >
+                    அனைத்தும்
+                  </button>
                 </div>
               </div>
-
-              <div className="week-actions">
-                <div className="week-range">{formatRange(weekStart, weekEnd)}</div>
-                <button className="btn primary" onClick={() => fetchRasi("weekly")}>Get Weekly Data</button>
+            ) : (
+              <div className="date-input-group">
+                <label>தேதி தேர்ந்தெடு:</label>
+                <input
+                  type="date"
+                  value={selectedDate}
+                  onChange={e => setSelectedDate(e.target.value)}
+                  className="date-input"
+                />
+                <button
+                  onClick={() => fetchRasi("daily")}
+                  className="fetch-btn"
+                  disabled={loading}
+                >
+                  இன்றைய பலன் பெறுக
+                </button>
               </div>
-            </div>
-          ) : (
-            <div className="single-date">
-              <input
-                type={duration === "monthly" ? "month" : duration === "yearly" ? "number" : "date"}
-                value={selectedDate}
-                onChange={(e) => {
-                  setSelectedDate(e.target.value);
-                  // For yearly we want year only; keep value as provided by user
-                }}
-                onBlur={() => {
-                  // auto fetch on blur to avoid fetch on each type for number input
-                  fetchRasi(duration);
-                }}
-                min={duration === "yearly" ? "1900" : undefined}
-                max={duration === "yearly" ? "2100" : undefined}
-                placeholder={duration === "yearly" ? "YYYY" : undefined}
-                className="date-input"
-              />
-              <button className="btn" onClick={() => fetchRasi(duration)}>Search</button>
+            )}
+          </div>
+
+          {fetching && <div className="loading">வார/மாத தகவல்களை பெறுகிறது...</div>}
+          {loading && <div className="loading">Loading...</div>}
+          {error && <div className="error-message">{error}</div>}
+
+          {/* Display Results Count */}
+          {filteredData.length > 0 && (
+            <div className="results-count">
+              {duration === "weekly" ? "வார" : duration === "monthly" ? "மாத" : "நாள்"} பலன்கள்: {filteredData.length}
             </div>
           )}
-        </div>
 
-        {loading ? (
-          <div className="skeleton-grid">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="skeleton-card">
-                <div className="skeleton-media" />
-                <div className="skeleton-line short" />
-                <div className="skeleton-line" />
-                <div className="skeleton-line long" />
+          {/* Display Results */}
+          <div className="results-container">
+            {filteredData.map((item, idx) => (
+              <div key={idx} className="rasi-card">
+                <div className="rasi-header">
+                  <div className="rasi-date">
+                    <strong>
+                      {duration === "weekly"
+                        ? item.dateRange?.formatted || item.date
+                        : duration === "monthly"
+                          ? item.monthInfo?.formatted || item.date
+                          : item.date}
+                    </strong>
+                    <span className="duration-badge">
+                      {duration === "weekly" ? "வாரம்" :
+                        duration === "monthly" ? "மாதம்" :
+                          "நாள்"}
+                    </span>
+                  </div>
+                  {item.fullItem?.created_at && (
+                    <div className="created-at">
+                      பதிவு செய்யப்பட்டது: {new Date(item.fullItem.created_at).toLocaleDateString('ta-IN')}
+                    </div>
+                  )}
+                </div>
+
+                <h3 className="rasi-greeting">{selectedRasi} ராசி அன்பர்களே..!</h3>
+
+                {item.rasiData.imageUrl && (
+                  <img
+                    className="rasiimg"
+                    src={item.rasiData.imageUrl}
+                    alt={`${selectedRasi} ${duration} prediction`}
+                  />
+                )}
+
+                <div className="rasi-content">
+                  {/* For Daily */}
+                  {duration === "daily" && item.rasiData.summary && (
+                    <p className="rasi-summary">{item.rasiData.summary}</p>
+                  )}
+
+                  {/* For Weekly */}
+                  {duration === "weekly" && (
+                    <>
+                      {item.rasiData.kiraganam && (
+                        <div className="section">
+                          <h4>கிரகணம்:</h4>
+                          <p>{item.rasiData.kiraganam}</p>
+                        </div>
+                      )}
+                      {item.rasiData.weekly_kiraganam && (
+                        <div className="section">
+                          <h4>வார கிரகணம்:</h4>
+                          <p>{item.rasiData.weekly_kiraganam}</p>
+                        </div>
+                      )}
+                      {item.rasiData.advantages && (
+                        <div className="section">
+                          <h4>நன்மைகள்:</h4>
+                          <p>{item.rasiData.advantages}</p>
+                        </div>
+                      )}
+                      {item.rasiData.prayers && (
+                        <div className="section">
+                          <h4>பிரார்த்தனைகள்:</h4>
+                          <p>{item.rasiData.prayers}</p>
+                        </div>
+                      )}
+                    </>
+                  )}
+
+                  {/* For Monthly */}
+                  {duration === "monthly" && (
+                    <>
+                      {item.rasiData.kiraganam && (
+                        <div className="section">
+                          <h4>கிரகணம்:</h4>
+                          <p>{item.rasiData.kiraganam}</p>
+                        </div>
+                      )}
+                      {item.rasiData.prayers && (
+                        <div className="section">
+                          <h4>பிரார்த்தனைகள்:</h4>
+                          <p>{item.rasiData.prayers}</p>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
               </div>
             ))}
           </div>
-        ) : error ? (
-          <div className="error">{error}</div>
-        ) : data.length === 0 ? (
-          <div className="empty">No result yet — choose a date and search</div>
-        ) : (
-          data.map((item, idx) => (
-            <div className="rasi-card" key={idx}>
-              {item.data.map((rasi, i) => (
-                <div className="rasi-inner" key={i}>
-                  <h3 className="greeting">{selectedRasi} ராசி அன்பர்களே..!</h3>
 
-                  {rasi.imageUrl && <img src={rasi.imageUrl} alt={rasi.name} className="rasi-img" />}
-
-                  <div className="width">
-                    <p className="para">{rasi.summary}</p>
-                  </div>
-
-                  <table className="info-table">
-                    <tbody>
-                      <tr className="table-head">
-                        <th colSpan="3">மேலும் தகவல்கள்</th>
-                      </tr>
-
-                      <tr>
-                        <th>அதிர்ஷ்ட எண்</th>
-                      </tr>
-                      <tr>
-                        <td>{rasi.luckyNumbers}</td>
-                      </tr>
-
-                      <tr>
-                        <th>அதிர்ஷ்ட நிறம்</th>
-                      </tr>
-                      <tr>
-                        <td>{rasi.lucky_color}</td>
-                      </tr>
-
-                      <tr>
-                        <th>அதிர்ஷ்ட திசை</th>
-                      </tr>
-                      <tr>
-                        <td>{rasi.lucky_dr}</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              ))}
+          {filteredData.length === 0 && !fetching && !loading && !error && (
+            <div className="no-data">
+              <p>தகவல்கள் இல்லை. தயவு செய்து வார/மாத தேர்வை மாற்றவும்.</p>
             </div>
-          ))
-        )}
-      </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
