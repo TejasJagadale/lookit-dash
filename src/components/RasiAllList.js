@@ -63,7 +63,7 @@ const RasiAllList = () => {
 
       const data = await response.json();
       console.log(data);
-      
+
 
       if (activeTab === 'daily') {
         setDailyData(data || []);
@@ -130,30 +130,56 @@ const RasiAllList = () => {
   };
 
   // Handle form submission for update
+  // Handle form submission for update
   const handleUpdateSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      const formData = new FormData();
+      // Prepare form data as URL encoded (since your other endpoints use GET)
+      const params = new URLSearchParams();
 
-      // Append form data
+      // Add all required parameters matching your API expectations
+      params.append('date', editForm.date);
+      params.append('rasi_id', editForm.rasiId); // Note: Check if backend expects "rasi_id" or "rasiId"
+      params.append('name', editForm.name);
+      params.append('summary', editForm.summary);
+      params.append('lucky_numbers', editForm.luckyNumbers); // Note: Check parameter name
+      params.append('lucky_dr', editForm.lucky_dr);
+      params.append('lucky_color', editForm.lucky_color);
+
+      // Add prayers if you have it
+      // if (editForm.prayers) {
+      //   params.append('prayers', editForm.prayers);
+      // }
+
+      console.log('Update Params:', params.toString());
+
+      // FIRST: Check if the correct endpoint exists by trying a simpler approach
+      // Since your status update uses GET, let's try GET for update too
+
+      // OPTION 1: Using GET request (if that's what your API expects)
+      // const response = await fetch(
+      //   `https://tnreaders.in/mobile/rasi-daily-update?${params.toString()}`,
+      //   {
+      //     method: 'GET',
+      //     headers: {
+      //       'Content-Type': 'application/json',
+      //     }
+      //   }
+      // );
+
+      // OPTION 2: If GET doesn't work, try POST with FormData
+      const formData = new FormData();
       Object.keys(editForm).forEach(key => {
-        if (editForm[key] !== null && editForm[key] !== undefined) {
-          if (key === 'image' && editForm[key]) {
-            formData.append('image', editForm[key]);
-          } else {
-            formData.append(key, editForm[key]);
-          }
+        if (key === 'image' && editForm[key]) {
+          formData.append('image', editForm[key]);
+        } else if (editForm[key] !== null && editForm[key] !== undefined) {
+          // Map frontend field names to backend field names
+          const backendKey = key === 'rasiId' ? 'rasi_id' :
+            key === 'luckyNumbers' ? 'lucky_numbers' : key;
+          formData.append(backendKey, editForm[key]);
         }
       });
-
-      // Add id if available (for update)
-      if (editingRasi?.id) {
-        formData.append('id', editingRasi.id);
-      }
-
-      console.log(formData);
-      
 
       const response = await fetch('https://tnreaders.in/mobile/rasi-daily-update', {
         method: 'POST',
@@ -161,10 +187,11 @@ const RasiAllList = () => {
       });
 
       if (!response.ok) {
-        throw new Error('Update failed');
+        throw new Error(`Update failed with status: ${response.status}`);
       }
 
       const result = await response.json();
+      console.log('Update Result:', result);
 
       if (result.success) {
         alert('Rasi updated successfully!');
@@ -176,7 +203,7 @@ const RasiAllList = () => {
       }
     } catch (error) {
       console.error('Update error:', error);
-      alert('Failed to update Rasi');
+      alert(`Failed to update Rasi: ${error.message}`);
     }
   };
 
