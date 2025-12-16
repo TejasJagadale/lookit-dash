@@ -18,6 +18,7 @@ const Duration = () => {
     const [loading, setloading] = useState(false);
     const [error, seterror] = useState(null);
     const [fileName, setfileName] = useState("No File Chosen");
+    const [weekRange, setWeekRange] = useState("");
 
     const handleChange = (e) => {
         const selectedName = e.target.value;
@@ -25,6 +26,39 @@ const Duration = () => {
         if (!match) return;
         setSelectedObj(match.rasiId);
         setobject(selectedName);
+    };
+
+    // Function to get week range (Sunday to Saturday) for Weekly selection
+    const getWeekRange = (date) => {
+        const selectedDate = new Date(date);
+        const day = selectedDate.getDay(); // 0 = Sunday, 6 = Saturday
+        
+        // Calculate Sunday of the week
+        const sunday = new Date(selectedDate);
+        sunday.setDate(selectedDate.getDate() - day);
+        
+        // Calculate Saturday of the week
+        const saturday = new Date(sunday);
+        saturday.setDate(sunday.getDate() + 6);
+        
+        // Format dates
+        const formatDate = (d) => {
+            return d.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        };
+        
+        const weekRangeString = `${formatDate(sunday)} to ${formatDate(saturday)}`;
+        setWeekRange(weekRangeString);
+        return weekRangeString;
+    };
+
+    // Handle date change for Weekly specifically
+    const handleWeeklyDateChange = (date) => {
+        setValue(date);
+        getWeekRange(date);
     };
 
     /* ---------------- FORM SUBMIT (PREVIEW DATA) ---------------- */
@@ -54,6 +88,7 @@ const Duration = () => {
         else if (dur === "Weekly") {
             data = {
                 date: values,
+                weekRange: weekRange, // Add week range to data
                 rasi: e.target.rasi.value,
                 name: e.target.name?.value,
                 kiraganam: e.target.kiraganam?.value,
@@ -61,10 +96,10 @@ const Duration = () => {
                 advantages: e.target.advantages?.value,
                 prayers: e.target.prayers?.value,
                 mon_lan: e.target.mon_lan?.value,
-                imageFile: e.target.image.files[0],
-                imageURL: e.target.image.files[0]
-                    ? URL.createObjectURL(e.target.image.files[0])
-                    : null,
+                // imageFile: e.target.image.files[0],
+                // imageURL: e.target.image.files[0]
+                //     ? URL.createObjectURL(e.target.image.files[0])
+                //     : null,
             };
         }
         /* ---------- MONTHLY ---------- */
@@ -114,6 +149,7 @@ const Duration = () => {
             API_URL = "https://tnreaders.in/mobile/storeweekly";
 
             formdata.append("date", predata.date);
+            formdata.append("week_range", predata.weekRange || getWeekRange(predata.date)); // Send week range
             formdata.append("rasi", predata.rasi);
             formdata.append("name", predata.name);
             formdata.append("kiraganam", predata.kiraganam);
@@ -160,7 +196,10 @@ const Duration = () => {
                 <h1>Upload Form</h1>
 
                 <label>கால அளவைத் தேர்வு செய்க:</label>
-                <select className='design' onChange={(e) => setdur(e.target.value)} required>
+                <select className='design' onChange={(e) => {
+                    setdur(e.target.value);
+                    setWeekRange(""); // Clear week range when duration changes
+                }} required>
                     <option>Daily</option>
                     <option>Weekly</option>
                     <option>Monthly</option>
@@ -174,7 +213,29 @@ const Duration = () => {
                         onDate={setValue}
                     />
                 )}
-                {dur === "Weekly" && <AntDatePicker onDate={setValue} />}
+                {dur === "Weekly" && (
+                    <>
+                        <BasicDateCalendar
+                            onformat={"YYYY-MM-DD"}
+                            onDate={handleWeeklyDateChange}
+                            placeholder="Select any day of the week"
+                        />
+                        {weekRange && (
+                            <div style={{
+                                marginTop: '10px',
+                                padding: '10px',
+                                backgroundColor: '#f0f0f0',
+                                borderRadius: '4px',
+                                border: '1px solid #ddd'
+                            }}>
+                                <strong>Selected Week:</strong> {weekRange}
+                                <div style={{ fontSize: '12px', color: '#666', marginTop: '5px' }}>
+                                    (Sunday to Saturday)
+                                </div>
+                            </div>
+                        )}
+                    </>
+                )}
                 {dur === "Monthly" &&
                     <BasicDateCalendar
                         onformat={"MMM YYYY"}
@@ -249,22 +310,14 @@ const Duration = () => {
                 )}
 
                 {/* PRAYERS FIELD FOR DAILY - Only show if not already shown above */}
-                {/* {dur === "Daily" && (
-                    <>
-                        <label>Prayers:</label>
-                        <textarea className='tadesign' name="prayers" required />
-                    </>
-                )} */}
-
-                {/* COMMON FIELD FOR KIRAGANAM FOR MONTHLY AND WEEKLY */}
-                {(dur === "Monthly" || dur === "Weekly") && (
+                {dur === "Daily" && (
                     <>
                         <label>Prayers:</label>
                         <textarea className='tadesign' name="prayers" required />
                     </>
                 )}
 
-                {/* <label>Upload Image:</label>
+                <label>Upload Image:</label>
                 <input
                     className='design'
                     type='file'
@@ -273,7 +326,7 @@ const Duration = () => {
                     onChange={(e) => e.target.files[0] && setfileName(e.target.files[0].name)}
                     required
                 />
-                <strong>{fileName}</strong> */}
+                <strong>{fileName}</strong>
 
                 <button className='btn' disabled={loading}>
                     {loading ? <CircularIndeterminate /> : "Upload"}

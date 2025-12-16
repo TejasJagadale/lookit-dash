@@ -509,7 +509,7 @@ const MainContent = ({ activeMenu }) => {
         return <h2>Article Management</h2>;
       case 'Add Article':
         return <AddArticle />;
-      case 'Add Article':
+      case 'AddArticlerm':
         return <AddArticleRm />
       case 'List':
         return <List />;

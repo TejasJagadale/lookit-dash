@@ -35,7 +35,7 @@ const Sidebar = ({ isLoggedIn, onLoginClick, onLogout, activeMenu, setActiveMenu
     },
     {
       name: 'ReadersMenu Articles',
-      submenus: ['Add Article', 'List and Edit Articles'],
+      submenus: ['AddArticlerm', 'List and Edit Articles'],
       icon: '/assets/article.png' 
     },
     {

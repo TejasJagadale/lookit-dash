@@ -40,7 +40,7 @@ const AddArticleRm = () => {
     // Fetch main category
     useEffect(() => {
         axios
-            .get("https://tnreaders.in/mobile/main-category")
+            .get("https://tnreaders.in/mobile/list-main-category-readers")
             .then((res) => {
                 const allowed = (res.data || []).filter((cat) => cat.status === "allow");
                 setMainCategories(allowed);
