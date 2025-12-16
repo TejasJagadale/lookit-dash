@@ -139,6 +139,7 @@
     opacity: 0;
     transform: translateY(-50px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -408,7 +409,9 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Date Header Container */
@@ -664,6 +667,10 @@
   .edit-btn {
     align-self: flex-start;
   }
+
+  .card-header {
+    flex-direction: column;
+  }
 }
 
 @media (max-width: 480px) {
@@ -701,6 +708,7 @@
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);

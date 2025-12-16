@@ -65,8 +65,15 @@ const Duration = () => {
     const validateForm = (formData) => {
         const errors = [];
 
+        // Date validation
         if (!values) {
             errors.push("Please select a date");
+        } else if (dur === "Daily") {
+            // Additional validation for Daily date if needed
+            const selectedDate = new Date(values);
+            if (isNaN(selectedDate.getTime())) {
+                errors.push("Please select a valid date");
+            }
         }
 
         if (!selectobj) {
@@ -80,6 +87,12 @@ const Duration = () => {
             if (!formData.luckyNumbers?.trim()) {
                 errors.push("Lucky Numbers are required");
             }
+            if (!formData.lucky_dr?.trim()) {
+                errors.push("Lucky Direction is required");
+            }
+            if (!formData.lucky_color?.trim()) {
+                errors.push("Lucky Color is required");
+            }
         }
 
         if (dur === "Weekly") {
@@ -88,6 +101,9 @@ const Duration = () => {
             }
             if (!formData.weekly_kiraganam?.trim()) {
                 errors.push("Weekly Kiraganam is required");
+            }
+            if (!formData.advantages?.trim()) {
+                errors.push("Advantages are required");
             }
         }
 
@@ -103,10 +119,6 @@ const Duration = () => {
         if (!formData.name?.trim()) {
             errors.push("Name is required");
         }
-
-        // if (!formData.prayers?.trim()) {
-        //     errors.push("Prayers are required");
-        // }
 
         return errors;
     };
@@ -129,7 +141,6 @@ const Duration = () => {
                 luckyNumbers: formElements.luckyNumbers?.value,
                 lucky_dr: formElements.lucky_dr?.value,
                 lucky_color: formElements.lucky_color?.value,
-                // prayers: formElements.prayers?.value,
             };
         }
         /* ---------- WEEKLY ---------- */
@@ -182,7 +193,6 @@ const Duration = () => {
         /* ---------- DAILY ---------- */
         if (dur === "Daily") {
             API_URL = "https://tnreaders.in/mobile/rasi-daily-store";
-            console.log(predata.rasiId);
             
             formdata.append("date", predata.date);
             formdata.append("duration", predata.duration);
@@ -192,7 +202,6 @@ const Duration = () => {
             formdata.append("luckyNumbers", predata.luckyNumbers);
             formdata.append("lucky_dr", predata.lucky_dr);
             formdata.append("lucky_color", predata.lucky_color);
-            // formdata.append("prayers", predata.prayers);
         }
         /* ---------- WEEKLY ---------- */
         else if (dur === "Weekly") {
@@ -205,7 +214,12 @@ const Duration = () => {
             formdata.append("kiraganam", predata.kiraganam);
             formdata.append("weekly_kiraganam", predata.weekly_kiraganam);
             formdata.append("advantages", predata.advantages);
-            // formdata.append("prayers", predata.prayers);
+            if (predata.prayers) {
+                formdata.append("prayers", predata.prayers);
+            }
+            if (predata.mon_lan) {
+                formdata.append("mon_lan", predata.mon_lan);
+            }
         }
         /* ---------- MONTHLY ---------- */
         else if (dur === "Monthly") {
@@ -216,7 +230,9 @@ const Duration = () => {
             formdata.append("rasi", predata.rasi);
             formdata.append("name", predata.name);
             formdata.append("kiraganam", predata.kiraganam);
-            // formdata.append("prayers", predata.prayers);
+            if (predata.prayers) {
+                formdata.append("prayers", predata.prayers);
+            }
         }
 
         try {
@@ -243,11 +259,7 @@ const Duration = () => {
                 toast.success(successMsg);
                 setdatabool(false); // Close preview after successful upload
                 // Reset form
-                // e.target.reset();
-                setValue(null);
-                setSelectedObj("");
-                setobject("");
-                setWeekRange("");
+                clearForm();
             } else {
                 throw new Error(data.error || "Upload failed");
             }
@@ -279,6 +291,12 @@ const Duration = () => {
         setpredata(null);
         setdatabool(false);
         seterror(null);
+        
+        // Reset form fields if form exists in DOM
+        const form = document.querySelector('.form');
+        if (form) {
+            form.reset();
+        }
     };
 
     return (
@@ -324,6 +342,7 @@ const Duration = () => {
                     onChange={(e) => {
                         setdur(e.target.value);
                         setWeekRange(""); // Clear week range when duration changes
+                        setValue(null); // Clear date when duration changes
                     }} 
                     required
                     value={dur}
@@ -335,13 +354,19 @@ const Duration = () => {
                 </select>
 
                 <label>தேதி:</label>
+                
+                {/* Daily Date Selection */}
                 {dur === "Daily" && (
-                    <BasicDateCalendar
-                        onformat={"YYYY-MM-DD"}
-                        onDate={setValue}
-                        value={values}
+                    <input 
+                        type='date' 
+                        className='design'
+                        value={values || ''}
+                        onChange={(e) => setValue(e.target.value)}
+                        required
                     />
                 )}
+                
+                {/* Weekly Date Selection */}
                 {dur === "Weekly" && (
                     <>
                         <BasicDateCalendar
@@ -360,7 +385,9 @@ const Duration = () => {
                         )}
                     </>
                 )}
-                {dur === "Monthly" &&
+                
+                {/* Monthly Date Selection */}
+                {dur === "Monthly" && (
                     <BasicDateCalendar
                         onformat={"MMM YYYY"}
                         onDate={setValue}
@@ -368,7 +395,7 @@ const Duration = () => {
                         onopen={"month"}
                         value={values}
                     />
-                }
+                )}
 
                 <label>ராசி பெயர்:</label>
                 <select 
@@ -433,15 +460,6 @@ const Duration = () => {
                             placeholder="e.g., Red, Blue" 
                             required 
                         />
-
-                        {/* <label>Prayers:</label>
-                        <textarea 
-                            className='tadesign' 
-                            name="prayers" 
-                            required 
-                            placeholder="Enter prayers"
-                            rows="4"
-                        /> */}
                     </>
                 )}
 
@@ -475,14 +493,20 @@ const Duration = () => {
                             rows="4"
                         />
 
-                        <label>Prayers:</label>
+                        <label>Prayers (Optional):</label>
                         <textarea 
                             className='tadesign' 
                             name="prayers" 
-                            // required 
-                            placeholder="Enter prayers"
+                            placeholder="Enter prayers (optional)"
                             rows="4"
                         />
+
+                        <label>Language (Optional):</label>
+                        <select className='design' name="mon_lan">
+                            <option value="">Select Language (Optional)</option>
+                            <option value="tamil">Tamil</option>
+                            <option value="english">English</option>
+                        </select>
                     </>
                 )}
 
@@ -505,12 +529,11 @@ const Duration = () => {
                             <option value="english">English</option>
                         </select>
 
-                        <label>Prayers:</label>
+                        <label>Prayers (Optional):</label>
                         <textarea 
                             className='tadesign' 
                             name="prayers" 
-                            // required 
-                            placeholder="Enter prayers"
+                            placeholder="Enter prayers (optional)"
                             rows="4"
                         />
                     </>
