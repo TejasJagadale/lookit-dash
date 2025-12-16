@@ -46,7 +46,7 @@ const ListarticleRm = () => {
     const fetchPosts = () => {
         setIsLoading(true);
         axios
-            .get(`https://tnreaders.in/mobile/view-readers-new?currentPage=1&perPage=200`)
+            .get(`https://tnreaders.in/mobile/list-posts-readers?currentPage=1&perPage=200`)
             .then((response) => {
                 setAllPosts(response.data.data || []);
                 setIsLoading(false);
