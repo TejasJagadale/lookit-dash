@@ -104,9 +104,9 @@ const Duration = () => {
             errors.push("Name is required");
         }
 
-        if (!formData.prayers?.trim()) {
-            errors.push("Prayers are required");
-        }
+        // if (!formData.prayers?.trim()) {
+        //     errors.push("Prayers are required");
+        // }
 
         return errors;
     };
@@ -129,7 +129,7 @@ const Duration = () => {
                 luckyNumbers: formElements.luckyNumbers?.value,
                 lucky_dr: formElements.lucky_dr?.value,
                 lucky_color: formElements.lucky_color?.value,
-                prayers: formElements.prayers?.value,
+                // prayers: formElements.prayers?.value,
             };
         }
         /* ---------- WEEKLY ---------- */
@@ -192,7 +192,7 @@ const Duration = () => {
             formdata.append("luckyNumbers", predata.luckyNumbers);
             formdata.append("lucky_dr", predata.lucky_dr);
             formdata.append("lucky_color", predata.lucky_color);
-            formdata.append("prayers", predata.prayers);
+            // formdata.append("prayers", predata.prayers);
         }
         /* ---------- WEEKLY ---------- */
         else if (dur === "Weekly") {
@@ -205,7 +205,7 @@ const Duration = () => {
             formdata.append("kiraganam", predata.kiraganam);
             formdata.append("weekly_kiraganam", predata.weekly_kiraganam);
             formdata.append("advantages", predata.advantages);
-            formdata.append("prayers", predata.prayers);
+            // formdata.append("prayers", predata.prayers);
         }
         /* ---------- MONTHLY ---------- */
         else if (dur === "Monthly") {
@@ -216,7 +216,7 @@ const Duration = () => {
             formdata.append("rasi", predata.rasi);
             formdata.append("name", predata.name);
             formdata.append("kiraganam", predata.kiraganam);
-            formdata.append("prayers", predata.prayers);
+            // formdata.append("prayers", predata.prayers);
         }
 
         try {
@@ -434,14 +434,14 @@ const Duration = () => {
                             required 
                         />
 
-                        <label>Prayers:</label>
+                        {/* <label>Prayers:</label>
                         <textarea 
                             className='tadesign' 
                             name="prayers" 
                             required 
                             placeholder="Enter prayers"
                             rows="4"
-                        />
+                        /> */}
                     </>
                 )}
 
@@ -479,7 +479,7 @@ const Duration = () => {
                         <textarea 
                             className='tadesign' 
                             name="prayers" 
-                            required 
+                            // required 
                             placeholder="Enter prayers"
                             rows="4"
                         />
@@ -509,7 +509,7 @@ const Duration = () => {
                         <textarea 
                             className='tadesign' 
                             name="prayers" 
-                            required 
+                            // required 
                             placeholder="Enter prayers"
                             rows="4"
                         />
