@@ -14,6 +14,8 @@ import AddArticleRm from './AddArticleRm';
 import ListarticleRm from './ListarticleRm';
 import MainCategoryRm from './MainCategoryRm';
 import SubCategoryRm from './SubCategoryRm';
+import RasiList from '../CalendarList/Rasipalan';
+import RasiAllList from './RasiAllList';
 
 const MainContent = ({ activeMenu }) => {
   const [categories, setCategories] = React.useState({});
@@ -486,7 +488,7 @@ const MainContent = ({ activeMenu }) => {
               </div>
             ) : (
               <div className="categories-container">
-                <h2 style={{textAlign: 'center'}}>LookIt Main Category</h2>
+                <h2 style={{ textAlign: 'center' }}>LookIt Main Category</h2>
                 {Object.keys(categories).map(categoryId => (
                   <CategorySection
                     key={categoryId}
@@ -524,7 +526,7 @@ const MainContent = ({ activeMenu }) => {
       case 'Rasi Upload Form':
         return <Form />;
       case 'RasiList':
-        return <AppRouter />;
+        return <RasiAllList />;
       case 'Banner':
         return <Banner />;
       default:
