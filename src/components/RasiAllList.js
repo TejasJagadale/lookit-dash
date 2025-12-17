@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import "../styles/RasiAllList.css"
 
 const RasiAllList = () => {
@@ -9,6 +9,10 @@ const RasiAllList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filteredRasi, setFilteredRasi] = useState([]);
+  const [sortOrder, setSortOrder] = useState('desc');
+  const [showCalendar, setShowCalendar] = useState(false);
 
   // Edit state
   const [editingRasi, setEditingRasi] = useState(null);
@@ -34,24 +38,49 @@ const RasiAllList = () => {
     monthly: 'https://tnreaders.in/mobile/listemonthly'
   };
 
-  // Rasi names in Tamil
-  const rasiNames = {
-    "1": "மேஷம்",
-    "2": "ரிஷபம்",
-    "3": "மிதுனம்",
-    "4": "கடகம்",
-    "5": "சிம்மம்",
-    "6": "கன்னி",
-    "7": "துலாம்",
-    "8": "விருச்சிகம்",
-    "9": "தனுசு",
-    "10": "மகரம்",
-    "11": "கும்பம்",
-    "12": "மீனம்"
+  // Rasi names in Tamil with colors
+  const rasiData = {
+    "1": { name: "மேஷம்", color: "#FF6B6B", emoji: "🐏" },
+    "2": { name: "ரிஷபம்", color: "#4ECDC4", emoji: "🐂" },
+    "3": { name: "மிதுனம்", color: "#45B7D1", emoji: "👫" },
+    "4": { name: "கடகம்", color: "#96CEB4", emoji: "🦀" },
+    "5": { name: "சிம்மம்", color: "#FFEAA7", emoji: "🦁" },
+    "6": { name: "கன்னி", color: "#DDA0DD", emoji: "👸" },
+    "7": { name: "துலாம்", color: "#98D8C8", emoji: "⚖️" },
+    "8": { name: "விருச்சிகம்", color: "#F7DC6F", emoji: "🦂" },
+    "9": { name: "தனுசு", color: "#BB8FCE", emoji: "🏹" },
+    "10": { name: "மகரம்", color: "#85C1E9", emoji: "🐊" },
+    "11": { name: "கும்பம்", color: "#82E0AA", emoji: "🏺" },
+    "12": { name: "மீனம்", color: "#F8C471", emoji: "🐟" }
+  };
+
+  // Format date for display
+  const formatDate = (dateStr) => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('ta-IN', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
+  // Format date for display
+  const formatDate1 = (dateStr) => {
+    const date = new Date(dateStr);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
+
+  // Get today's date in YYYY-MM-DD format
+  const getTodayDate = () => {
+    return new Date().toISOString().split('T')[0];
   };
 
   // Fetch data based on active tab
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     setError(null);
 
@@ -60,13 +89,22 @@ const RasiAllList = () => {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-
       const data = await response.json();
-      console.log(data);
 
-
+      // Automatically select today's date for daily tab
       if (activeTab === 'daily') {
-        setDailyData(data || []);
+        const processedData = data || [];
+        setDailyData(processedData);
+
+        // Select today's date by default
+        const today = getTodayDate();
+        const dateExists = processedData.some(item => item.date === today);
+        if (dateExists) {
+          setSelectedDate(today);
+        } else if (processedData.length > 0) {
+          // Select the first date if today doesn't exist
+          setSelectedDate(processedData[0]?.date || null);
+        }
       } else if (activeTab === 'weekly') {
         setWeeklyData(data?.data || []);
       } else if (activeTab === 'monthly') {
@@ -78,11 +116,27 @@ const RasiAllList = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [activeTab]);
 
   useEffect(() => {
     fetchData();
-  }, [activeTab]);
+  }, [activeTab, fetchData]);
+
+  // Filter and sort daily data
+  useEffect(() => {
+    if (activeTab === 'daily' && dailyData.length > 0) {
+      let result = [...dailyData];
+
+      // Sort by date
+      result.sort((a, b) => {
+        return sortOrder === 'desc'
+          ? new Date(b.date) - new Date(a.date)
+          : new Date(a.date) - new Date(b.date);
+      });
+
+      setFilteredRasi(result);
+    }
+  }, [dailyData, activeTab, sortOrder]);
 
   // Handle edit button click
   const handleEditClick = (rasi, date) => {
@@ -96,7 +150,6 @@ const RasiAllList = () => {
       luckyNumbers: rasi.luckyNumbers || '',
       lucky_dr: rasi.lucky_dr || '',
       lucky_color: rasi.lucky_color || '',
-      // prayers: rasi.prayers || '',
       image: null
     });
     setImagePreview(rasi.imageUrl || '');
@@ -111,70 +164,16 @@ const RasiAllList = () => {
     }));
   };
 
-  // Handle image change
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setEditForm(prev => ({
-        ...prev,
-        image: file
-      }));
-
-      // Create preview
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  // Handle form submission for update
   // Handle form submission for update
   const handleUpdateSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      // Prepare form data as URL encoded (since your other endpoints use GET)
-      const params = new URLSearchParams();
-
-      // Add all required parameters matching your API expectations
-      params.append('date', editForm.date);
-      params.append('rasi_id', editForm.rasiId); // Note: Check if backend expects "rasi_id" or "rasiId"
-      params.append('name', editForm.name);
-      params.append('summary', editForm.summary);
-      params.append('lucky_numbers', editForm.luckyNumbers); // Note: Check parameter name
-      params.append('lucky_dr', editForm.lucky_dr);
-      params.append('lucky_color', editForm.lucky_color);
-
-      // Add prayers if you have it
-      // if (editForm.prayers) {
-      //   params.append('prayers', editForm.prayers);
-      // }
-
-      console.log('Update Params:', params.toString());
-
-      // FIRST: Check if the correct endpoint exists by trying a simpler approach
-      // Since your status update uses GET, let's try GET for update too
-
-      // OPTION 1: Using GET request (if that's what your API expects)
-      // const response = await fetch(
-      //   `https://tnreaders.in/mobile/rasi-daily-update?${params.toString()}`,
-      //   {
-      //     method: 'GET',
-      //     headers: {
-      //       'Content-Type': 'application/json',
-      //     }
-      //   }
-      // );
-
-      // OPTION 2: If GET doesn't work, try POST with FormData
       const formData = new FormData();
       Object.keys(editForm).forEach(key => {
         if (key === 'image' && editForm[key]) {
           formData.append('image', editForm[key]);
         } else if (editForm[key] !== null && editForm[key] !== undefined) {
-          // Map frontend field names to backend field names
           const backendKey = key === 'rasiId' ? 'rasi_id' :
             key === 'luckyNumbers' ? 'lucky_numbers' : key;
           formData.append(backendKey, editForm[key]);
@@ -197,7 +196,7 @@ const RasiAllList = () => {
         alert('Rasi updated successfully!');
         setIsEditing(false);
         setEditingRasi(null);
-        fetchData(); // Refresh data
+        fetchData();
       } else {
         alert(result.message || 'Update failed');
       }
@@ -207,13 +206,18 @@ const RasiAllList = () => {
     }
   };
 
-  // Handle status toggle
+  // Handle status toggle with confirmation
   const handleStatusToggle = async (date, currentStatus) => {
     if (!date) return;
 
     const newStatus = currentStatus === 'allow' ? 'disallow' : 'allow';
-    const statusId = isUpdatingStatus[date];
+    const confirmMessage = `Are you sure you want to ${newStatus === 'allow' ? 'enable' : 'disable'} predictions for ${formatDate(date)}?`;
 
+    if (!window.confirm(confirmMessage)) {
+      return;
+    }
+
+    const statusId = isUpdatingStatus[date];
     if (statusId) {
       clearTimeout(statusId);
     }
@@ -227,7 +231,6 @@ const RasiAllList = () => {
     });
     setDailyData(updatedDailyData);
 
-    // Set loading state for this date
     setIsUpdatingStatus(prev => ({
       ...prev,
       [date]: setTimeout(() => {
@@ -242,9 +245,7 @@ const RasiAllList = () => {
     try {
       const response = await fetch(
         `https://tnreaders.in/mobile/rasi-daily-status?date=${date}&status=${newStatus}`,
-        {
-          method: 'GET'
-        }
+        { method: 'GET' }
       );
 
       if (!response.ok) {
@@ -263,11 +264,11 @@ const RasiAllList = () => {
         });
         setDailyData(revertedData);
         alert('Failed to update status');
+      } else {
+        alert(`Status updated to ${newStatus === 'allow' ? 'Enabled' : 'Disabled'}`);
       }
     } catch (error) {
       console.error('Status toggle error:', error);
-
-      // Revert on error
       const revertedData = dailyData.map(item => {
         if (item.date === date) {
           return { ...item, status: currentStatus };
@@ -291,26 +292,46 @@ const RasiAllList = () => {
       luckyNumbers: '',
       lucky_dr: '',
       lucky_color: '',
-      // prayers: '',
       image: null
     });
     setImagePreview('');
+  };
+
+  // Quick navigation functions
+  const navigateToPreviousDate = () => {
+    if (filteredRasi.length === 0) return;
+    const currentIndex = filteredRasi.findIndex(item => item.date === selectedDate);
+    if (currentIndex < filteredRasi.length - 1) {
+      setSelectedDate(filteredRasi[currentIndex + 1].date);
+    }
+  };
+
+  const navigateToNextDate = () => {
+    if (filteredRasi.length === 0) return;
+    const currentIndex = filteredRasi.findIndex(item => item.date === selectedDate);
+    if (currentIndex > 0) {
+      setSelectedDate(filteredRasi[currentIndex - 1].date);
+    }
+  };
+
+  const navigateToToday = () => {
+    const today = getTodayDate();
+    const dateExists = dailyData.some(item => item.date === today);
+    if (dateExists) {
+      setSelectedDate(today);
+    } else {
+      alert("Today's data is not available");
+    }
   };
 
   // Render Daily Content
   const renderDailyContent = () => {
     if (!dailyData.length) return <div className="no-data">No daily data available</div>;
 
-    // Group by date for easier navigation
     const groupedByDate = dailyData.reduce((acc, item) => {
       acc[item.date] = item;
       return acc;
     }, {});
-
-    const dates = Object.keys(groupedByDate).sort((a, b) => {
-      // Sort dates with proper date parsing
-      return new Date(b) - new Date(a);
-    });
 
     return (
       <div className="daily-container">
@@ -319,34 +340,37 @@ const RasiAllList = () => {
           <div className="modal-overlay">
             <div className="modal-content">
               <div className="modal-header">
-                <h3>Edit Rasi Prediction</h3>
+                <h3>✏️ Edit Rasi Prediction</h3>
                 <button className="close-btn" onClick={handleCancelEdit}>×</button>
               </div>
-
               <form onSubmit={handleUpdateSubmit} className="edit-form">
                 <div className="form-group">
                   <label>Date:</label>
                   <input
                     type="text"
                     name="date"
-                    value={editForm.date}
-                    onChange={handleInputChange}
+                    value={formatDate(editForm.date)}
                     className="form-input"
-                    required
                     disabled
                   />
                 </div>
 
                 <div className="form-group">
-                  <label>Rasi ID:</label>
-                  <input
-                    type="text"
+                  <label>Select Rasi:</label>
+                  <select
                     name="rasiId"
                     value={editForm.rasiId}
                     onChange={handleInputChange}
                     className="form-input"
                     required
-                  />
+                  >
+                    <option value="">Select Rasi</option>
+                    {Object.entries(rasiData).map(([id, data]) => (
+                      <option key={id} value={id}>
+                        {data.emoji} {data.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <div className="form-group">
@@ -357,6 +381,7 @@ const RasiAllList = () => {
                     value={editForm.name}
                     onChange={handleInputChange}
                     className="form-input"
+                    placeholder="Enter Rasi name in Tamil"
                     required
                   />
                 </div>
@@ -368,78 +393,51 @@ const RasiAllList = () => {
                     value={editForm.summary}
                     onChange={handleInputChange}
                     className="form-textarea"
-                    rows="5"
+                    rows="4"
+                    placeholder="Enter prediction summary in Tamil"
                     required
                   />
                 </div>
 
                 <div className="form-row">
-                  <div className="form-group half">
-                    <label>Lucky Numbers:</label>
+                  <div className="form-group">
+                    <label>🎲 Lucky Numbers:</label>
                     <input
                       type="text"
                       name="luckyNumbers"
                       value={editForm.luckyNumbers}
                       onChange={handleInputChange}
                       className="form-input"
+                      placeholder="e.g., 5, 12, 24"
                       required
                     />
                   </div>
 
-                  <div className="form-group half">
-                    <label>Lucky Color:</label>
+                  <div className="form-group">
+                    <label>🎨 Lucky Color:</label>
                     <input
                       type="text"
                       name="lucky_color"
                       value={editForm.lucky_color}
                       onChange={handleInputChange}
                       className="form-input"
+                      placeholder="e.g., சிவப்பு"
                       required
                     />
                   </div>
-                </div>
-
-                <div className="form-row">
-                  <div className="form-group half">
-                    <label>Lucky Direction:</label>
-                    <input
-                      type="text"
-                      name="lucky_dr"
-                      value={editForm.lucky_dr}
-                      onChange={handleInputChange}
-                      className="form-input"
-                      required
-                    />
-                  </div>
-
-                  {/* <div className="form-group half">
-                    <label>Prayers:</label>
-                    <input
-                      type="text"
-                      name="prayers"
-                      value={editForm.prayers}
-                      onChange={handleInputChange}
-                      className="form-input"
-                    />
-                  </div> */}
                 </div>
 
                 <div className="form-group">
-                  {/* <label>Image:</label>
-                  <div className="image-upload-container">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageChange}
-                      className="image-upload"
-                    />
-                    {imagePreview && (
-                      <div className="image-preview">
-                        <img src={imagePreview} alt="Preview" />
-                        <p>Current Image</p>
-                      </div>
-                    )} */}
-                  {/* </div> */}
+                  <label>🧭 Lucky Direction:</label>
+                  <input
+                    type="text"
+                    name="lucky_dr"
+                    value={editForm.lucky_dr}
+                    onChange={handleInputChange}
+                    className="form-input"
+                    placeholder="e.g., வடக்கு"
+                    required
+                  />
                 </div>
 
                 <div className="form-buttons">
@@ -455,101 +453,181 @@ const RasiAllList = () => {
           </div>
         )}
 
-        {/* Date Selector */}
-        <div className="date-selector">
-          {dates.map(date => (
-            <div key={date} className="date-item">
-              <button
-                className={`date-btn ${selectedDate === date ? 'active' : ''}`}
-                onClick={() => setSelectedDate(date === selectedDate ? null : date)}
-              >
-                {date}
-              </button>
+        {/* Date Selector with Calendar View */}
+        <div className="date-selector-container">
+          <div className="date-selector-header">
+            <h3>📅 Select Date</h3>
+          </div>
 
-              {/* Status Toggle Button */}
-              <div className="status-control">
-                <span className="status-label">
-                  Status: {groupedByDate[date].status}
-                </span>
-                <button
-                  className={`status-toggle ${groupedByDate[date].status === 'allow' ? 'allowed' : 'disallowed'}`}
-                  onClick={() => handleStatusToggle(date, groupedByDate[date].status)}
-                  disabled={isUpdatingStatus[date]}
+          {showCalendar && (
+            <div className="calendar-view">
+              {filteredRasi.map((item) => (
+                <div
+                  key={item.date}
+                  className={`calendar-date ${selectedDate === item.date ? 'selected' : ''}`}
+                  onClick={() => setSelectedDate(item.date)}
                 >
-                  {isUpdatingStatus[date] ? (
-                    <span className="loading-spinner"></span>
-                  ) : (
-                    groupedByDate[date].status === 'allow' ? 'Disable' : 'Enable'
-                  )}
-                </button>
-              </div>
+                  <div className="calendar-date-day">
+                    {new Date(item.date).getDate()}
+                  </div>
+                  <div className="calendar-date-month">
+                    {new Date(item.date).toLocaleDateString('en-US', { month: 'short' })}
+                  </div>
+                  <div className={`calendar-status ${item.status}`}>
+                    {item.status === 'allow' ? '✓' : '✗'}
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
+          )}
+
+          <div className="date-scroll">
+            {filteredRasi.map(item => (
+              <div key={item.date} className="date-item">
+                <button
+                  className={`date-btn ${selectedDate === item.date ? 'active' : ''}`}
+                  onClick={() => setSelectedDate(item.date === selectedDate ? null : item.date)}
+                >
+                  <div className="date-btn-content">
+                    <div className="date-btn-full-date">
+                      {formatDate1(item.date)}
+                    </div>
+                    <div className="date-btn-weekday">
+                      {new Date(item.date).toLocaleDateString('en-US', { weekday: 'short' })}
+                    </div>
+                  </div>
+                </button>
+
+                <div className="status-control">
+                  <span className={`status-badge ${item.status}`}>
+                    {item.status === 'allow' ? 'Enabled' : 'Disabled'}
+                  </span>
+                  <button
+                    className={`status-toggle ${item.status === 'allow' ? 'allowed' : 'disallowed'}`}
+                    onClick={() => handleStatusToggle(item.date, item.status)}
+                    disabled={isUpdatingStatus[item.date]}
+                    title={`${item.status === 'allow' ? 'Disable' : 'Enable'} predictions`}
+                  >
+                    {isUpdatingStatus[item.date] ? (
+                      <span className="loading-spinner"></span>
+                    ) : (
+                      item.status === 'allow' ? 'Disable' : 'Enable'
+                    )}
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Rasi List */}
         <div className="rasi-list-container">
-          {(selectedDate ? [selectedDate] : dates).map(date => (
-            <div key={date} className="date-group">
-              {!selectedDate && (
-                <div className="date-header-container">
-                  <h3 className="date-header">{date}</h3>
-                  <span className={`status-badge ${groupedByDate[date].status}`}>
-                    {groupedByDate[date].status}
+          {selectedDate && groupedByDate[selectedDate] && (
+            <div className="date-group">
+              <div className="date-header-container">
+                <div className="date-header-main">
+                  <h2 className="date-header">{formatDate(selectedDate)}</h2>
+                  <span className="total-rasi">
+                    {groupedByDate[selectedDate].data?.length || 0} Rasis
                   </span>
                 </div>
-              )}
 
-              <div className="rasi-cards">
-                {groupedByDate[date].data?.map((rasi, index) => (
-                  <div key={`${date}-${index}`} className="rasi-card">
-                    <div className="card-header">
-                      <div className="card-header-top">
-                        <div className="rasi-title">
-                          <h4>{rasi.name || rasiNames[rasi.rasiId] || `ராசி ${rasi.rasiId}`}</h4>
+                <div className="date-actions">
+                  <span className={`global-status ${groupedByDate[selectedDate].status}`}>
+                    Status: {groupedByDate[selectedDate].status === 'allow' ? 'Active' : 'Inactive'}
+                  </span>
+                </div>
+              </div>
+
+              <div className="rasi-grid">
+                {groupedByDate[selectedDate].data?.map((rasi, index) => {
+                  const rasiInfo = rasiData[rasi.rasiId] || { name: rasi.name, color: '#666', emoji: '⭐' };
+
+                  return (
+                    <div
+                      key={`${selectedDate}-${index}`}
+                      className="rasi-card1"
+                      style={{ borderLeftColor: rasiInfo.color }}
+                    >
+                      <div className="card-header1">
+                        <div className="card-header-top">
+                          <div className="rasi-title">
+                            <div className="rasi-emoji">{rasiInfo.emoji}</div>
+                            <div>
+                              <h4>{rasi.name || rasiInfo.name}</h4>
+                              <div className="rasi-id">Rasi ID: {rasi.rasiId}</div>
+                            </div>
+                          </div>
+
+                          <button
+                            className="edit-btn"
+                            onClick={() => handleEditClick(rasi, selectedDate)}
+                            title="Edit Rasi"
+                          >
+                            <span className="edit-icon">✏️</span>
+                            Edit
+                          </button>
                         </div>
 
-                        {/* Edit Button */}
-                        <button
-                          className="edit-btn"
-                          onClick={() => handleEditClick(rasi, date)}
-                          title="Edit Rasi"
-                        >
-                          ✏️ Edit
-                        </button>
-                      </div>
+                        <div className="lucky-info-grid">
+                          <div className="lucky-item">
+                            <span className="lucky-icon">🎲</span>
+                            <div>
+                              <div className="lucky-label">அதிர்ஷ்ட எண்கள்</div>
+                              <div className="lucky-value">{rasi.luckyNumbers}</div>
+                            </div>
+                          </div>
 
-                      <div className="lucky-info">
-                        <span className="lucky-label">அதிர்ஷ்ட எண்கள்: {rasi.luckyNumbers}</span>
-                        <span className="lucky-label">நல்ல திசை: {rasi.lucky_dr}</span>
-                        <span className="lucky-label">நல்ல நிறம்: {rasi.lucky_color}</span>
-                      </div>
-                    </div>
+                          <div className="lucky-item">
+                            <span className="lucky-icon">🧭</span>
+                            <div>
+                              <div className="lucky-label">நல்ல திசை</div>
+                              <div className="lucky-value">{rasi.lucky_dr}</div>
+                            </div>
+                          </div>
 
-                    <div className="card-content">
-                      <div className="summary-section">
-                        <h5>ராசி பலன்</h5>
-                        <p className="summary-text">{rasi.summary}</p>
-                      </div>
-
-                      {rasi.imageUrl && (
-                        <div className="image-section">
-                          <img
-                            src={rasi.imageUrl}
-                            alt={rasi.name}
-                            className="rasi-image"
-                            onError={(e) => {
-                              e.target.style.display = 'none';
-                            }}
-                          />
+                          <div className="lucky-item">
+                            <span className="lucky-icon">🎨</span>
+                            <div>
+                              <div className="lucky-label">நல்ல நிறம்</div>
+                              <div className="lucky-value">{rasi.lucky_color}</div>
+                            </div>
+                          </div>
                         </div>
-                      )}
+                      </div>
+
+                      <div className="card-content">
+                        <div className="summary-section">
+                          <h5>
+                            <span className="summary-icon">📜</span>
+                            ராசி பலன்
+                          </h5>
+                          <p className="summary-text">{rasi.summary}</p>
+                        </div>
+
+                        {rasi.imageUrl && (
+                          <div className="image-section">
+                            <div className="image-header">
+                              <span className="image-icon">🖼️</span>
+                              <span>ராசி படம்</span>
+                            </div>
+                            <img
+                              src={rasi.imageUrl}
+                              alt={rasi.name}
+                              className="rasi-image"
+                              onError={(e) => {
+                                e.target.style.display = 'none';
+                              }}
+                            />
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
-          ))}
+          )}
         </div>
       </div>
     );
@@ -561,51 +639,67 @@ const RasiAllList = () => {
 
     return (
       <div className="weekly-container">
+        <div className="period-info">
+          <h2>📅 Weekly Predictions</h2>
+          <p className="info-text">Weekly predictions are updated every Monday</p>
+        </div>
+
         {weeklyData.map((week, index) => (
           <div key={week.id || index} className="week-group">
-            <h3 className="period-header">{week.date}</h3>
-            <div className="rasi-cards">
+            <div className="period-header-container">
+              <h3 className="period-header">
+                <span className="period-icon">🗓️</span>
+                {week.date}
+              </h3>
+              <span className="period-count">
+                {week.rasi?.length || 0} Rasis
+              </span>
+            </div>
+
+            <div className="rasi-grid">
               {week.rasi?.map((rasi, rasiIndex) => (
-                <div key={rasiIndex} className="rasi-card weekly-card">
+                <div key={rasiIndex} className="rasi-card1 weekly-card">
                   <div className="card-header">
                     <div className="rasi-title">
-                      <h4>{rasi.name || rasiNames[rasi.rasi] || `ராசி ${rasi.rasi}`}</h4>
+                      <div className="rasi-emoji">{rasiData[rasi.rasi]?.emoji || '⭐'}</div>
+                      <h4>{rasi.name || rasiData[rasi.rasi]?.name || `ராசி ${rasi.rasi}`}</h4>
                     </div>
                   </div>
 
                   <div className="card-content">
-                    <div className="section">
-                      <h5>கிரகணம்</h5>
-                      <p>{rasi.kiraganam}</p>
-                    </div>
-
-                    <div className="section">
-                      <h5>வாராந்திர கிரகணம்</h5>
-                      <p>{rasi.weekly_kiraganam}</p>
-                    </div>
-
-                    <div className="section">
-                      <h5>நன்மைகள்</h5>
-                      <p>{rasi.advantages}</p>
-                    </div>
-
-                    <div className="section">
-                      <h5>பிரார்த்தனைகள்</h5>
-                      <p>{rasi.prayers}</p>
-                    </div>
-
-                    {rasi.imageUrl && (
-                      <div className="image-section">
-                        <img
-                          src={rasi.imageUrl}
-                          alt={rasi.name}
-                          className="rasi-image"
-                          onError={(e) => {
-                            e.target.style.display = 'none';
-                          }}
-                        />
+                    <div className="info-section">
+                      <div className="info-item">
+                        <h5>
+                          <span className="info-icon">🌟</span>
+                          கிரகணம்
+                        </h5>
+                        <p>{rasi.kiraganam}</p>
                       </div>
-                    )}
+
+                      <div className="info-item">
+                        <h5>
+                          <span className="info-icon">📈</span>
+                          வாராந்திர கிரகணம்
+                        </h5>
+                        <p>{rasi.weekly_kiraganam}</p>
+                      </div>
+
+                      <div className="info-item">
+                        <h5>
+                          <span className="info-icon">👍</span>
+                          நன்மைகள்
+                        </h5>
+                        <p>{rasi.advantages}</p>
+                      </div>
+
+                      <div className="info-item">
+                        <h5>
+                          <span className="info-icon">🙏</span>
+                          பிரார்த்தனைகள்
+                        </h5>
+                        <p>{rasi.prayers}</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -616,74 +710,60 @@ const RasiAllList = () => {
     );
   };
 
-  // Render Monthly Content
-  const renderMonthlyContent = () => {
-    if (!monthlyData.length) return <div className="no-data">No monthly data available</div>;
+  // Render Loading State
+  const renderLoading = () => (
+    <div className="loading-container">
+      <div className="loading-spinner-large"></div>
+      <p>Loading {activeTab} predictions...</p>
+      <p className="loading-subtext">Please wait while we fetch the latest data</p>
+    </div>
+  );
 
-    return (
-      <div className="monthly-container">
-        {monthlyData.map((month, index) => (
-          <div key={month.id || index} className="month-group">
-            <h3 className="period-header">{month.date}</h3>
-            <div className="rasi-cards">
-              {month.rasi?.map((rasi, rasiIndex) => (
-                <div key={rasiIndex} className="rasi-card monthly-card">
-                  <div className="card-header">
-                    <div className="rasi-title">
-                      <h4>{rasi.name || rasiNames[rasi.rasi] || `ராசி ${rasi.rasi}`}</h4>
-                    </div>
-                  </div>
+  // Render Error State
+  const renderError = () => (
+    <div className="error-container">
+      <div className="error-icon">⚠️</div>
+      <h3>Error Loading Data</h3>
+      <p>{error}</p>
+      <button className="btn-retry" onClick={fetchData}>
+        🔄 Retry
+      </button>
+      <p className="error-help">
+        If the problem persists, please check your internet connection
+      </p>
+    </div>
+  );
 
-                  <div className="card-content">
-                    <div className="section">
-                      <h5>கிரகணம்</h5>
-                      <p>{rasi.kiraganam}</p>
-                    </div>
-
-                    <div className="section">
-                      <h5>பிரார்த்தனைகள்</h5>
-                      <p>{rasi.prayers}</p>
-                    </div>
-
-                    {rasi.imageUrl && (
-                      <div className="image-section">
-                        <img
-                          src={rasi.imageUrl}
-                          alt={rasi.name}
-                          className="rasi-image"
-                          onError={(e) => {
-                            e.target.style.display = 'none';
-                          }}
-                        />
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-    );
-  };
+  // Render Empty State
+  const renderEmptyState = () => (
+    <div className="empty-state">
+      <div className="empty-icon">📭</div>
+      <h3>No Data Available</h3>
+      <p>There are no {activeTab} predictions to display at the moment.</p>
+      <p className="empty-subtext">Please check back later or try another tab.</p>
+    </div>
+  );
 
   // Render content based on active tab
   const renderContent = () => {
     if (loading) {
-      return <div className="loading">Loading {activeTab} data...</div>;
+      return renderLoading();
     }
 
     if (error) {
-      return <div className="error">Error: {error}</div>;
+      return renderError();
     }
 
     switch (activeTab) {
       case 'daily':
+        if (!dailyData.length) return renderEmptyState();
         return renderDailyContent();
       case 'weekly':
+        if (!weeklyData.length) return renderEmptyState();
         return renderWeeklyContent();
-      case 'monthly':
-        return renderMonthlyContent();
+      // case 'monthly':
+      //   if (!monthlyData.length) return renderEmptyState();
+      //   return renderMonthlyContent();
       default:
         return null;
     }
@@ -692,8 +772,16 @@ const RasiAllList = () => {
   return (
     <div className="rasi-all-list-container">
       <div className="container">
-        <h1 className="main-title">ராசி பலன்</h1>
-        <p className="subtitle">தினசரி, வாராந்திர மற்றும் மாதாந்திர ராசி பலன்கள்</p>
+        {/* Header */}
+        <header className="main-header">
+          <h1 className="main-title">
+            <span className="title-icon">⭐</span>
+            ராசி பலன்
+          </h1>
+          <p className="subtitle">
+            Daily, Weekly & Monthly Rasi Predictions in Tamil
+          </p>
+        </header>
 
         {/* Tabs */}
         <div className="tabs-container">
@@ -706,7 +794,8 @@ const RasiAllList = () => {
                 setIsEditing(false);
               }}
             >
-              தினசரி
+              <span className="tab-icon">📅</span>
+              Daily
             </button>
             <button
               className={`tab ${activeTab === 'weekly' ? 'active' : ''}`}
@@ -715,7 +804,8 @@ const RasiAllList = () => {
                 setIsEditing(false);
               }}
             >
-              வாராந்திர
+              <span className="tab-icon">📊</span>
+              Weekly
             </button>
             <button
               className={`tab ${activeTab === 'monthly' ? 'active' : ''}`}
@@ -724,7 +814,8 @@ const RasiAllList = () => {
                 setIsEditing(false);
               }}
             >
-              மாதாந்திர
+              <span className="tab-icon">📈</span>
+              Monthly
             </button>
           </div>
         </div>
@@ -732,12 +823,6 @@ const RasiAllList = () => {
         {/* Content */}
         <div className="content-container">
           {renderContent()}
-        </div>
-
-        {/* Info Footer */}
-        <div className="info-footer">
-          <p>மூலம்: TN Readers</p>
-          <p className="note">* தினசரி பலன்கள் தினமும் புதுப்பிக்கப்படுகின்றன</p>
         </div>
       </div>
     </div>

@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import "../styles/AuthModal.css";
 import {
   Mail, Lock, Phone, User, Calendar, Gift,
-  X, ArrowLeft, Shield, CheckCircle
+  X, ArrowLeft, Shield, CheckCircle, Smartphone
 } from "lucide-react";
 
 const AuthModal = ({ onClose, onLogin }) => {
@@ -13,10 +13,14 @@ const AuthModal = ({ onClose, onLogin }) => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ text: "", type: "" });
   const [shake, setShake] = useState(false);
+  
+  // Login method (email or mobile)
+  const [loginMethod, setLoginMethod] = useState("email"); // "email" or "mobile"
 
   // Login fields
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [mobileLogin, setMobileLogin] = useState("");
 
   // OTP fields
   const [mobile, setMobile] = useState("");
@@ -77,7 +81,6 @@ const AuthModal = ({ onClose, onLogin }) => {
     if (value && index < 3) {
       document.getElementById(`otp-${index + 1}`)?.focus();
     }
-
   };
 
   const showMessage = (text, type = "info") => {
@@ -113,20 +116,41 @@ const AuthModal = ({ onClose, onLogin }) => {
     showMessage("Authenticating...", "info");
 
     try {
-      const response = await axios.post(
-        "https://users.mpdatahub.com/api/mps-bus-sol-login",
-        { email, password }
-      );
-
-      const userMobile = response.data.user.mobile;
-      setMobile(userMobile);
-
-      showMessage("Login successful! Sending OTP...", "success");
-
-      await handleSendOtpAPI(userMobile);
+      let response;
+      
+      if (loginMethod === "email") {
+        // Email login
+        response = await axios.post(
+          "https://users.mpdatahub.com/api/mps-bus-sol-login",
+          { email, password }
+        );
+        
+        const userMobile = response.data.user.mobile;
+        setMobile(userMobile);
+        showMessage("Login successful! Sending OTP...", "success");
+        await handleSendOtpAPI(userMobile);
+        
+      } else {
+        // Mobile login - first send OTP
+        if (!mobileLogin.match(/^[0-9]{10}$/)) {
+          showMessage("Please enter a valid 10-digit mobile number", "error");
+          setLoading(false);
+          return;
+        }
+        
+        setMobile(mobileLogin);
+        showMessage("Sending OTP to your mobile...", "info");
+        await handleSendOtpAPI(mobileLogin);
+        showMessage("OTP sent successfully!", "success");
+      }
+      
       setStep(2);
     } catch (err) {
-      showMessage("Invalid email or password.", "error");
+      if (loginMethod === "email") {
+        showMessage("Invalid email or password.", "error");
+      } else {
+        showMessage("Failed to send OTP. Please try again.", "error");
+      }
     } finally {
       setLoading(false);
     }
@@ -157,33 +181,55 @@ const AuthModal = ({ onClose, onLogin }) => {
 
     try {
       const otpString = otp.join("");
-      const res = await axios.post(
-        "https://users.mpdatahub.com/api/verifyotp",
-        { mobile, otp: otpString }
-      );
+      let userData;
+      
+      if (loginMethod === "email") {
+        // Email login OTP verification
+        const res = await axios.post(
+          "https://users.mpdatahub.com/api/verifyotp",
+          { mobile, otp: otpString }
+        );
 
-      console.log("OTP Verify Response:", res);
+        const user = res.data;
+        userData = {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          mobile: user.mobile,
+          token: user.token,
+          role: user.role,
+          onboarding: user.onboarding,
+          referal_code: user.referal_code,
+          dob: user.dob,
+          image: `https://ui-avatars.com/api/?name=${user.name}&background=667eea&color=fff`,
+        };
+      } else {
+        // Mobile login OTP verification - you might need a different endpoint
+        const res = await axios.post(
+          "https://users.mpdatahub.com/api/verifyotp", // Update this endpoint
+          { mobile, otp: otpString }
+        );
 
-      const user = res.data; // your real data object
+        const user = res.data;
+        userData = {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          mobile: user.mobile,
+          token: user.token,
+          role: user.role,
+          onboarding: user.onboarding,
+          referal_code: user.referal_code,
+          dob: user.dob,
+          image: `https://ui-avatars.com/api/?name=${user.name}&background=667eea&color=fff`,
+        };
+      }
 
-      const userData = {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        mobile: user.mobile,
-        token: user.token,
-        role: user.role,
-        onboarding: user.onboarding,
-        referal_code: user.referal_code,
-        dob: user.dob,
-        image: `https://ui-avatars.com/api/?name=${user.name}&background=667eea&color=fff`,
-      };
+      console.log("User Data:", userData);
 
-      console.log(userData);
-
-      // ⭐ Save full user data in localStorage
+      // Save full user data in localStorage
       localStorage.setItem("mp_user", JSON.stringify(userData));
-      localStorage.setItem("mp_token", user?.token);
+      localStorage.setItem("mp_token", userData?.token);
 
       showMessage("Verification successful! Welcome back!", "success");
 
@@ -199,11 +245,19 @@ const AuthModal = ({ onClose, onLogin }) => {
     }
   };
 
-
   const getPasswordStrengthColor = () => {
     if (passwordStrength >= 75) return "#10b981";
     if (passwordStrength >= 50) return "#f59e0b";
     return "#ef4444";
+  };
+
+  // Reset login form when switching methods
+  const switchLoginMethod = (method) => {
+    setLoginMethod(method);
+    setEmail("");
+    setPassword("");
+    setMobileLogin("");
+    setMessage({ text: "", type: "" });
   };
 
   return (
@@ -269,13 +323,17 @@ const AuthModal = ({ onClose, onLogin }) => {
               animate={{ y: 0, opacity: 1 }}
             >
               {activeTab === "login"
-                ? step === 1 ? "Welcome Back!" : "Verify Identity"
+                ? step === 1 
+                  ? loginMethod === "email" ? "Welcome Back!" : "Mobile Login"
+                  : "Verify Identity"
                 : "Create Account"}
             </motion.h2>
             <p className="auth-subtitle1">
               {activeTab === "login"
                 ? step === 1
-                  ? "Login securely with your credentials"
+                  ? loginMethod === "email"
+                    ? "Login securely with your credentials"
+                    : "Login using your mobile number"
                   : "Enter OTP sent to your mobile"
                 : "Join thousands of satisfied users"}
             </p>
@@ -380,6 +438,7 @@ const AuthModal = ({ onClose, onLogin }) => {
                       name="mobile"
                       placeholder="Mobile Number"
                       required
+                      maxLength={10}
                       value={form.mobile}
                       onChange={handleSignupChange}
                     />
@@ -429,53 +488,89 @@ const AuthModal = ({ onClose, onLogin }) => {
 
             {/* LOGIN STEP 1 */}
             {activeTab === "login" && step === 1 && (
-              <motion.form
-                key="login"
-                className="auth-form1"
-                onSubmit={handleLoginSubmit}
+              <motion.div
+                key="login-step1"
                 initial={{ x: 20, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
                 exit={{ x: -20, opacity: 0 }}
               >
-                <div className="input-group1">
-                  <Mail size={18} className="input-icon1" />
-                  <input
-                    type="email"
-                    placeholder="Email Address"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
+                {/* Login Method Selection */}
+                <div className="login-method-selector1">
+                  <button
+                    type="button"
+                    className={`method-btn1 ${loginMethod === "email" ? "active" : ""}`}
+                    onClick={() => switchLoginMethod("email")}
+                  >
+                    <Mail size={16} />
+                    Email Login
+                  </button>
+                  <button
+                    type="button"
+                    className={`method-btn1 ${loginMethod === "mobile" ? "active" : ""}`}
+                    onClick={() => switchLoginMethod("mobile")}
+                  >
+                    <Smartphone size={16} />
+                    Mobile Login
+                  </button>
                 </div>
 
-                <div className="input-group1">
-                  <Lock size={18} className="input-icon1" />
-                  <input
-                    type="password"
-                    placeholder="Password"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                </div>
-
-                <motion.button
-                  className="auth-btn1 primary"
-                  type="submit"
-                  disabled={loading}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  {loading ? (
+                <form className="auth-form1" onSubmit={handleLoginSubmit}>
+                  {loginMethod === "email" ? (
                     <>
-                      <div className="spinner1"></div>
-                      Authenticating...
+                      <div className="input-group1">
+                        <Mail size={18} className="input-icon1" />
+                        <input
+                          type="email"
+                          placeholder="Email Address"
+                          required
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                        />
+                      </div>
+
+                      <div className="input-group1">
+                        <Lock size={18} className="input-icon1" />
+                        <input
+                          type="password"
+                          placeholder="Password"
+                          required
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                        />
+                      </div>
                     </>
                   ) : (
-                    "Continue to OTP"
+                    <div className="input-group1">
+                      <Phone size={18} className="input-icon1" />
+                      <input
+                        type="tel"
+                        placeholder="Enter 10-digit Mobile Number"
+                        required
+                        maxLength={10}
+                        value={mobileLogin}
+                        onChange={(e) => setMobileLogin(e.target.value.replace(/\D/g, ''))}
+                      />
+                    </div>
                   )}
-                </motion.button>
-              </motion.form>
+
+                  <motion.button
+                    className="auth-btn1 primary"
+                    type="submit"
+                    disabled={loading}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    {loading ? (
+                      <>
+                        <div className="spinner1"></div>
+                        {loginMethod === "email" ? "Authenticating..." : "Sending OTP..."}
+                      </>
+                    ) : (
+                      loginMethod === "email" ? "Continue to OTP" : "Send OTP"
+                    )}
+                  </motion.button>
+                </form>
+              </motion.div>
             )}
 
             {/* OTP VERIFICATION */}
@@ -490,6 +585,9 @@ const AuthModal = ({ onClose, onLogin }) => {
                 <div className="otp-header1">
                   <Phone size={24} />
                   <p>OTP sent to ******{mobile.slice(-4)}</p>
+                  <small className="login-method-indicator1">
+                    {loginMethod === "email" ? "Email Login" : "Mobile Login"}
+                  </small>
                 </div>
 
                 <div className="otp-container1">

@@ -46,7 +46,7 @@ const ListarticleRm = () => {
     const fetchPosts = () => {
         setIsLoading(true);
         axios
-            .get(`https://tnreaders.in/mobile/list-posts-readers?currentPage=1&perPage=200`)
+            .get(`https://tnreaders.in/mobile/list-posts-readers?currentPage=1&perPage=1000`)
             .then((response) => {
                 setAllPosts(response.data.data || []);
                 setIsLoading(false);
@@ -297,6 +297,8 @@ const ListarticleRm = () => {
     };
 
     const togglePostStatus = async (postId, currentStatus) => {
+        console.log(postId);
+
         const newStatus = currentStatus === "yes" ? "no" : "yes";
         setIsProcessing(true);
         console.log(`https://tnreaders.in/mobile/update-activereaders?postId=${postId}&isActive=${newStatus}`);
@@ -467,7 +469,7 @@ const ListarticleRm = () => {
                 <Loader />
             ) : !editingPost && !viewingPost ? (
                 <>
-                <h1 style={{textAlign:'center', marginBottom: '20px'}}>List & Edit ReadersMenu Articles</h1>
+                    <h1 style={{ textAlign: 'center', marginBottom: '20px' }}>List & Edit ReadersMenu Articles</h1>
                     <div className="filters-section">
                         <div className="filters-grid">
                             <div className="filter-group">

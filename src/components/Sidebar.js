@@ -21,22 +21,27 @@ const Sidebar = ({ isLoggedIn, onLoginClick, onLogout, activeMenu, setActiveMenu
     {
       name: 'LookIt Categories',
       submenus: ['Main-Category', 'sub-Category'],
-      icon: '/assets/article.png'
+      icon: '/assets/lookit1.webp'
     },
     {
       name: 'ReadersMenu Categories',
       submenus: ['MainCategoryRm'],
-      icon: '/assets/article.png'
+      icon: '/assets/readersmenu.png'
     },
     {
       name: 'Lookit Articles',
       submenus: ['Add Article', 'List & Edit Articles'],
-      icon: '/assets/article.png'
+      icon: '/assets/lookit1.webp'
     },
     {
       name: 'ReadersMenu Articles',
       submenus: ['AddArticlerm', 'List and Edit Articles'],
-      icon: '/assets/article.png' 
+      icon: '/assets/readersmenu.png'
+    },
+    {
+      name: 'Astrology',
+      submenus: ['Rasi Upload Form', 'RasiList'],
+      icon: '/assets/astrology.png'
     },
     {
       name: 'Notifications',
@@ -47,11 +52,6 @@ const Sidebar = ({ isLoggedIn, onLoginClick, onLogout, activeMenu, setActiveMenu
       name: 'Schedule',
       submenus: [],
       icon: '/assets/calendar.png'
-    },
-    {
-      name: 'Astrology',
-      submenus: ['Rasi Upload Form', 'RasiList'],
-      icon: '/assets/astrology.png'
     },
     {
       name: 'Banner',
