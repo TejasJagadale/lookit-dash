@@ -74,6 +74,13 @@ const Sidebar = ({ isLoggedIn, onLoginClick, onLogout, activeMenu, setActiveMenu
     setHoveredMenu(null);
   };
 
+  // Add this function to handle touch events
+  const handleTouchStart = (itemName) => {
+    if (window.innerWidth <= 768) {
+      setHoveredMenu(hoveredMenu === itemName ? null : itemName);
+    }
+  };
+
   return (
     <>
       {isOpen && <div className="sidebar-overlay" onClick={onClose}></div>}
@@ -167,6 +174,7 @@ const Sidebar = ({ isLoggedIn, onLoginClick, onLogout, activeMenu, setActiveMenu
                 className={`icon-container ${activeMenu === item.name || item.submenus?.includes(activeMenu) ? 'active' : ''}`}
                 onMouseEnter={() => handleIconHover(item.name)}
                 onMouseLeave={handleIconLeave}
+                onTouchStart={() => handleTouchStart(item.name)}
               >
                 <div
                   className="icon-item"

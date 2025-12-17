@@ -8,7 +8,7 @@
     position: fixed;
     left: 0;
     top: 70px;
-    overflow-y: scroll;
+    overflow-y: auto;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 1000;
 }
@@ -16,6 +16,7 @@
 .sidebar.collapsed {
     width: 80px;
     padding: 1rem 0;
+    overflow: visible;
 }
 
 .sidebar-header {
@@ -301,15 +302,28 @@
 /* Submenu Popout */
 .submenu-popout {
     position: absolute;
-    left: 100%;
+    left: calc(100% + -6px);
     top: 0;
     background: white;
     border-radius: 8px;
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
     min-width: 200px;
-    z-index: 1001;
+    z-index: 1002;
     animation: popoutSlide 0.2s ease-out;
     border: 1px solid #e2e8f0;
+}
+
+/* Add a small arrow/connector to popout */
+.submenu-popout::before {
+    content: '';
+    position: absolute;
+    left: -6px;
+    top: 20px;
+    width: 0;
+    height: 0;
+    border-top: 6px solid transparent;
+    border-bottom: 6px solid transparent;
+    border-right: 6px solid white;
 }
 
 @keyframes popoutSlide {
@@ -373,7 +387,7 @@
 .icon-item[title]:hover::after {
     content: attr(title);
     position: absolute;
-    left: 100%;
+    left: calc(100% + 5px);
     top: 50%;
     transform: translateY(-50%);
     background: #2d3748;
@@ -382,12 +396,11 @@
     border-radius: 6px;
     font-size: 0.8rem;
     white-space: nowrap;
-    opacity: 1;
-    visibility: visible;
-    z-index: 1000;
+    z-index: 1002;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     margin-left: 10px;
 }
+
 
 /* Hide tooltip when submenu popout is visible */
 .icon-container:hover .icon-item[title]::after {
@@ -472,6 +485,7 @@
 
     .sidebar.collapsed {
         width: 280px;
+        overflow: auto;
     }
 
     .main-content {
@@ -511,6 +525,13 @@
         max-width: calc(100vw - 110px);
         max-height: 300px;
         overflow-y: auto;
+        z-index: 1003;
+        /* Higher z-index for mobile */
+    }
+
+    .submenu-popout::before {
+        display: none;
+        /* Hide arrow on mobile */
     }
 
     /* Touch-friendly submenu activation */
@@ -524,13 +545,15 @@
     .sidebar {
         width: 100%;
         top: 63px;
-        /* max-width: 300px; */
     }
 
     .submenu-popout {
         left: 20px;
         right: 20px;
         max-width: calc(100vw - 40px);
+        top: auto;
+        bottom: 100px;
+        /* Position from bottom for better visibility */
     }
 }
 

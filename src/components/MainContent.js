@@ -181,7 +181,7 @@ const MainContent = ({ activeMenu }) => {
       <div className="top-post-card">
         <div className="post-header">
           <h4>{title}</h4>
-          <span className="post-category">{category}</span>
+          {/* <span className="post-category">{category}</span> */}
         </div>
       </div>
     );
@@ -480,34 +480,6 @@ const MainContent = ({ activeMenu }) => {
               {recentPosts.map((post, index) => (
                 <TopPostCard key={post.id || index} post={post} />
               ))}
-            </div>
-          </div>
-
-          {/* Quick Actions */}
-          <div className="quick-actions-card">
-            <div className="card-header">
-              <h3>Quick Actions</h3>
-            </div>
-            <div className="quick-actions">
-              <button
-                className="quick-action-btn"
-                onClick={() => window.location.hash = '#Add Article'}
-              >
-                <span className="action-icon">📝</span>
-                <span>Write Article</span>
-              </button>
-              <button className="quick-action-btn">
-                <span className="action-icon">📊</span>
-                <span>View Analytics</span>
-              </button>
-              <button className="quick-action-btn">
-                <span className="action-icon">👥</span>
-                <span>Manage Users</span>
-              </button>
-              <button className="quick-action-btn">
-                <span className="action-icon">⚙️</span>
-                <span>Settings</span>
-              </button>
             </div>
           </div>
         </div>

@@ -49,7 +49,7 @@ function MainCategoryRm() {
 
             // Use perPage=1000 and currentPage parameter
             const response = await fetch(
-                `https://tnreaders.in/mobile/view-readers-new?perPage=100&currentPage=${page}`
+                `https://tnreaders.in/mobile/list-readers-active?perPage=100&currentPage=${page}`
             );
 
             if (!response.ok) {
