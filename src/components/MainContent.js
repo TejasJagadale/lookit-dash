@@ -17,6 +17,9 @@ import SubCategoryRm from './SubCategoryRm';
 import RasiList from '../CalendarList/Rasipalan';
 import RasiAllList from './RasiAllList';
 
+// Import necessary icons
+import { FaArrowUp } from 'react-icons/fa';
+
 const MainContent = ({ activeMenu }) => {
   const [categories, setCategories] = React.useState({});
   const [loading, setLoading] = React.useState(true);
@@ -24,6 +27,10 @@ const MainContent = ({ activeMenu }) => {
   const [apiResponse, setApiResponse] = React.useState(null);
   const [dashboardData, setDashboardData] = React.useState(null);
   const [dashboardLoading, setDashboardLoading] = React.useState(false);
+  
+  // State for scroll-to-top functionality
+  const [showScrollToTop, setShowScrollToTop] = React.useState(false);
+  const [prevActiveMenu, setPrevActiveMenu] = React.useState(activeMenu);
 
   // Fetch dashboard data
   const fetchDashboardData = async () => {
@@ -46,6 +53,45 @@ const MainContent = ({ activeMenu }) => {
     }
   };
 
+  // Effect to handle scroll visibility and menu changes
+  React.useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY || document.documentElement.scrollTop;
+      setShowScrollToTop(scrollPosition > 300);
+    };
+
+    // Add scroll event listener
+    window.addEventListener('scroll', handleScroll);
+    
+    // Check on initial load
+    handleScroll();
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
+  // Effect to scroll to top when menu changes
+  React.useEffect(() => {
+    // Only scroll if the menu actually changed
+    if (prevActiveMenu !== activeMenu) {
+      // Scroll to top of the page
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+      
+      // Also scroll to top of the main content area
+      const contentBody = document.querySelector('.content-body');
+      if (contentBody) {
+        contentBody.scrollTop = 0;
+      }
+      
+      // Update previous menu state
+      setPrevActiveMenu(activeMenu);
+    }
+  }, [activeMenu, prevActiveMenu]);
+
   React.useEffect(() => {
     if (activeMenu === 'Main-Category') {
       fetchPosts();
@@ -53,6 +99,23 @@ const MainContent = ({ activeMenu }) => {
       fetchDashboardData();
     }
   }, [activeMenu]);
+
+  // Scroll to top function
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+    
+    // Also scroll the content body if it exists
+    const contentBody = document.querySelector('.content-body');
+    if (contentBody) {
+      contentBody.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    }
+  };
 
   // Stat card component - FIXED
   const StatCard = ({ title, value, change, icon, color }) => {
@@ -539,6 +602,17 @@ const MainContent = ({ activeMenu }) => {
       <div className="content-body">
         {renderContent()}
       </div>
+      
+      {/* Scroll to Top Button */}
+      {showScrollToTop && (
+        <button 
+          className="scroll-to-top-btn"
+          onClick={scrollToTop}
+          aria-label="Scroll to top"
+        >
+          <FaArrowUp />
+        </button>
+      )}
     </main>
   );
 };

@@ -16,7 +16,6 @@ const ListarticleRm = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [totalPosts, setTotalPosts] = useState(0);
-    // const postsPerPage = 50;
     const [selectedMain, setSelectedMain] = useState("");
     const [selectedSub, setSelectedSub] = useState("");
     const [title, setTitle] = useState("");
@@ -29,7 +28,7 @@ const ListarticleRm = () => {
     const [isSubCategoriesLoaded, setIsSubCategoriesLoaded] = useState(false);
     const [contentType, setContentType] = useState("");
     const [isEditLoading, setIsEditLoading] = useState(false);
-    const [postsPerPage, setPostsPerPage] = useState("20")
+    const [postsPerPage, setPostsPerPage] = useState("20");
     const [filters, setFilters] = useState({
         category: "",
         status: "",
@@ -39,10 +38,20 @@ const ListarticleRm = () => {
 
     const [allPosts, setAllPosts] = useState([]);
 
+    // Utility function for safe string conversion
+    const safeToString = (value) => {
+        if (value === null || value === undefined) return '';
+        if (typeof value === 'string') return value;
+        if (typeof value === 'number') return value.toString();
+        if (typeof value === 'boolean') return value.toString();
+        return String(value);
+    };
+
     // Fetch posts with pagination
     useEffect(() => {
         fetchPosts();
     }, []);
+    
     const fetchPosts = () => {
         setIsLoading(true);
         axios
@@ -62,48 +71,64 @@ const ListarticleRm = () => {
         if (allPosts.length === 0) return;
 
         let filtered = [...allPosts];
-        // Apply category filter
+        console.log("Total posts before filtering:", filtered.length);
+
+        // Apply category filter - FIXED: Added null checks
         if (filters.category) {
-            filtered = filtered.filter(
-                (post) => post.category.parent_id.toString() === filters.category
-            );
+            filtered = filtered.filter((post) => {
+                // Safely get parent_id with null checks
+                const parentId = post?.category?.parent_id;
+                return parentId !== null && parentId !== undefined && 
+                       safeToString(parentId) === filters.category;
+            });
         }
-        // Apply status filter
+        
+        // Apply status filter - FIXED: Added null checks
         if (filters.status) {
-            filtered = filtered.filter((post) => post.isActive === filters.status);
+            filtered = filtered.filter((post) => {
+                const status = post?.isActive || '';
+                return status === filters.status;
+            });
         }
-        // Apply content type filter
+        
+        // Apply content type filter - FIXED: Added null checks
         if (filters.contentType) {
-            filtered = filtered.filter(
-                (post) => post.content_type === filters.contentType
-            );
+            filtered = filtered.filter((post) => {
+                const type = post?.content_type || '';
+                return type === filters.contentType;
+            });
         }
-        // Apply trending filter
+        
+        // Apply trending filter - FIXED: Added null checks
         if (filters.trending !== "") {
-            filtered = filtered.filter(
-                (post) => post.istrending.toString() === filters.trending
-            );
+            filtered = filtered.filter((post) => {
+                const trending = post?.istrending;
+                return trending !== null && trending !== undefined && 
+                       safeToString(trending) === filters.trending;
+            });
         }
+        
         // Calculate pagination
-        const startIndex = (currentPage - 1) * postsPerPage;
-        const endIndex = startIndex + postsPerPage;
+        const startIndex = (currentPage - 1) * parseInt(postsPerPage, 10);
+        const endIndex = startIndex + parseInt(postsPerPage, 10);
         const paginatedPosts = filtered.slice(startIndex, endIndex);
 
         setPosts(paginatedPosts);
-        console.log(posts);
+        console.log("Filtered posts:", paginatedPosts.length);
 
         setTotalPosts(filtered.length);
-        setTotalPages(Math.ceil(filtered.length / postsPerPage));
-    }, [allPosts, currentPage, filters]);
+        setTotalPages(Math.ceil(filtered.length / parseInt(postsPerPage, 10)));
+    }, [allPosts, currentPage, filters, postsPerPage]);
 
     // Fetch Main Categories on load
     useEffect(() => {
         axios
-            .get("https://tnreaders.in/mobile/list-main-category-readers")
+            .get("https://tnreaders.in/mobile/main-category")
             .then((res) => {
                 const allowedCategories = (res.data || []).filter(
                     (cat) => cat.status === "allow"
                 );
+                console.log("Main categories loaded:", allowedCategories.length);
                 setMainCategories(allowedCategories);
             })
             .catch((err) => console.error("Main category error", err));
@@ -131,7 +156,7 @@ const ListarticleRm = () => {
     // Set the subcategory after subcategories are loaded and we're editing a post
     useEffect(() => {
         if (isSubCategoriesLoaded && editingPost && editingPost.category_id) {
-            setSelectedSub(editingPost.category_id.toString() || "");
+            setSelectedSub(safeToString(editingPost.category_id));
         }
     }, [isSubCategoriesLoaded, editingPost]);
 
@@ -176,7 +201,7 @@ const ListarticleRm = () => {
             const [mainCatRes, subCatRes] = await Promise.all([
                 axios.get("https://tnreaders.in/mobile/main-category"),
                 axios.get(
-                    `https://tnreaders.in/mobile/sub-category?id=${post.category.parent_id}`
+                    `https://tnreaders.in/mobile/sub-category?id=${post.category?.parent_id || ''}`
                 )
             ]);
 
@@ -199,8 +224,13 @@ const ListarticleRm = () => {
             );
             setMainCategories(allowedCategories);
             setSubCategories(subCatRes.data || []);
-            setSelectedMain(post.category.parent_id.toString());
-            setSelectedSub(post.category_id.toString());
+            
+            // FIXED: Added null checks
+            const parentId = post.category?.parent_id;
+            setSelectedMain(parentId ? safeToString(parentId) : "");
+            
+            const categoryId = post.category_id;
+            setSelectedSub(categoryId ? safeToString(categoryId) : "");
         } catch (err) {
             console.error("Edit load error:", err);
             alert("Failed to load edit data");
@@ -245,7 +275,7 @@ const ListarticleRm = () => {
 
         const formData = new FormData();
         formData.append("user_id", "84");
-        formData.append("category_id", selectedSub ? String(selectedSub) : "");
+        formData.append("category_id", selectedSub ? safeToString(selectedSub) : "");
         formData.append("title", title || "");
         formData.append("message", description || "");
         formData.append("youtube_url", youtubeURL || "");
@@ -266,7 +296,7 @@ const ListarticleRm = () => {
 
         // Add post_id only when editing
         if (editingPost) {
-            formData.append("post_id", editingPost.id.toString());
+            formData.append("post_id", safeToString(editingPost.id));
         }
 
         try {
@@ -297,11 +327,11 @@ const ListarticleRm = () => {
     };
 
     const togglePostStatus = async (postId, currentStatus) => {
-        console.log(postId);
+        console.log("Toggling status for post:", postId);
 
         const newStatus = currentStatus === "yes" ? "no" : "yes";
         setIsProcessing(true);
-        console.log(`https://tnreaders.in/mobile/update-activereaders?postId=${postId}&isActive=${newStatus}`);
+        console.log(`API URL: https://tnreaders.in/mobile/update-activereaders?postId=${postId}&isActive=${newStatus}`);
 
         try {
             await axios.get(`https://tnreaders.in/mobile/update-activereaders?postId=${postId}&isActive=${newStatus}`);
@@ -329,7 +359,6 @@ const ListarticleRm = () => {
 
     const toggleTrendingStatus = async (postId, currentTrendingStatus) => {
         const newTrendingStatus = currentTrendingStatus === 1 ? 0 : 1;
-        const payloadStatus = currentTrendingStatus === 1 ? "no" : "yes";
         setIsProcessing(true);
         try {
             console.log(
@@ -460,9 +489,6 @@ const ListarticleRm = () => {
         return pageNumbers;
     };
 
-    // console.log(viewingPost);
-
-
     return (
         <div className="articles-container">
             {isLoading ? (
@@ -481,7 +507,7 @@ const ListarticleRm = () => {
                                 >
                                     <option value="">All Categories</option>
                                     {mainCategories.map((cat) => (
-                                        <option key={cat.id} value={cat.id}>
+                                        <option key={cat.id} value={safeToString(cat.id)}>
                                             {cat.name}
                                         </option>
                                     ))}
@@ -541,14 +567,18 @@ const ListarticleRm = () => {
                             posts.map((post) => (
                                 <div className="post-cardss" key={post.id}>
                                     <img
-                                        src={post.web_thumbnail}
+                                        src={post.web_thumbnail || post.FullImgPath}
                                         className="post-image"
-                                        alt={post.FullImgPath}
+                                        alt={post.title || "Post image"}
                                         loading="lazy"
                                         decoding="async"
+                                        onError={(e) => {
+                                            e.target.onerror = null;
+                                            e.target.src = "https://via.placeholder.com/300x200?text=No+Image";
+                                        }}
                                     />
                                     <div className="post-contentss">
-                                        <h3 className="post-title">{post.title}</h3>
+                                        <h3 className="post-title">{post.title || "Untitled"}</h3>
                                         <div className="post-meta">
                                             <div>
                                                 <div className="post-category">
@@ -558,7 +588,7 @@ const ListarticleRm = () => {
                                             <div className="post-date">
                                                 <div className="date-label">Created At</div>
                                                 <div className="date-value">
-                                                    {new Date(post.created_at).toLocaleString()}
+                                                    {post.created_at ? new Date(post.created_at).toLocaleString() : "N/A"}
                                                 </div>
                                             </div>
                                         </div>
@@ -585,7 +615,7 @@ const ListarticleRm = () => {
                                                         : ""
                                                         }`}
                                                     onClick={() =>
-                                                        toggleTrendingStatus(post.id, post.istrending)
+                                                        toggleTrendingStatus(post.id, post.istrending || 0)
                                                     }
                                                 >
                                                     <input
@@ -607,7 +637,7 @@ const ListarticleRm = () => {
                                                         : "status-inactive"
                                                         }`}
                                                     onClick={() =>
-                                                        togglePostStatus(post.id, post.isActive)
+                                                        togglePostStatus(post.id, post.isActive || "no")
                                                     }
                                                 >
                                                     <input
@@ -624,9 +654,6 @@ const ListarticleRm = () => {
                                             </div>
                                         </div>
                                     </div>
-                                    {/* <div className="post-author">
-                                        <small>By {post.submasteruser.name || "Unknown Author"}</small>
-                                    </div> */}
                                 </div>
                             ))
                         ) : (
@@ -637,7 +664,6 @@ const ListarticleRm = () => {
                         )}
                     </div>
 
-                    {/* Pagination Controls */}
                     {/* Enhanced Pagination Controls */}
                     {totalPages > 1 && (
                         <div className="pagination-section">
@@ -712,8 +738,8 @@ const ListarticleRm = () => {
                     )}
 
                     <div className="results-info">
-                        Showing {(currentPage - 1) * postsPerPage + 1} to{" "}
-                        {Math.min(currentPage * postsPerPage, totalPosts)} of {totalPosts}{" "}
+                        Showing {Math.min((currentPage - 1) * parseInt(postsPerPage, 10) + 1, totalPosts)} to{" "}
+                        {Math.min(currentPage * parseInt(postsPerPage, 10), totalPosts)} of {totalPosts}{" "}
                         posts
                     </div>
                 </>
@@ -724,28 +750,28 @@ const ListarticleRm = () => {
                         <div className="detail-grid">
                             <div className="detail-group">
                                 <span className="detail-label">Title</span>
-                                <p className="detail-value">{viewingPost.title}</p>
+                                <p className="detail-value">{viewingPost.title || "N/A"}</p>
                             </div>
                             <div className="detail-group">
                                 <span className="detail-label">Content Type</span>
-                                <p className="detail-value">{viewingPost.content_type}</p>
+                                <p className="detail-value">{viewingPost.content_type || "N/A"}</p>
                             </div>
                         </div>
 
                         <div className="detail-grid">
                             <div className="detail-group">
                                 <span className="detail-label">Main Category</span>
-                                <p className="detail-value">{viewingPost.main_category?.name || "N/A"}</p>
+                                <p className="detail-value">{viewingPost.category?.parent?.name || viewingPost.main_category?.name || "N/A"}</p>
                             </div>
                             <div className="detail-group">
                                 <span className="detail-label">Sub Category</span>
-                                <p className="detail-value">{viewingPost.sub_category?.name || "N/A"}</p>
+                                <p className="detail-value">{viewingPost.category?.name || viewingPost.sub_category?.name || "N/A"}</p>
                             </div>
                         </div>
 
                         <div className="detail-group">
                             <span className="detail-label">Description</span>
-                            <p className="detail-value">{viewingPost.description}</p>
+                            <p className="detail-value">{viewingPost.description || "N/A"}</p>
                         </div>
 
                         {viewingPost.youtube_url && (
@@ -755,7 +781,7 @@ const ListarticleRm = () => {
                                     href={viewingPost.youtube_url}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="detail-value"
+                                    className="detail-value link"
                                 >
                                     {viewingPost.youtube_url}
                                 </a>
@@ -765,30 +791,41 @@ const ListarticleRm = () => {
                         <div className="detail-grid">
                             <div className="detail-group">
                                 <span className="detail-label">App Thumbnail</span>
-                                {viewingPost.app_thumbnail && (
+                                {viewingPost.app_thumbnail ? (
                                     <img
                                         src={viewingPost.app_thumbnail}
                                         alt="App Thumbnail"
                                         className="detail-image"
+                                        onError={(e) => {
+                                            e.target.onerror = null;
+                                            e.target.src = "https://via.placeholder.com/300x200?text=No+Image";
+                                        }}
                                     />
+                                ) : (
+                                    <p className="detail-value">No image available</p>
                                 )}
                             </div>
                             <div className="detail-group">
                                 <span className="detail-label">Web Thumbnail</span>
-                                {viewingPost.web_thumbnail && (
+                                {viewingPost.web_thumbnail ? (
                                     <img
                                         src={viewingPost.web_thumbnail}
                                         alt="Web Thumbnail"
                                         className="detail-image"
+                                        onError={(e) => {
+                                            e.target.onerror = null;
+                                            e.target.src = "https://via.placeholder.com/300x200?text=No+Image";
+                                        }}
                                     />
+                                ) : (
+                                    <p className="detail-value">No image available</p>
                                 )}
                             </div>
                         </div>
 
                         <div className="detail-grid">
                             <div className="detail-group">
-                                <span className="detail-label">Status</span>
-
+                                <span className="detail-label">Status Controls</span>
                                 <div className="status-controls-group">
                                     <div>
                                         <span className="detail-label">Trending:</span>
@@ -806,7 +843,7 @@ const ListarticleRm = () => {
                                                 onClick={() =>
                                                     toggleTrendingStatus(
                                                         viewingPost.id,
-                                                        viewingPost.istrending
+                                                        viewingPost.istrending || 0
                                                     )
                                                 }
                                             >
@@ -842,7 +879,7 @@ const ListarticleRm = () => {
                                                 onClick={() =>
                                                     togglePostStatus(
                                                         viewingPost.id,
-                                                        viewingPost.isActive
+                                                        viewingPost.isActive || "no"
                                                     )
                                                 }
                                             >
@@ -867,20 +904,16 @@ const ListarticleRm = () => {
                                 <span className="detail-label">Author</span>
                                 <p className="detail-value">{viewingPost.submasteruser?.name || "N/A"}</p>
                             </div>
-                            <div className="detail-group">
-                                <span className="detail-label">Author</span>
-                                <p className="detail-value">{viewingPost.submasteruser?.name || "N/A"}</p>
-                            </div>
                         </div>
 
                         <div className="detail-grid">
                             <div className="detail-group">
                                 <span className="detail-label">Created At</span>
-                                <p className="detail-value">{new Date(viewingPost.created_at).toLocaleString()}</p>
+                                <p className="detail-value">{viewingPost.created_at ? new Date(viewingPost.created_at).toLocaleString() : "N/A"}</p>
                             </div>
                             <div className="detail-group">
                                 <span className="detail-label">Updated At</span>
-                                <p className="detail-value">{new Date(viewingPost.updated_at).toLocaleString()}</p>
+                                <p className="detail-value">{viewingPost.updated_at ? new Date(viewingPost.updated_at).toLocaleString() : "N/A"}</p>
                             </div>
                         </div>
 
@@ -969,7 +1002,7 @@ const ListarticleRm = () => {
                                         <option value="">Select Main Category</option>
                                         {mainCategories.length > 0 &&
                                             mainCategories.map((cat) => (
-                                                <option key={cat.id} value={cat.id.toString()}>
+                                                <option key={cat.id} value={safeToString(cat.id)}>
                                                     {cat.name}
                                                 </option>
                                             ))}
@@ -986,7 +1019,7 @@ const ListarticleRm = () => {
                                         <option value="">Select Sub Category</option>
                                         {subCategories.length > 0 &&
                                             subCategories.map((sub) => (
-                                                <option key={sub.id} value={sub.id.toString()}>
+                                                <option key={sub.id} value={safeToString(sub.id)}>
                                                     {sub.name}
                                                 </option>
                                             ))}
