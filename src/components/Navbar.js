@@ -9,19 +9,19 @@ const Navbar = ({ isLoggedIn, currentUser, onLoginClick, onLogout, onMenuToggle 
         <button className="menu-toggle" onClick={onMenuToggle}>
           ☰
         </button>
-        <div className="logo">LookIt</div>
+        <div className="logo"> <a className='logoa' href='/Main-Category'> LookIt </a></div>
       </div>
 
       <div className="navbar-right">
         {isLoggedIn ? (
           <div className="profile-section">
-            <button 
+            <button
               className="profile-button"
               onClick={() => setShowProfileDropdown(!showProfileDropdown)}
             >
-              <img 
-                src={currentUser?.image || '/api/placeholder/40/40'} 
-                alt="Profile" 
+              <img
+                src={currentUser?.image || '/api/placeholder/40/40'}
+                alt="Profile"
                 className="profile-image"
               />
               <span>{currentUser?.name || 'User'}</span>

@@ -1,16 +1,16 @@
 /* Enhanced Sidebar Styles */
 .sidebar {
     width: 280px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    box-shadow: 2px 0 20px rgba(0, 0, 0, 0.1);
+    background: #E9EEF3;
     padding: 1rem 0;
     height: 100%;
     position: fixed;
     left: 0;
-    top: 70px;
+    top: 67px;
     overflow-y: auto;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 1000;
+    border-right: 1px solid gray;
 }
 
 .sidebar.collapsed {
@@ -24,8 +24,7 @@
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     margin-bottom: 0rem;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    justify-content: flex-end;
 }
 
 .sidebar.collapsed .sidebar-header {
@@ -50,6 +49,7 @@
 .brand-text {
     font-size: 1.25rem;
     font-weight: 700;
+    color: #2d3748;
 }
 
 .sidebar-controls {
@@ -150,10 +150,11 @@
     cursor: pointer;
     transition: all 0.3s ease;
     border-left: 3px solid transparent;
-    color: white;
+    color: #333;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    border-bottom: 1px solid gray;
 }
 
 .menu-title:hover {
@@ -216,22 +217,22 @@
     padding: 0.6rem 1.5rem 0.6rem 3rem;
     cursor: pointer;
     transition: all 0.3s ease;
-    color: rgba(255, 255, 255, 0.8);
+    color: rgb(105, 105, 105);
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    border-left: 3px solid transparent;
+    border-bottom: 1px solid rgb(185, 185, 185);
 }
 
 .submenu-item:hover {
     background: rgba(255, 255, 255, 0.05);
-    color: white;
+    color: gray;
     border-left-color: rgba(255, 255, 255, 0.2);
 }
 
 .submenu-item.active {
     background: rgba(255, 255, 255, 0.1);
-    color: white;
+    color: gray;
     border-left-color: white;
 }
 
@@ -343,7 +344,7 @@
     align-items: center;
     gap: 0.5rem;
     padding: 1rem;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #667eea;
     color: white;
     border-radius: 8px 8px 0 0;
 }
@@ -544,7 +545,7 @@
 @media (max-width: 480px) {
     .sidebar {
         width: 100%;
-        top: 63px;
+        top: 53px;
     }
 
     .submenu-popout {

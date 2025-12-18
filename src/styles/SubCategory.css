@@ -36,7 +36,7 @@
 .stat-badgedash {
   text-align: center;
   padding: 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #667eea;
   border-radius: 15px;
   color: white;
   min-width: 120px;
@@ -79,7 +79,7 @@
   border-radius: 20px;
   /* box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06); */
   transition: all 0.3s ease;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid gray;
   gap: 20px;
 }
 
@@ -111,7 +111,7 @@
 }
 
 .stat-icondash.totaldash {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #667eea;
   filter: invert();
 }
 
@@ -143,7 +143,7 @@
   background: white;
   border-radius: 20px;
   padding: 15px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid gray;
 }
 
 .section-headerdash {
@@ -212,7 +212,7 @@
 }
 
 .trending-badgedash {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #667eea;
   color: white;
   padding: 4px 12px;
   border-radius: 12px;
@@ -487,7 +487,7 @@
   align-items: flex-start;
   padding: 2rem 2rem 1rem;
   border-bottom: 1px solid #e9ecef;
-  position: sticky;
+  /* position: sticky; */
   top: 0;
   background: white;
   z-index: 10;
@@ -621,7 +621,7 @@
 }
 
 .external-link-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #667eea;
   color: white;
   padding: 1rem 2rem;
   border-radius: 8px;

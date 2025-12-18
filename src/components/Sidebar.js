@@ -88,12 +88,12 @@ const Sidebar = ({ isLoggedIn, onLoginClick, onLogout, activeMenu, setActiveMenu
 
         {/* Sidebar Header */}
         <div className="sidebar-header">
-          {!isCollapsed && (
+          {/* {!isCollapsed && (
             <div className="sidebar-brand">
               <span className="brand-icon"><img alt='' className='sideicon' src='/assets/dashboard.png' /></span>
               <span className="brand-text">Dashboard</span>
             </div>
-          )}
+          )} */}
 
           {!isCollapsed && (
             <div className="sidebar-controls">

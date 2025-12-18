@@ -5,8 +5,9 @@
 
 /* Welcome Header */
 .welcome-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: #E9EEF3;
+  border: 1px solid gray;
+  color: #333;
   padding: 2rem;
   border-radius: 12px;
   margin-bottom: 2rem;
@@ -77,16 +78,15 @@
   background: white;
   padding: 1.5rem;
   border-radius: 12px;
-  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
   display: flex;
   align-items: center;
   gap: 1rem;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid gray;
 }
 
 .stat-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
 }
 
 .stat-icon {
@@ -141,7 +141,7 @@
   background: white;
   padding: 1.5rem;
   border-radius: 12px;
-  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+  border: 1px solid gray;
 }
 
 .chart-header {
@@ -254,7 +254,7 @@
   background: white;
   padding: 0.5rem;
   border-radius: 12px;
-  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+  border: 1px solid gray;
 }
 
 .quick-actions-card {
@@ -557,11 +557,40 @@ html {
   }
 
   .stat-card {
-    flex-direction: column;
+    /* flex-direction: column; */
     text-align: center;
+    padding: 1rem;
+    gap: 0.5rem;
+    justify-content: space-between;
+  }
+
+  .top-posts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .stat-content {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .stat-content h3 {
+    margin: 0 0 0.25rem 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #2c3e50;
   }
 
   .quick-actions {
     grid-template-columns: 1fr;
+  }
+
+  .stat-content p {
+    margin: 0 0 0rem 0;
+    color: #7f8c8d;
+    font-weight: 500;
+    font-size: 0.8rem;
   }
 }
