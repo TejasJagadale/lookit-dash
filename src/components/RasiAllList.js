@@ -13,21 +13,43 @@ const RasiAllList = () => {
     const [sortOrder, setSortOrder] = useState('desc');
     const [showCalendar, setShowCalendar] = useState(false);
     const [yearlyData, setYearlyData] = useState([]);
-
+    const [kiraganamRows, setKiraganamRows] = useState([{}]);
+    const [kiraganamEyeRows, setKiraganamEyeRows] = useState([{}]);
 
     // Edit state
     const [editingRasi, setEditingRasi] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
+    const [editMode, setEditMode] = useState('daily');
     const [editForm, setEditForm] = useState({
+        id: '',
         date: '',
+        duration: '',
         rasiId: '',
+        rasiId: '',
+        rasi: '',
         name: '',
         summary: '',
         luckyNumbers: '',
         lucky_dr: '',
         lucky_color: '',
+        kiraganam: '',
+        kiraganam_eye: '',
+        weekly_kiraganam: '',
+        advantages: '',
         prayers: '',
-        image: null
+        image: null,
+        mon_lan: 'tamil',
+        rasi_des: '',
+        Officers: '',
+        Traders: '',
+        Pengal: '',
+        politician: '',
+        artist: '',
+        students: '',
+        Good: '',
+        Attention: '',
+        Police: '',
+        Note: ''
     });
     const [imagePreview, setImagePreview] = useState('');
     const [isUpdatingStatus, setIsUpdatingStatus] = useState({});
@@ -38,6 +60,14 @@ const RasiAllList = () => {
         weekly: 'https://tnreaders.in/mobile/listWeekly',
         monthly: 'https://tnreaders.in/mobile/listemonthly',
         yearly: 'https://tnreaders.in/mobile/listyearly'
+    };
+
+    // Update APIs
+    const UPDATE_API_ENDPOINTS = {
+        daily: 'https://tnreaders.in/mobile/rasi-daily-update',
+        weekly: 'https://tnreaders.in/mobile/weekly/update',
+        monthly: 'https://tnreaders.in/mobile/update/monthly',
+        yearly: 'https://tnreaders.in/mobile/yearly/update'
     };
 
     // Rasi names in Tamil with colors
@@ -66,7 +96,7 @@ const RasiAllList = () => {
         });
     };
 
-    // Format date for display
+    // Format date for display (DD-MM-YYYY)
     const formatDate1 = (dateStr) => {
         const date = new Date(dateStr);
         const day = String(date.getDate()).padStart(2, '0');
@@ -79,8 +109,6 @@ const RasiAllList = () => {
     const getTodayDate = () => {
         return new Date().toISOString().split('T')[0];
     };
-
-    console.log(yearlyData);
 
     // Fetch data based on active tab
     const fetchData = useCallback(async () => {
@@ -145,65 +173,359 @@ const RasiAllList = () => {
         }
     }, [dailyData, activeTab, sortOrder]);
 
-    // Handle edit button click
-    const handleEditClick = (rasi, date) => {
-        setEditingRasi({ ...rasi, date });
-        setIsEditing(true);
-        setEditForm({
-            date: date,
-            rasiId: rasi.rasiId || '',
-            name: rasi.name || '',
-            summary: rasi.summary || '',
-            luckyNumbers: rasi.luckyNumbers || '',
-            lucky_dr: rasi.lucky_dr || '',
-            lucky_color: rasi.lucky_color || '',
-            image: null
+    // Helper functions for dynamic tables
+    const getKiraganamHeaders = () => {
+        if (kiraganamRows.length === 0) return [];
+        return Object.keys(kiraganamRows[0]);
+    };
+
+    const getKiraganamEyeHeaders = () => {
+        if (kiraganamEyeRows.length === 0) return [];
+        return Object.keys(kiraganamEyeRows[0]);
+    };
+
+    const addKiraganamRow = () => {
+        const newRow = {};
+        getKiraganamHeaders().forEach(header => {
+            newRow[header] = '';
         });
-        setImagePreview(rasi.imageUrl || '');
+        setKiraganamRows([...kiraganamRows, newRow]);
+    };
+
+    const addKiraganamEyeRow = () => {
+        const newRow = {};
+        getKiraganamEyeHeaders().forEach(header => {
+            newRow[header] = '';
+        });
+        setKiraganamEyeRows([...kiraganamEyeRows, newRow]);
+    };
+
+    const removeKiraganamRow = (index) => {
+        const newRows = [...kiraganamRows];
+        newRows.splice(index, 1);
+        setKiraganamRows(newRows);
+    };
+
+    const removeKiraganamEyeRow = (index) => {
+        const newRows = [...kiraganamEyeRows];
+        newRows.splice(index, 1);
+        setKiraganamEyeRows(newRows);
+    };
+
+    const handleKiraganamChange = (rowIndex, header, value) => {
+        const newRows = [...kiraganamRows];
+        newRows[rowIndex] = {
+            ...newRows[rowIndex],
+            [header]: value
+        };
+        setKiraganamRows(newRows);
+    };
+
+    const handleKiraganamEyeChange = (rowIndex, header, value) => {
+        const newRows = [...kiraganamEyeRows];
+        newRows[rowIndex] = {
+            ...newRows[rowIndex],
+            [header]: value
+        };
+        setKiraganamEyeRows(newRows);
+    };
+
+    // Update the handleEditClick function to ensure we're getting the right ID
+    const handleEditClick = (rasi, mode, parentData = null, id = null) => {
+        setEditMode(mode);
+        setEditingRasi(rasi);
+        setIsEditing(true);
+
+        // Get the ID - for all modes, we use the passed ID or rasi.id
+        let recordId = id;
+
+        // Try to get ID from different sources based on mode
+        if (!recordId) {
+            switch (mode) {
+                case 'daily':
+                    // For daily, it's the parent ID (date group ID)
+                    recordId = parentData?.id || rasi.id;
+                    break;
+                case 'weekly':
+                    // For weekly, try rasi.id first, then parent id
+                    recordId = rasi.id || parentData?.id;
+                    break;
+                case 'monthly':
+                    // For monthly, it's the parent ID (month group ID)
+                    recordId = parentData?.id || rasi.id;
+                    break;
+                case 'yearly':
+                    // For yearly, try rasi.id first, then parent id
+                    recordId = rasi.id || parentData?.id;
+                    break;
+            }
+        }
+
+        let formData = {
+            id: recordId || '',
+            date: '',
+            duration: '',
+            rasiId: '',
+            name: '',
+            summary: '',
+            luckyNumbers: '',
+            lucky_dr: '',
+            lucky_color: '',
+            kiraganam: '',
+            kiraganam_eye: '',
+            weekly_kiraganam: '',
+            advantages: '',
+            prayers: '',
+            image: null,
+            mon_lan: 'tamil',
+            rasi_des: '',
+            Officers: '',
+            Traders: '',
+            Pengal: '',
+            politician: '',
+            artist: '',
+            students: '',
+            Good: '',
+            Attention: '',
+            Police: '',
+            Note: ''
+        };
+
+        // Set rasi and rasiId based on data
+        const rasiValue = rasi.rasiId || rasi.rasi || '';
+        formData.rasi = rasiValue;
+        formData.rasiId = rasiValue;
+
+        // Set name
+        formData.name = rasi.name || '';
+
+        // Set image preview if exists
+        if (rasi.imageUrl) {
+            setImagePreview(rasi.imageUrl);
+        } else {
+            setImagePreview('');
+        }
+
+        // Tab-specific field mapping based on your payload requirements
+        switch (mode) {
+            case 'daily':
+                formData.date = parentData?.date || parentData || '';
+                formData.duration = 'Daily';
+                formData.summary = rasi.summary || '';
+                formData.luckyNumbers = rasi.luckyNumbers || '';
+                formData.lucky_dr = rasi.lucky_dr || '';
+                formData.lucky_color = rasi.lucky_color || '';
+                formData.prayers = rasi.prayers || '';
+                break;
+
+            case 'weekly':
+                formData.date = parentData?.date || '';
+                formData.kiraganam = rasi.kiraganam || '';
+                formData.weekly_kiraganam = rasi.weekly_kiraganam || '';
+                formData.advantages = rasi.advantages || '';
+                formData.prayers = rasi.prayers || '';
+                break;
+
+            case 'monthly':
+                formData.date = parentData?.date || '';
+                formData.mon_lan = parentData?.mon_lan || 'tamil';
+                formData.kiraganam = rasi.kiraganam || '';
+                formData.prayers = rasi.prayers || '';
+                break;
+
+            case 'yearly':
+                formData.date = parentData?.date || '';
+                formData.mon_lan = parentData?.mon_lan || 'tamil';
+                formData.kiraganam = rasi.kiraganam || '';
+                formData.kiraganam_eye = rasi.kiraganam_eye || '';
+                formData.rasi_des = rasi.rasi_des || '';
+                formData.advantages = rasi.advantages || '';
+                formData.Officers = rasi.Officers || '';
+                formData.Traders = rasi.Traders || '';
+                formData.Pengal = rasi.Pengal || '';
+                formData.politician = rasi.politician || '';
+                formData.artist = rasi.artist || '';
+                formData.students = rasi.students || '';
+                formData.Good = rasi.Good || '';
+                formData.Attention = rasi.Attention || '';
+                formData.Police = rasi.Police || '';
+                formData.Note = rasi.Note || '';
+                formData.prayers = rasi.prayers || '';
+
+                // Initialize kiraganam rows if data exists
+                if (rasi.kiraganam && typeof rasi.kiraganam === 'object') {
+                    try {
+                        const kiraganamData = Array.isArray(rasi.kiraganam) ? rasi.kiraganam : [rasi.kiraganam];
+                        setKiraganamRows(kiraganamData);
+                    } catch (error) {
+                        console.error('Error parsing kiraganam data:', error);
+                        setKiraganamRows([{}]);
+                    }
+                } else {
+                    setKiraganamRows([{}]);
+                }
+
+                // Initialize kiraganam_eye rows if data exists
+                if (rasi.kiraganam_eye && typeof rasi.kiraganam_eye === 'object') {
+                    try {
+                        const eyeData = Array.isArray(rasi.kiraganam_eye) ? rasi.kiraganam_eye : [rasi.kiraganam_eye];
+                        setKiraganamEyeRows(eyeData);
+                    } catch (error) {
+                        console.error('Error parsing kiraganam_eye data:', error);
+                        setKiraganamEyeRows([{}]);
+                    }
+                } else {
+                    setKiraganamEyeRows([{}]);
+                }
+                break;
+        }
+
+        setEditForm(formData);
     };
 
     // Handle form input changes
     const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setEditForm(prev => ({
-            ...prev,
-            [name]: value
-        }));
+        const { name, value, type, files } = e.target;
+
+        if (type === 'file') {
+            const file = files[0];
+            setEditForm(prev => ({
+                ...prev,
+                image: file
+            }));
+            if (file) {
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    setImagePreview(reader.result);
+                };
+                reader.readAsDataURL(file);
+            }
+        } else {
+            setEditForm(prev => ({
+                ...prev,
+                [name]: value
+            }));
+        }
     };
 
-    // Handle form submission for update
+    // Update the handleUpdateSubmit function to send ID in payload for all modes
     const handleUpdateSubmit = async (e) => {
         e.preventDefault();
 
         try {
             const formData = new FormData();
-            Object.keys(editForm).forEach(key => {
-                if (key === 'image' && editForm[key]) {
-                    formData.append('image', editForm[key]);
-                } else if (editForm[key] !== null && editForm[key] !== undefined) {
-                    const backendKey = key === 'rasiId' ? 'rasi_id' :
-                        key === 'luckyNumbers' ? 'lucky_numbers' : key;
-                    formData.append(backendKey, editForm[key]);
-                }
-            });
 
-            const response = await fetch('https://tnreaders.in/mobile/rasi-daily-update', {
-                method: 'POST',
+            console.log('=== EDITING RASi ===');
+            console.log('Mode:', editMode);
+            console.log('Edit Form:', editForm);
+
+
+            // Add fields based on edit mode (using your exact payload requirements)
+            switch (editMode) {
+                case 'daily':
+                    // Daily payload
+                    formData.append('date', editForm.date);
+                    formData.append('duration', 'Daily');
+                    formData.append('rasiId', editForm.rasiId || editForm.rasi);
+                    formData.append('name', editForm.name);
+                    formData.append('summary', editForm.summary);
+                    formData.append('luckyNumbers', editForm.luckyNumbers);
+                    formData.append('lucky_dr', editForm.lucky_dr);
+                    formData.append('lucky_color', editForm.lucky_color);
+                    if (editForm.id) formData.append('id', editForm.id);
+                    break;
+
+                case 'weekly':
+                    // Weekly payload - include ID in payload
+                    formData.append('date', editForm.date); // Format: 2025-12-01/2025-12-07
+                    formData.append('rasiId', editForm.rasiId || editForm.rasiId);
+                    formData.append('name', editForm.name);
+                    formData.append('kiraganam', editForm.kiraganam);
+                    formData.append('weekly_kiraganam', editForm.weekly_kiraganam);
+                    formData.append('advantages', editForm.advantages);
+                    formData.append('prayers', editForm.prayers);
+                    if (editForm.id) formData.append('id', editForm.id);
+                    break;
+
+                case 'monthly':
+                    // Monthly payload
+                    formData.append('date', editForm.date);
+                    formData.append('rasiId', editForm.rasi || editForm.rasiId);
+                    formData.append('name', editForm.name);
+                    formData.append('kiraganam', editForm.kiraganam);
+                    formData.append('prayers', editForm.prayers);
+                    formData.append('mon_lan', editForm.mon_lan);
+                    if (editForm.id) formData.append('id', editForm.id);
+                    break;
+
+                case 'yearly':
+                    // Yearly payload - check language
+                    formData.append('date', editForm.date);
+                    formData.append('rasiId', editForm.rasi || editForm.rasiId);
+                    formData.append('name', editForm.name);
+                    formData.append('kiraganam', JSON.stringify(kiraganamRows));
+                    formData.append('kiraganam_eye', JSON.stringify(kiraganamEyeRows));
+                    formData.append('prayers', editForm.prayers);
+                    formData.append('mon_lan', editForm.mon_lan);
+                    if (editForm.id) formData.append('id', editForm.id);
+
+                    if (editForm.mon_lan === 'tamil') {
+                        // Tamil yearly payload
+                        formData.append('advantages', editForm.advantages);
+                        formData.append('Traders', editForm.Traders);
+                        formData.append('Officers', editForm.Officers);
+                        formData.append('Police', editForm.Police);
+                        formData.append('politician', editForm.politician);
+                        formData.append('Pengal', editForm.Pengal);
+                        formData.append('students', editForm.students);
+                        formData.append('Good', editForm.Good);
+                        formData.append('Attention', editForm.Attention);
+                        formData.append('Note', editForm.Note);
+                    } else {
+                        // English yearly payload
+                        formData.append('rasi_des', editForm.rasi_des);
+                        formData.append('advantages', editForm.advantages);
+                        formData.append('Officers', editForm.Officers);
+                        formData.append('Traders', editForm.Traders);
+                        formData.append('Pengal', editForm.Pengal);
+                        formData.append('politician', editForm.politician);
+                        formData.append('artist', editForm.artist);
+                        formData.append('students', editForm.students);
+                        formData.append('Good', editForm.Good);
+                        formData.append('Attention', editForm.Attention);
+                    }
+                    break;
+            }
+
+            // Add image if exists
+            if (editForm.image) {
+                formData.append('image', editForm.image);
+            }
+
+            // Log the payload
+            console.log('=== PAYLOAD for', editMode, '===');
+            for (let pair of formData.entries()) {
+                console.log(pair[0] + ': ' + pair[1]);
+            }
+
+            const apiUrl = UPDATE_API_ENDPOINTS[editMode];
+            const method = 'POST'; // All updates use POST with ID in payload
+
+            console.log('Calling API:', apiUrl, 'Method:', method);
+
+            const response = await fetch(apiUrl, {
+                method: method,
                 body: formData
             });
 
-            if (!response.ok) {
-                throw new Error(`Update failed with status: ${response.status}`);
-            }
-
             const result = await response.json();
-            console.log('Update Result:', result);
+            console.log('=== RESPONSE ===', result);
 
             if (result.success) {
-                alert('Rasi updated successfully!');
+                alert(result.message || 'Rasi updated successfully!');
                 setIsEditing(false);
                 setEditingRasi(null);
-                fetchData();
+                fetchData(); // Refresh data to show updated content
             } else {
                 alert(result.message || 'Update failed');
             }
@@ -292,14 +614,33 @@ const RasiAllList = () => {
         setIsEditing(false);
         setEditingRasi(null);
         setEditForm({
+            id: '',
             date: '',
+            duration: '',
             rasiId: '',
             name: '',
             summary: '',
             luckyNumbers: '',
             lucky_dr: '',
             lucky_color: '',
-            image: null
+            kiraganam: '',
+            kiraganam_eye: '',
+            weekly_kiraganam: '',
+            advantages: '',
+            prayers: '',
+            image: null,
+            mon_lan: 'tamil',
+            rasi_des: '',
+            Officers: '',
+            Traders: '',
+            Pengal: '',
+            politician: '',
+            artist: '',
+            students: '',
+            Good: '',
+            Attention: '',
+            Police: '',
+            Note: ''
         });
         setImagePreview('');
     };
@@ -331,69 +672,69 @@ const RasiAllList = () => {
         return value;
     };
 
-
-    // Render Daily Content
-    const renderDailyContent = () => {
-        if (!dailyData.length) return <div className="no-data">No daily data available</div>;
-
-        const groupedByDate = dailyData.reduce((acc, item) => {
-            acc[item.date] = item;
-            return acc;
-        }, {});
+    // Render Edit Form Modal
+    const renderEditModal = () => {
+        const getModalTitle = () => {
+            switch (editMode) {
+                case 'daily': return '✏️ Edit Daily Rasi Prediction';
+                case 'weekly': return '✏️ Edit Weekly Rasi Prediction';
+                case 'monthly': return '✏️ Edit Monthly Rasi Prediction';
+                case 'yearly': return '✏️ Edit Yearly Rasi Prediction';
+                default: return '✏️ Edit Rasi Prediction';
+            }
+        };
 
         return (
-            <div className="daily-container">
-                {/* Edit Form Modal */}
-                {isEditing && (
-                    <div className="modal-overlay">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h3>✏️ Edit Rasi Prediction</h3>
-                                <button className="close-btn" onClick={handleCancelEdit}>×</button>
-                            </div>
-                            <form onSubmit={handleUpdateSubmit} className="edit-form">
-                                <div className="form-group">
-                                    <label>Date:</label>
-                                    <input
-                                        type="text"
-                                        name="date"
-                                        value={formatDate(editForm.date)}
-                                        className="form-input"
-                                        disabled
-                                    />
-                                </div>
+            <div className="modal-overlay">
+                <div className="modal-content">
+                    <div className="modal-header">
+                        <h3>{getModalTitle()}</h3>
+                        <button className="close-btn" onClick={handleCancelEdit}>×</button>
+                    </div>
 
-                                <div className="form-group">
-                                    <label>Select Rasi:</label>
-                                    <select
-                                        name="rasiId"
-                                        value={editForm.rasiId}
-                                        onChange={handleInputChange}
-                                        className="form-input"
-                                        required
-                                    >
-                                        <option value="">Select Rasi</option>
-                                        {Object.entries(rasiData).map(([id, data]) => (
-                                            <option key={id} value={id}>
-                                                {data.emoji} {data.name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
+                    <form onSubmit={handleUpdateSubmit} className="edit-form">
+                        {/* Common Fields */}
+                        <div className="form-group">
+                            <label>Select Rasi:</label>
+                            <select
+                                name="rasiId"
+                                value={editForm.rasiId}
+                                onChange={(e) => {
+                                    const value = e.target.value;
+                                    setEditForm(prev => ({
+                                        ...prev,
+                                        rasiId: value,
+                                        rasiId: value
+                                    }));
+                                }}
+                                className="form-input"
+                                required
+                            >
+                                <option value="">Select Rasi</option>
+                                {Object.entries(rasiData).map(([id, data]) => (
+                                    <option key={id} value={id}>
+                                        {data.emoji} {data.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
 
-                                <div className="form-group">
-                                    <label>Rasi Name:</label>
-                                    <input
-                                        type="text"
-                                        name="name"
-                                        value={editForm.name}
-                                        onChange={handleInputChange}
-                                        className="form-input"
-                                        placeholder="Enter Rasi name in Tamil"
-                                        required
-                                    />
-                                </div>
+                        <div className="form-group">
+                            <label>Rasi Name:</label>
+                            <input
+                                type="text"
+                                name="name"
+                                value={editForm.name}
+                                onChange={handleInputChange}
+                                className="form-input"
+                                placeholder="Enter Rasi name"
+                                required
+                            />
+                        </div>
 
+                        {/* Daily Specific Fields */}
+                        {editMode === 'daily' && (
+                            <>
                                 <div className="form-group">
                                     <label>Summary:</label>
                                     <textarea
@@ -402,7 +743,7 @@ const RasiAllList = () => {
                                         onChange={handleInputChange}
                                         className="form-textarea"
                                         rows="4"
-                                        placeholder="Enter prediction summary in Tamil"
+                                        placeholder="Enter prediction summary"
                                         required
                                     />
                                 </div>
@@ -448,18 +789,679 @@ const RasiAllList = () => {
                                     />
                                 </div>
 
-                                <div className="form-buttons">
-                                    <button type="button" className="btn btn-secondary" onClick={handleCancelEdit}>
-                                        Cancel
-                                    </button>
-                                    <button type="submit" className="btn btn-primary">
-                                        Update Rasi
-                                    </button>
+                                <div className="form-group">
+                                    <label>🙏 பிரார்த்தனைகள்:</label>
+                                    <textarea
+                                        name="prayers"
+                                        value={editForm.prayers}
+                                        onChange={handleInputChange}
+                                        className="form-textarea"
+                                        rows="3"
+                                        placeholder="Enter பிரார்த்தனைகள்"
+                                    />
                                 </div>
-                            </form>
+                            </>
+                        )}
+
+                        {/* Weekly Specific Fields */}
+                        {editMode === 'weekly' && (
+                            <>
+                                <div className="form-group">
+                                    <label>🌟 கிரகணம்:</label>
+                                    <textarea
+                                        name="kiraganam"
+                                        value={editForm.kiraganam}
+                                        onChange={handleInputChange}
+                                        className="form-textarea"
+                                        rows="3"
+                                        placeholder="Enter கிரகணம்"
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label>📈 வாராந்திர கிரகணம்:</label>
+                                    <textarea
+                                        name="weekly_kiraganam"
+                                        value={editForm.weekly_kiraganam}
+                                        onChange={handleInputChange}
+                                        className="form-textarea"
+                                        rows="3"
+                                        placeholder="Enter வாராந்திர கிரகணம்"
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label>👍 நன்மைகள்:</label>
+                                    <textarea
+                                        name="advantages"
+                                        value={editForm.advantages}
+                                        onChange={handleInputChange}
+                                        className="form-textarea"
+                                        rows="3"
+                                        placeholder="Enter நன்மைகள்"
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label>🙏 பிரார்த்தனைகள்:</label>
+                                    <textarea
+                                        name="prayers"
+                                        value={editForm.prayers}
+                                        onChange={handleInputChange}
+                                        className="form-textarea"
+                                        rows="3"
+                                        placeholder="Enter பிரார்த்தனைகள்"
+                                    />
+                                </div>
+                            </>
+                        )}
+
+                        {/* Monthly Specific Fields */}
+                        {editMode === 'monthly' && (
+                            <>
+                                <div className="form-group">
+                                    <label>🌟 கிரகணம்:</label>
+                                    <textarea
+                                        name="kiraganam"
+                                        value={editForm.kiraganam}
+                                        onChange={handleInputChange}
+                                        className="form-textarea"
+                                        rows="4"
+                                        placeholder="Enter கிரகணம்"
+                                        required
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label>Language:</label>
+                                    <select
+                                        name="mon_lan"
+                                        value={editForm.mon_lan}
+                                        onChange={handleInputChange}
+                                        className="form-input"
+                                    >
+                                        <option value="tamil">தமிழ்</option>
+                                        <option value="english">English</option>
+                                    </select>
+                                </div>
+
+                                <div className="form-group">
+                                    <label>🙏 பிரார்த்தனைகள்:</label>
+                                    <textarea
+                                        name="prayers"
+                                        value={editForm.prayers}
+                                        onChange={handleInputChange}
+                                        className="form-textarea"
+                                        rows="3"
+                                        placeholder="Enter பிரார்த்தனைகள்"
+                                    />
+                                </div>
+                            </>
+                        )}
+
+                        {/* Yearly Specific Fields */}
+// In renderEditModal function, replace the yearly section with:
+                        {editMode === 'yearly' && (
+                            <>
+                                <div className="form-group">
+                                    <label>Language:</label>
+                                    <select
+                                        name="mon_lan"
+                                        value={editForm.mon_lan}
+                                        onChange={handleInputChange}
+                                        className="form-input"
+                                    >
+                                        <option value="tamil">தமிழ்</option>
+                                        <option value="english">English</option>
+                                    </select>
+                                </div>
+
+                                {/* Dynamic Kiraganam Table */}
+                                <div className="form-group">
+                                    <label>🌟 Kiraganam Data:</label>
+                                    <div className="dynamic-table-container">
+                                        <div className="table-header">
+                                            <h4>Kiraganam Table</h4>
+                                            <button
+                                                type="button"
+                                                className="btn-add-row"
+                                                onClick={addKiraganamRow}
+                                            >
+                                                + Add Row
+                                            </button>
+                                        </div>
+
+                                        <div className="table-wrapper">
+                                            <table className="dynamic-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>#</th>
+                                                        {getKiraganamHeaders().map((header, idx) => (
+                                                            <th key={idx}>
+                                                                <input
+                                                                    type="text"
+                                                                    className="table-header-input"
+                                                                    placeholder="Column name"
+                                                                    value={header}
+                                                                    onChange={(e) => {
+                                                                        const newRows = [...kiraganamRows];
+                                                                        const oldHeader = header;
+                                                                        newRows.forEach(row => {
+                                                                            if (row[oldHeader] !== undefined) {
+                                                                                row[e.target.value] = row[oldHeader];
+                                                                                delete row[oldHeader];
+                                                                            }
+                                                                        });
+                                                                        setKiraganamRows(newRows);
+                                                                    }}
+                                                                />
+                                                            </th>
+                                                        ))}
+                                                        <th>Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {kiraganamRows.map((row, rowIndex) => (
+                                                        <tr key={rowIndex}>
+                                                            <td>{rowIndex + 1}</td>
+                                                            {getKiraganamHeaders().map((header, colIndex) => (
+                                                                <td key={colIndex}>
+                                                                    <input
+                                                                        type="text"
+                                                                        className="table-cell-input"
+                                                                        placeholder="Enter value"
+                                                                        value={row[header] || ''}
+                                                                        onChange={(e) => handleKiraganamChange(rowIndex, header, e.target.value)}
+                                                                    />
+                                                                </td>
+                                                            ))}
+                                                            <td>
+                                                                <button
+                                                                    type="button"
+                                                                    className="btn-remove-row"
+                                                                    onClick={() => removeKiraganamRow(rowIndex)}
+                                                                >
+                                                                    ✕
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+
+                                        <div className="table-controls">
+                                            <button
+                                                type="button"
+                                                className="btn-add-column"
+                                                onClick={() => {
+                                                    const newHeaders = [...getKiraganamHeaders(), `field_${Date.now()}`];
+                                                    const newRows = kiraganamRows.map(row => ({
+                                                        ...row,
+                                                        [newHeaders[newHeaders.length - 1]]: ''
+                                                    }));
+                                                    setKiraganamRows(newRows);
+                                                }}
+                                            >
+                                                + Add Column
+                                            </button>
+                                            {getKiraganamHeaders().length > 0 && (
+                                                <button
+                                                    type="button"
+                                                    className="btn-remove-column"
+                                                    onClick={() => {
+                                                        const headers = getKiraganamHeaders();
+                                                        if (headers.length > 0) {
+                                                            const lastHeader = headers[headers.length - 1];
+                                                            const newRows = kiraganamRows.map(row => {
+                                                                const newRow = { ...row };
+                                                                delete newRow[lastHeader];
+                                                                return newRow;
+                                                            });
+                                                            setKiraganamRows(newRows);
+                                                        }
+                                                    }}
+                                                >
+                                                    - Remove Last Column
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Dynamic Kiraganam Eye Table */}
+                                <div className="form-group">
+                                    <label>👁️ Kiraganam Eye Data:</label>
+                                    <div className="dynamic-table-container">
+                                        <div className="table-header">
+                                            <h4>Kiraganam Eye Table</h4>
+                                            <button
+                                                type="button"
+                                                className="btn-add-row"
+                                                onClick={addKiraganamEyeRow}
+                                            >
+                                                + Add Row
+                                            </button>
+                                        </div>
+
+                                        <div className="table-wrapper">
+                                            <table className="dynamic-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>#</th>
+                                                        {getKiraganamEyeHeaders().map((header, idx) => (
+                                                            <th key={idx}>
+                                                                <input
+                                                                    type="text"
+                                                                    className="table-header-input"
+                                                                    placeholder="Column name"
+                                                                    value={header}
+                                                                    onChange={(e) => {
+                                                                        const newRows = [...kiraganamEyeRows];
+                                                                        const oldHeader = header;
+                                                                        newRows.forEach(row => {
+                                                                            if (row[oldHeader] !== undefined) {
+                                                                                row[e.target.value] = row[oldHeader];
+                                                                                delete row[oldHeader];
+                                                                            }
+                                                                        });
+                                                                        setKiraganamEyeRows(newRows);
+                                                                    }}
+                                                                />
+                                                            </th>
+                                                        ))}
+                                                        <th>Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {kiraganamEyeRows.map((row, rowIndex) => (
+                                                        <tr key={rowIndex}>
+                                                            <td>{rowIndex + 1}</td>
+                                                            {getKiraganamEyeHeaders().map((header, colIndex) => (
+                                                                <td key={colIndex}>
+                                                                    <input
+                                                                        type="text"
+                                                                        className="table-cell-input"
+                                                                        placeholder="Enter value"
+                                                                        value={row[header] || ''}
+                                                                        onChange={(e) => handleKiraganamEyeChange(rowIndex, header, e.target.value)}
+                                                                    />
+                                                                </td>
+                                                            ))}
+                                                            <td>
+                                                                <button
+                                                                    type="button"
+                                                                    className="btn-remove-row"
+                                                                    onClick={() => removeKiraganamEyeRow(rowIndex)}
+                                                                >
+                                                                    ✕
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+
+                                        <div className="table-controls">
+                                            <button
+                                                type="button"
+                                                className="btn-add-column"
+                                                onClick={() => {
+                                                    const newHeaders = [...getKiraganamEyeHeaders(), `field_${Date.now()}`];
+                                                    const newRows = kiraganamEyeRows.map(row => ({
+                                                        ...row,
+                                                        [newHeaders[newHeaders.length - 1]]: ''
+                                                    }));
+                                                    setKiraganamEyeRows(newRows);
+                                                }}
+                                            >
+                                                + Add Column
+                                            </button>
+                                            {getKiraganamEyeHeaders().length > 0 && (
+                                                <button
+                                                    type="button"
+                                                    className="btn-remove-column"
+                                                    onClick={() => {
+                                                        const headers = getKiraganamEyeHeaders();
+                                                        if (headers.length > 0) {
+                                                            const lastHeader = headers[headers.length - 1];
+                                                            const newRows = kiraganamEyeRows.map(row => {
+                                                                const newRow = { ...row };
+                                                                delete newRow[lastHeader];
+                                                                return newRow;
+                                                            });
+                                                            setKiraganamEyeRows(newRows);
+                                                        }
+                                                    }}
+                                                >
+                                                    - Remove Last Column
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Rest of the yearly fields based on language */}
+                                {editForm.mon_lan === 'tamil' ? (
+                                    <>
+                                        <div className="form-group">
+                                            <label>👍 நன்மைகள்:</label>
+                                            <textarea
+                                                name="advantages"
+                                                value={editForm.advantages}
+                                                onChange={handleInputChange}
+                                                className="form-textarea"
+                                                rows="2"
+                                                placeholder="Enter நன்மைகள்"
+                                            />
+                                        </div>
+
+                                        <div className="form-row">
+                                            <div className="form-group">
+                                                <label>🏪 வியாபாரிகள்:</label>
+                                                <textarea
+                                                    name="Traders"
+                                                    value={editForm.Traders}
+                                                    onChange={handleInputChange}
+                                                    className="form-textarea"
+                                                    rows="2"
+                                                    placeholder="Enter வியாபாரிகள்"
+                                                />
+                                            </div>
+
+                                            <div className="form-group">
+                                                <label>👮 அதிகாரிகள்:</label>
+                                                <textarea
+                                                    name="Officers"
+                                                    value={editForm.Officers}
+                                                    onChange={handleInputChange}
+                                                    className="form-textarea"
+                                                    rows="2"
+                                                    placeholder="Enter அதிகாரிகள்"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="form-row">
+                                            <div className="form-group">
+                                                <label>👮‍♀️ காவல்துறை:</label>
+                                                <textarea
+                                                    name="Police"
+                                                    value={editForm.Police}
+                                                    onChange={handleInputChange}
+                                                    className="form-textarea"
+                                                    rows="2"
+                                                    placeholder="Enter காவல்துறை"
+                                                />
+                                            </div>
+
+                                            <div className="form-group">
+                                                <label>🏛️ அரசியல்வாதிகள்:</label>
+                                                <textarea
+                                                    name="politician"
+                                                    value={editForm.politician}
+                                                    onChange={handleInputChange}
+                                                    className="form-textarea"
+                                                    rows="2"
+                                                    placeholder="Enter அரசியல்வாதிகள்"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="form-row">
+                                            <div className="form-group">
+                                                <label>👩 பெண்கள்:</label>
+                                                <textarea
+                                                    name="Pengal"
+                                                    value={editForm.Pengal}
+                                                    onChange={handleInputChange}
+                                                    className="form-textarea"
+                                                    rows="2"
+                                                    placeholder="Enter பெண்கள்"
+                                                />
+                                            </div>
+
+                                            <div className="form-group">
+                                                <label>🎓 மாணவர்கள்:</label>
+                                                <textarea
+                                                    name="students"
+                                                    value={editForm.students}
+                                                    onChange={handleInputChange}
+                                                    className="form-textarea"
+                                                    rows="2"
+                                                    placeholder="Enter மாணவர்கள்"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="form-row">
+                                            <div className="form-group">
+                                                <label>👍 நல்லது:</label>
+                                                <textarea
+                                                    name="Good"
+                                                    value={editForm.Good}
+                                                    onChange={handleInputChange}
+                                                    className="form-textarea"
+                                                    rows="2"
+                                                    placeholder="Enter நல்லது"
+                                                />
+                                            </div>
+
+                                            <div className="form-group">
+                                                <label>⚠️ கவனம்:</label>
+                                                <textarea
+                                                    name="Attention"
+                                                    value={editForm.Attention}
+                                                    onChange={handleInputChange}
+                                                    className="form-textarea"
+                                                    rows="2"
+                                                    placeholder="Enter கவனம்"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="form-group">
+                                            <label>📝 குறிப்பு:</label>
+                                            <textarea
+                                                name="Note"
+                                                value={editForm.Note}
+                                                onChange={handleInputChange}
+                                                className="form-textarea"
+                                                rows="2"
+                                                placeholder="Enter குறிப்பு"
+                                            />
+                                        </div>
+                                    </>
+                                ) : (
+                                    <>
+                                        <div className="form-group">
+                                            <label>📜 Rasi Description:</label>
+                                            <textarea
+                                                name="rasi_des"
+                                                value={editForm.rasi_des}
+                                                onChange={handleInputChange}
+                                                className="form-textarea"
+                                                rows="3"
+                                                placeholder="Enter Rasi Description"
+                                            />
+                                        </div>
+
+                                        <div className="form-group">
+                                            <label>👍 Advantages:</label>
+                                            <textarea
+                                                name="advantages"
+                                                value={editForm.advantages}
+                                                onChange={handleInputChange}
+                                                className="form-textarea"
+                                                rows="2"
+                                                placeholder="Enter Advantages"
+                                            />
+                                        </div>
+
+                                        <div className="form-row">
+                                            <div className="form-group">
+                                                <label>👮 Officers:</label>
+                                                <textarea
+                                                    name="Officers"
+                                                    value={editForm.Officers}
+                                                    onChange={handleInputChange}
+                                                    className="form-textarea"
+                                                    rows="2"
+                                                    placeholder="Enter for Officers"
+                                                />
+                                            </div>
+
+                                            <div className="form-group">
+                                                <label>🏪 Traders:</label>
+                                                <textarea
+                                                    name="Traders"
+                                                    value={editForm.Traders}
+                                                    onChange={handleInputChange}
+                                                    className="form-textarea"
+                                                    rows="2"
+                                                    placeholder="Enter for Traders"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="form-row">
+                                            <div className="form-group">
+                                                <label>👩 Pengal:</label>
+                                                <textarea
+                                                    name="Pengal"
+                                                    value={editForm.Pengal}
+                                                    onChange={handleInputChange}
+                                                    className="form-textarea"
+                                                    rows="2"
+                                                    placeholder="Enter for Pengal"
+                                                />
+                                            </div>
+
+                                            <div className="form-group">
+                                                <label>🏛️ Politician:</label>
+                                                <textarea
+                                                    name="politician"
+                                                    value={editForm.politician}
+                                                    onChange={handleInputChange}
+                                                    className="form-textarea"
+                                                    rows="2"
+                                                    placeholder="Enter for Politician"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="form-row">
+                                            <div className="form-group">
+                                                <label>🎨 Artist:</label>
+                                                <textarea
+                                                    name="artist"
+                                                    value={editForm.artist}
+                                                    onChange={handleInputChange}
+                                                    className="form-textarea"
+                                                    rows="2"
+                                                    placeholder="Enter for Artist"
+                                                />
+                                            </div>
+
+                                            <div className="form-group">
+                                                <label>🎓 Students:</label>
+                                                <textarea
+                                                    name="students"
+                                                    value={editForm.students}
+                                                    onChange={handleInputChange}
+                                                    className="form-textarea"
+                                                    rows="2"
+                                                    placeholder="Enter for Students"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="form-row">
+                                            <div className="form-group">
+                                                <label>👍 Good:</label>
+                                                <textarea
+                                                    name="Good"
+                                                    value={editForm.Good}
+                                                    onChange={handleInputChange}
+                                                    className="form-textarea"
+                                                    rows="2"
+                                                    placeholder="Enter Good"
+                                                />
+                                            </div>
+
+                                            <div className="form-group">
+                                                <label>⚠️ Attention:</label>
+                                                <textarea
+                                                    name="Attention"
+                                                    value={editForm.Attention}
+                                                    onChange={handleInputChange}
+                                                    className="form-textarea"
+                                                    rows="2"
+                                                    placeholder="Enter Attention"
+                                                />
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
+
+                                <div className="form-group">
+                                    <label>🙏 Prayers:</label>
+                                    <textarea
+                                        name="prayers"
+                                        value={editForm.prayers}
+                                        onChange={handleInputChange}
+                                        className="form-textarea"
+                                        rows="3"
+                                        placeholder="Enter Prayers"
+                                    />
+                                </div>
+                            </>
+                        )}
+
+                        {/* Image Upload for all */}
+                        <div className="form-group">
+                            <label>🖼️ Image:</label>
+                            <input
+                                type="file"
+                                name="image"
+                                onChange={handleInputChange}
+                                className="form-input"
+                                accept="image/*"
+                            />
+                            {imagePreview && (
+                                <div className="image-preview">
+                                    <img src={imagePreview} alt="Preview" style={{ maxWidth: '200px', marginTop: '10px' }} />
+                                </div>
+                            )}
                         </div>
-                    </div>
-                )}
+
+                        <div className="form-buttons">
+                            <button type="button" className="btn btn-secondary" onClick={handleCancelEdit}>
+                                Cancel
+                            </button>
+                            <button type="submit" className="btn btn-primary">
+                                Update Rasi
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        );
+    };
+
+    // Render Daily Content
+    const renderDailyContent = () => {
+        if (!dailyData.length) return <div className="no-data">No daily data available</div>;
+
+        const groupedByDate = dailyData.reduce((acc, item) => {
+            acc[item.date] = item;
+            return acc;
+        }, {});
+
+        return (
+            <div className="daily-container">
+                {/* Edit Form Modal will be rendered by renderEditModal() */}
 
                 {/* Date Selector with Calendar View */}
                 <div className="date-selector-container">
@@ -550,6 +1552,8 @@ const RasiAllList = () => {
                             <div className="rasi-grid">
                                 {groupedByDate[selectedDate].data?.map((rasi, index) => {
                                     const rasiInfo = rasiData[rasi.rasiId] || { name: rasi.name, color: '#666', emoji: '⭐' };
+                                    // Get the parent ID for daily
+                                    const parentId = groupedByDate[selectedDate].id;
 
                                     return (
                                         <div
@@ -569,7 +1573,7 @@ const RasiAllList = () => {
 
                                                     <button
                                                         className="edit-btn"
-                                                        onClick={() => handleEditClick(rasi, selectedDate)}
+                                                        onClick={() => handleEditClick(rasi, 'daily', selectedDate, parentId)}
                                                         title="Edit Rasi"
                                                     >
                                                         <span className="edit-icon">✏️</span>
@@ -659,9 +1663,6 @@ const RasiAllList = () => {
                                 <span className="period-icon">🗓️</span>
                                 {week.date}
                             </h3>
-                            {/* <span className="period-count">
-                                {week.rasi?.length || 0} 
-                            </span> */}
                         </div>
 
                         <div className="rasi-grid">
@@ -671,6 +1672,15 @@ const RasiAllList = () => {
                                         <div className="rasi-title">
                                             <div className="rasi-emoji">{rasiData[rasi.rasi]?.emoji || '⭐'}</div>
                                             <h4>{rasi.name || rasiData[rasi.rasi]?.name || `ராசி ${rasi.rasi}`}</h4>
+                                            <button
+                                                className="edit-btn"
+                                                onClick={() => handleEditClick(rasi, 'weekly', week, week.id)}
+                                                title="Edit Weekly Rasi"
+                                                style={{ marginLeft: 'auto' }}
+                                            >
+                                                <span className="edit-icon">✏️</span>
+                                                Edit
+                                            </button>
                                         </div>
                                     </div>
 
@@ -744,9 +1754,6 @@ const RasiAllList = () => {
                                 <span className="lang-badge">
                                     {month.mon_lan === 'tamil' ? 'தமிழ்' : 'English'}
                                 </span>
-                                {/* <span className="period-count">
-                                    {month.rasi?.length || 0} Rasis
-                                </span> */}
                             </div>
                         </div>
 
@@ -776,6 +1783,15 @@ const RasiAllList = () => {
                                                         <div className="rasi-id">Rasi ID: {rasiId}</div>
                                                     )}
                                                 </div>
+                                                <button
+                                                    className="edit-btn"
+                                                    onClick={() => handleEditClick(rasi, 'monthly', month, month.id)}
+                                                    title="Edit Monthly Rasi"
+                                                    style={{ marginLeft: 'auto' }}
+                                                >
+                                                    <span className="edit-icon">✏️</span>
+                                                    Edit
+                                                </button>
                                             </div>
                                         </div>
 
@@ -844,9 +1860,6 @@ const RasiAllList = () => {
                                 <span className="lang-badge">
                                     {yearItem.mon_lan === 'tamil' ? 'தமிழ்' : 'English'}
                                 </span>
-                                {/* <span className="period-count">
-                                    {yearItem.rasi?.length || 0} Rasis
-                                </span> */}
                             </div>
                         </div>
 
@@ -874,6 +1887,15 @@ const RasiAllList = () => {
                                                     <h4>{rasi.name || rasiInfo.name}</h4>
                                                     <div className="rasi-id">Rasi ID: {rasiId}</div>
                                                 </div>
+                                                <button
+                                                    className="edit-btn"
+                                                    onClick={() => handleEditClick(rasi, 'yearly', yearItem, rasi.id)}
+                                                    title="Edit Yearly Rasi"
+                                                    style={{ marginLeft: 'auto' }}
+                                                >
+                                                    <span className="edit-icon">✏️</span>
+                                                    Edit
+                                                </button>
                                             </div>
                                         </div>
 
@@ -944,7 +1966,6 @@ const RasiAllList = () => {
             </div>
         );
     };
-
 
     // Render Loading State
     const renderLoading = () => (
@@ -1066,7 +2087,6 @@ const RasiAllList = () => {
                             <span className="tab-icon">📆</span>
                             Yearly
                         </button>
-
                     </div>
                 </div>
 
@@ -1075,6 +2095,9 @@ const RasiAllList = () => {
                     {renderContent()}
                 </div>
             </div>
+
+            {/* Edit Modal (rendered outside main content) */}
+            {isEditing && renderEditModal()}
         </div>
     );
 };

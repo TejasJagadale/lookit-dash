@@ -63,6 +63,128 @@
   gap: 8px;
 }
 
+/* Dynamic Table Styles */
+.dynamic-table-container {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 20px;
+  background: #f9f9f9;
+}
+
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.table-header h4 {
+  margin: 0;
+  color: #333;
+}
+
+.btn-add-row {
+  background: #4CAF50;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.btn-add-row:hover {
+  background: #45a049;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  margin-bottom: 15px;
+}
+
+.dynamic-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+}
+
+.dynamic-table th,
+.dynamic-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.dynamic-table th {
+  background: #f2f2f2;
+  font-weight: bold;
+}
+
+.table-header-input {
+  width: 100%;
+  padding: 6px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.table-cell-input {
+  width: 100%;
+  padding: 6px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.btn-remove-row {
+  background: #f44336;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.btn-remove-row:hover {
+  background: #d32f2f;
+}
+
+.table-controls {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.btn-add-column {
+  background: #2196F3;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.btn-add-column:hover {
+  background: #0b7dda;
+}
+
+.btn-remove-column {
+  background: #ff9800;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.btn-remove-column:hover {
+  background: #e68a00;
+}
+
 .tab {
   flex: 1;
   padding: 10px;
@@ -342,15 +464,15 @@
   border-radius: 10px;
 }
 
-.month-group{
+.month-group {
   margin-bottom: 20px;
 }
 
-.week-group{
+.week-group {
   margin-bottom: 20px;
 }
 
-.info-text{
+.info-text {
   padding: 10px 0;
 }
 

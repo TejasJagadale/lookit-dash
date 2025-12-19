@@ -388,43 +388,7 @@ const MainContent = ({ activeMenu }) => {
             <p>Here's what's happening with your content today</p>
           </div>
           <div className="welcome-actions">
-            {/* <button className="btn-primary" onClick={() => window.location.hash = 'Add Article'}>
-              Create New Post
-            </button>
-            <button className="btn-secondary">View Analytics</button> */}
           </div>
-        </div>
-
-        {/* Statistics Grid */}
-        <div className="stats-grid">
-          <StatCard
-            title="Total Views"
-            value={Number(safeDashboardData.total_views) || 0}
-            change={12.5}
-            icon="👁️"
-            color="#667eea"
-          />
-          <StatCard
-            title="Total Posts"
-            value={Number(safeDashboardData.total_posts) || 0}
-            change={8.2}
-            icon="📝"
-            color="#764ba2"
-          />
-          <StatCard
-            title="Active Users"
-            value={Number(safeDashboardData.active_users) || 0}
-            change={15.3}
-            icon="👥"
-            color="#f093fb"
-          />
-          <StatCard
-            title="Engagement Rate"
-            value={Math.round((Number(safeDashboardData.active_users || 0) / (Number(safeDashboardData.total_posts) || 1)) * 100) || 0}
-            change={3.7}
-            icon="💫"
-            color="#4ecdc4"
-          />
         </div>
 
         {/* Charts and Analytics Section */}
