@@ -5,30 +5,31 @@ const Updates = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
   const [editingId, setEditingId] = useState(null);
-  
+
   // Form states
   const [formData, setFormData] = useState({
     name: '',
     image: '',
-    isActive: 'yes'
+    isActive: 'yes',
+    user_id: '84'
   });
-  
+
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState('');
-  
+
   // Fetch categories on component mount
   useEffect(() => {
     fetchCategories();
   }, []);
-  
+
   // Fetch all categories
   const fetchCategories = async () => {
     setLoading(true);
     try {
-      const response = await fetch('https://tnreaders.in/mobile/articles-category');
+      const response = await fetch('https://tnreaders.in/mobile/articles');
       const data = await response.json();
       console.log(data.data);
-      
+
       setCategories(data.data);
     } catch (error) {
       console.error('Error fetching categories:', error);
@@ -37,7 +38,7 @@ const Updates = () => {
       setLoading(false);
     }
   };
-  
+
   // Handle form input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -46,7 +47,7 @@ const Updates = () => {
       [name]: value
     });
   };
-  
+
   // Handle image file selection
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -59,94 +60,97 @@ const Updates = () => {
       });
     }
   };
-  
+
   // Handle form submission (Add/Update)
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     console.log(formData.isActive);
-    
-    
+
+
     if (!formData.name.trim()) {
       alert('Please enter category name');
       return;
     }
-    
+
     const formPayload = new FormData();
     formPayload.append('name', formData.name);
     formPayload.append('isActive', formData.isActive);
-    
+    formPayload.append('user_id', formData.user_id);
+    console.log(formData.user_id);
+
     if (imageFile) {
       formPayload.append('image', imageFile);
     } else if (formData.image && !imageFile) {
       formPayload.append('image', formData.image);
     }
-    
+
     try {
       let response;
 
       console.log(formData.image);
-      
+
       if (editingId) {
         // Update existing category
-        response = await fetch(`https://tnreaders.in/mobile/articles-category-update/${editingId}`, {
+        response = await fetch(`https://tnreaders.in/mobile/post-update/${editingId}`, {
           method: 'POST',
           body: formPayload
         });
-        
+
         if (response.ok) {
           alert('Category updated successfully!');
         }
       } else {
         console.log(formPayload);
-        
+
         // Add new category
-        response = await fetch('https://tnreaders.in/mobile/articles-category-add', {
+        response = await fetch('https://tnreaders.in/mobile/post-store', {
           method: 'POST',
           body: formPayload
         });
-        
+
         if (response.ok) {
           alert('Category added successfully!');
         }
       }
-      
+
       // Reset form and refresh list
       resetForm();
       fetchCategories();
-      
+
     } catch (error) {
       console.error('Error saving category:', error);
       alert('Failed to save category');
     }
   };
-  
+
   // Edit category
   const handleEdit = (category) => {
     setEditingId(category.id);
     setFormData({
       name: category.name || '',
       image: category.image || '',
-      isActive: category.isActive || 'yes'
+      isActive: category.isActive || 'yes',
+      user_id: '84'
     });
     setImagePreview(category.image ? `${category.image}` : '');
     setImageFile(null);
-    
+
     // Scroll to form
     document.querySelector('.category-form-container').scrollIntoView({ behavior: 'smooth' });
   };
-  
+
   // Delete category
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this category?')) {
       return;
     }
-    
+
     try {
-      const response = await fetch(`https://tnreaders.in/mobile/articles-category-destroy/${id}`, {
+      const response = await fetch(`https://tnreaders.in/mobile/post-delete/${id}`, {
         method: 'POST'
       });
-      
+
       if (response.ok) {
         alert('Category deleted successfully!');
         fetchCategories();
@@ -156,28 +160,29 @@ const Updates = () => {
       alert('Failed to delete category');
     }
   };
-  
+
   // Reset form
   const resetForm = () => {
     setFormData({
       name: '',
       image: '',
-      isActive: 'yes'
+      isActive: 'yes',
+      user_id: ''
     });
     setImageFile(null);
     setImagePreview('');
     setEditingId(null);
   };
-  
+
   return (
-    <div className="article-categories-container">      
+    <div className="article-categories-container">
       <main className="main-content">
         {/* Add/Edit Form */}
         <section className="category-form-container">
           <h2>{editingId ? 'Edit Update Post' : 'Add New Updates Post'}</h2>
           <form onSubmit={handleSubmit} className="category-form">
             <div className="form-group">
-              <label htmlFor="name">Category Name *</label>
+              <label htmlFor="name">Post Name *</label>
               <input
                 type="text"
                 id="name"
@@ -188,9 +193,9 @@ const Updates = () => {
                 required
               />
             </div>
-            
+
             <div className="form-group">
-              <label htmlFor="image">Category Image</label>
+              <label htmlFor="image">Post Image</label>
               <input
                 type="file"
                 id="image"
@@ -199,31 +204,31 @@ const Updates = () => {
                 onChange={handleImageChange}
                 className="file-input"
               />
-              
+
               {imagePreview && (
                 <div className="image-preview">
                   <img src={imagePreview} alt="Preview" />
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     className="remove-image-btn"
                     onClick={() => {
                       setImagePreview('');
                       setImageFile(null);
-                      setFormData({...formData, image: ''});
+                      setFormData({ ...formData, image: '' });
                     }}
                   >
                     Remove Image
                   </button>
                 </div>
               )}
-              
+
               {!imagePreview && formData.image && (
                 <div className="current-image">
                   <p>Current Image: {formData.image}</p>
                 </div>
               )}
             </div>
-            
+
             <div className="form-group">
               <label htmlFor="isActive">Status</label>
               <select
@@ -236,15 +241,15 @@ const Updates = () => {
                 <option value="no">Inactive</option>
               </select>
             </div>
-            
+
             <div className="form-actions">
               <button type="submit" className="btn btn-primary">
-                {editingId ? 'Update Category' : 'Add Category'}
+                {editingId ? 'Update Post' : 'Add Post'}
               </button>
-              
+
               {editingId && (
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   className="btn btn-secondary"
                   onClick={resetForm}
                 >
@@ -254,12 +259,12 @@ const Updates = () => {
             </div>
           </form>
         </section>
-        
+
         {/* Categories List */}
         <section className="categories-list-container">
           <div className="list-header">
-            <h2>All Categories ({categories.length})</h2>
-            <button 
+            <h2>All Posts ({categories.length})</h2>
+            <button
               className="btn btn-refresh"
               onClick={fetchCategories}
               disabled={loading}
@@ -267,12 +272,12 @@ const Updates = () => {
               {loading ? 'Refreshing...' : 'Refresh List'}
             </button>
           </div>
-          
+
           {loading && categories.length === 0 ? (
             <div className="loading-spinner">Loading categories...</div>
           ) : categories.length === 0 ? (
             <div className="empty-state">
-              <p>No categories found. Add your first category!</p>
+              <p>No Posts found. Add your first category!</p>
             </div>
           ) : (
             <div className="categories-grid">
@@ -284,11 +289,11 @@ const Updates = () => {
                       {category.isActive === 'yes' ? 'Active' : 'Inactive'}
                     </span>
                   </div>
-                  
+
                   {category.image && (
                     <div className="card-image">
-                      <img 
-                        src={`${category.image}`} 
+                      <img
+                        src={`${category.image}`}
                         alt={category.name}
                         onError={(e) => {
                           e.target.style.display = 'none';
@@ -296,15 +301,15 @@ const Updates = () => {
                       />
                     </div>
                   )}
-                  
+
                   <div className="card-actions">
-                    <button 
+                    <button
                       className="btn btn-edit"
                       onClick={() => handleEdit(category)}
                     >
                       Edit
                     </button>
-                    <button 
+                    <button
                       className="btn btn-delete"
                       onClick={() => handleDelete(category.id)}
                     >
@@ -317,7 +322,7 @@ const Updates = () => {
           )}
         </section>
       </main>
-      
+
       <footer className="app-footer">
         <p>Total Categories: {categories.length}</p>
         {editingId && <p className="editing-notice">Editing Mode Active</p>}
