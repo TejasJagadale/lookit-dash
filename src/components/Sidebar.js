@@ -44,6 +44,11 @@ const Sidebar = ({ isLoggedIn, onLoginClick, onLogout, activeMenu, setActiveMenu
       icon: '/assets/astrology.png'
     },
     {
+      name: 'Updates',
+      submenus: [],
+      icon: '/assets/updated.png'
+    },
+    {
       name: 'Notifications',
       submenus: [],
       icon: '/assets/bell.png'

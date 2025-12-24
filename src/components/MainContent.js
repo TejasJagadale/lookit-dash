@@ -19,6 +19,7 @@ import RasiAllList from './RasiAllList';
 
 // Import necessary icons
 import { FaArrowUp } from 'react-icons/fa';
+import Updates from './Updates';
 
 const MainContent = ({ activeMenu }) => {
   const [categories, setCategories] = React.useState({});
@@ -27,7 +28,7 @@ const MainContent = ({ activeMenu }) => {
   const [apiResponse, setApiResponse] = React.useState(null);
   const [dashboardData, setDashboardData] = React.useState(null);
   const [dashboardLoading, setDashboardLoading] = React.useState(false);
-  
+
   // State for scroll-to-top functionality
   const [showScrollToTop, setShowScrollToTop] = React.useState(false);
   const [prevActiveMenu, setPrevActiveMenu] = React.useState(activeMenu);
@@ -62,7 +63,7 @@ const MainContent = ({ activeMenu }) => {
 
     // Add scroll event listener
     window.addEventListener('scroll', handleScroll);
-    
+
     // Check on initial load
     handleScroll();
 
@@ -80,13 +81,13 @@ const MainContent = ({ activeMenu }) => {
         top: 0,
         behavior: 'smooth'
       });
-      
+
       // Also scroll to top of the main content area
       const contentBody = document.querySelector('.content-body');
       if (contentBody) {
         contentBody.scrollTop = 0;
       }
-      
+
       // Update previous menu state
       setPrevActiveMenu(activeMenu);
     }
@@ -106,7 +107,7 @@ const MainContent = ({ activeMenu }) => {
       top: 0,
       behavior: 'smooth'
     });
-    
+
     // Also scroll the content body if it exists
     const contentBody = document.querySelector('.content-body');
     if (contentBody) {
@@ -517,7 +518,9 @@ const MainContent = ({ activeMenu }) => {
       case 'List & Edit Articles':
         return <Listarticle />;
       case 'List and Edit Articles':
-        return <ListarticleRm />
+        return <ListarticleRm />;
+      case 'Updates':
+        return <Updates />;
       case 'Notifications':
         return <NotificationList />;
       case 'Schedule':
@@ -538,10 +541,10 @@ const MainContent = ({ activeMenu }) => {
       <div className="content-body">
         {renderContent()}
       </div>
-      
+
       {/* Scroll to Top Button */}
       {showScrollToTop && (
-        <button 
+        <button
           className="scroll-to-top-btn"
           onClick={scrollToTop}
           aria-label="Scroll to top"
