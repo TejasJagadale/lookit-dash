@@ -6,9 +6,9 @@ const Updates = () => {
   const [loading, setLoading] = useState(false);
   const [editingId, setEditingId] = useState(null);
 
-  // Form states
+  // Form states - using category_name instead of name
   const [formData, setFormData] = useState({
-    name: '',
+    category_name: '',  // Changed from 'name'
     image: '',
     isActive: 'yes',
     user_id: '84'
@@ -29,7 +29,6 @@ const Updates = () => {
       const response = await fetch('https://tnreaders.in/mobile/articles');
       const data = await response.json();
       console.log(data.data);
-
       setCategories(data.data);
     } catch (error) {
       console.error('Error fetching categories:', error);
@@ -65,19 +64,20 @@ const Updates = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    console.log(formData.isActive);
+    console.log('Form Data:', formData);
+    console.log('isActive:', formData.isActive);
 
-
-    if (!formData.name.trim()) {
+    if (!formData.category_name.trim()) {  // Changed from formData.name
       alert('Please enter category name');
       return;
     }
 
     const formPayload = new FormData();
-    formPayload.append('name', formData.name);
+    formPayload.append('category_name', formData.category_name);  // Changed from 'name'
     formPayload.append('isActive', formData.isActive);
     formPayload.append('user_id', formData.user_id);
-    console.log(formData.user_id);
+    
+    console.log('User ID:', formData.user_id);
 
     if (imageFile) {
       formPayload.append('image', imageFile);
@@ -85,23 +85,35 @@ const Updates = () => {
       formPayload.append('image', formData.image);
     }
 
+    // Log form data for debugging
+    console.log('FormData entries:');
+    for (let pair of formPayload.entries()) {
+      console.log(pair[0] + ': ' + pair[1]);
+    }
+
     try {
       let response;
 
-      console.log(formData.image);
+      console.log('Image:', formData.image);
 
       if (editingId) {
         // Update existing category
+        console.log('Updating post with ID:', editingId);
         response = await fetch(`https://tnreaders.in/mobile/post-update/${editingId}`, {
           method: 'POST',
           body: formPayload
         });
 
         if (response.ok) {
-          alert('Category updated successfully!');
+          alert('Post updated successfully!');
+        } else {
+          const errorData = await response.json();
+          console.error('Update failed:', errorData);
+          alert('Update failed: ' + (errorData.message || 'Unknown error'));
         }
       } else {
-        console.log(formPayload);
+        console.log('Adding new post');
+        console.log('Payload:', formPayload);
 
         // Add new category
         response = await fetch('https://tnreaders.in/mobile/post-store', {
@@ -110,7 +122,11 @@ const Updates = () => {
         });
 
         if (response.ok) {
-          alert('Category added successfully!');
+          alert('Post added successfully!');
+        } else {
+          const errorData = await response.json();
+          console.error('Add failed:', errorData);
+          alert('Add failed: ' + (errorData.message || 'Unknown error'));
         }
       }
 
@@ -119,8 +135,8 @@ const Updates = () => {
       fetchCategories();
 
     } catch (error) {
-      console.error('Error saving category:', error);
-      alert('Failed to save category');
+      console.error('Error saving post:', error);
+      alert('Failed to save post: ' + error.message);
     }
   };
 
@@ -128,21 +144,31 @@ const Updates = () => {
   const handleEdit = (category) => {
     setEditingId(category.id);
     setFormData({
-      name: category.name || '',
+      category_name: category.category_name || category.name || '',  // Handle both category_name and name
       image: category.image || '',
       isActive: category.isActive || 'yes',
       user_id: '84'
     });
-    setImagePreview(category.image ? `${category.image}` : '');
+    
+    if (category.image) {
+      const imageUrl = category.image.startsWith('http') ? category.image : `${category.image}`;
+      setImagePreview(imageUrl);
+    } else {
+      setImagePreview('');
+    }
+    
     setImageFile(null);
 
     // Scroll to form
-    document.querySelector('.category-form-container').scrollIntoView({ behavior: 'smooth' });
+    const formElement = document.querySelector('.category-form-container');
+    if (formElement) {
+      formElement.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
   // Delete category
   const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this category?')) {
+    if (!window.confirm('Are you sure you want to delete this post?')) {
       return;
     }
 
@@ -152,22 +178,26 @@ const Updates = () => {
       });
 
       if (response.ok) {
-        alert('Category deleted successfully!');
+        alert('Post deleted successfully!');
         fetchCategories();
+      } else {
+        const errorData = await response.json();
+        console.error('Delete failed:', errorData);
+        alert('Delete failed: ' + (errorData.message || 'Unknown error'));
       }
     } catch (error) {
-      console.error('Error deleting category:', error);
-      alert('Failed to delete category');
+      console.error('Error deleting post:', error);
+      alert('Failed to delete post: ' + error.message);
     }
   };
 
   // Reset form
   const resetForm = () => {
     setFormData({
-      name: '',
+      category_name: '',  // Changed from 'name'
       image: '',
       isActive: 'yes',
-      user_id: ''
+      user_id: '84'
     });
     setImageFile(null);
     setImagePreview('');
@@ -182,14 +212,15 @@ const Updates = () => {
           <h2>{editingId ? 'Edit Update Post' : 'Add New Updates Post'}</h2>
           <form onSubmit={handleSubmit} className="category-form">
             <div className="form-group">
-              <label htmlFor="name">Post Name *</label>
+              {/* Changed input name to category_name */}
+              <label htmlFor="category_name">Post Name *</label>
               <input
                 type="text"
-                id="name"
-                name="name"
-                value={formData.name}
+                id="category_name"
+                name="category_name"
+                value={formData.category_name}
                 onChange={handleInputChange}
-                placeholder="Enter category name"
+                placeholder="Enter post name"
                 required
               />
             </div>
@@ -260,7 +291,7 @@ const Updates = () => {
           </form>
         </section>
 
-        {/* Categories List */}
+        {/* Posts List */}
         <section className="categories-list-container">
           <div className="list-header">
             <h2>All Posts ({categories.length})</h2>
@@ -274,27 +305,28 @@ const Updates = () => {
           </div>
 
           {loading && categories.length === 0 ? (
-            <div className="loading-spinner">Loading categories...</div>
+            <div className="loading-spinner">Loading posts...</div>
           ) : categories.length === 0 ? (
             <div className="empty-state">
-              <p>No Posts found. Add your first category!</p>
+              <p>No posts found. Add your first post!</p>
             </div>
           ) : (
             <div className="categories-grid">
               {categories.map((category) => (
                 <div key={category.id} className="category-card">
                   <div className="card-header">
-                    <h3>{category.name}</h3>
+                    {/* Display category_name or name from API */}
+                    <h3>{category.category_name || category.name || 'Unnamed Post'}</h3>
                     <span className={`status-badge ${category.isActive === 'yes' ? 'active' : 'inactive'}`}>
                       {category.isActive === 'yes' ? 'Active' : 'Inactive'}
                     </span>
-                  </div>
+                  </div>    
 
                   {category.image && (
                     <div className="card-image">
                       <img
                         src={`${category.image}`}
-                        alt={category.name}
+                        alt={category.category_name || category.name || 'Post'}
                         onError={(e) => {
                           e.target.style.display = 'none';
                         }}
@@ -324,7 +356,7 @@ const Updates = () => {
       </main>
 
       <footer className="app-footer">
-        <p>Total Categories: {categories.length}</p>
+        <p>Total Posts: {categories.length}</p>
         {editingId && <p className="editing-notice">Editing Mode Active</p>}
       </footer>
     </div>
