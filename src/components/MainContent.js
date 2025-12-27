@@ -20,6 +20,7 @@ import RasiAllList from './RasiAllList';
 // Import necessary icons
 import { FaArrowUp } from 'react-icons/fa';
 import Updates from './Updates';
+import Notiupdate from './Notiupdate';
 
 const MainContent = ({ activeMenu }) => {
   const [categories, setCategories] = React.useState({});
@@ -521,6 +522,8 @@ const MainContent = ({ activeMenu }) => {
         return <ListarticleRm />;
       case 'Updates':
         return <Updates />;
+      case 'Notification Update':
+        return <Notiupdate />;
       case 'Notifications':
         return <NotificationList />;
       case 'Schedule':

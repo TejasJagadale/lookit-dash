@@ -49,7 +49,7 @@ const Sidebar = ({ isLoggedIn, onLoginClick, onLogout, activeMenu, setActiveMenu
       icon: '/assets/updated.png'
     },
     {
-      name: 'Notifications',
+      name: 'Notification Update',
       submenus: [],
       icon: '/assets/bell.png'
     },
