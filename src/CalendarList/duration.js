@@ -23,9 +23,10 @@ import {
   Alert,
   Snackbar,
   Card,
-  CardContent
+  CardContent,
+  CircularProgress
 } from '@mui/material';
-import { Add, Delete, Save } from '@mui/icons-material';
+import { Add, Delete, Save, CloudUpload } from '@mui/icons-material';
 import "./simple.css"
 
 const rasiOptions = [
@@ -58,6 +59,9 @@ const RasiUpdateForm = () => {
   const [yearlyLanguage, setYearlyLanguage] = useState('english');
   const [monthlyLanguage, setMonthlyLanguage] = useState('english');
   const [notification, setNotification] = useState({ open: false, message: '', severity: 'success' });
+  const [uploading, setUploading] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState('');
 
   // Base form state
   const [formData, setFormData] = useState({
@@ -177,6 +181,8 @@ const RasiUpdateForm = () => {
     setFormData(resetData);
     setKiraganamRows([{}]);
     setKiraganamEyeRows([{}]);
+    setSelectedImage(null);
+    setImagePreview('');
   };
 
   const handleInputChange = (e) => {
@@ -197,6 +203,101 @@ const RasiUpdateForm = () => {
         [name]: value
       }));
     }
+  };
+
+  // Handle image upload
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      setNotification({
+        open: true,
+        message: 'Please select a valid image file (JPEG, PNG, GIF, WebP)',
+        severity: 'error'
+      });
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setNotification({
+        open: true,
+        message: 'Image size should be less than 5MB',
+        severity: 'error'
+      });
+      return;
+    }
+
+    setSelectedImage(file);
+    
+    // Create preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result);
+    };
+    reader.readAsDataURL(file);
+
+    // Upload image to server
+    await uploadImageToServer(file);
+  };
+
+  const uploadImageToServer = async (file) => {
+    setUploading(true);
+    const formData = new FormData();
+    formData.append('image', file);
+    
+    // Generate a unique filename based on rasiId, date, and timestamp
+    const rasiId = formData.rasiId || 'unknown';
+    const date = new Date().toISOString().split('T')[0];
+    const timestamp = Date.now();
+    const filename = `${rasiId}_${date}_${timestamp}_${file.name}`;
+    formData.append('filename', filename);
+
+    try {
+      // You need to create an endpoint for image upload on your server
+      // For example: 'https://tnreaders.in/mobile/upload-image'
+      const uploadResponse = await axios.post('https://tnreaders.in/mobile/upload-image', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
+      if (uploadResponse.data.success) {
+        // Update formData with the uploaded image URL
+        setFormData(prev => ({
+          ...prev,
+          image: uploadResponse.data.imageUrl
+        }));
+        
+        setNotification({
+          open: true,
+          message: 'Image uploaded successfully!',
+          severity: 'success'
+        });
+      } else {
+        throw new Error(uploadResponse.data.message || 'Failed to upload image');
+      }
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      setNotification({
+        open: true,
+        message: `Failed to upload image: ${error.message}`,
+        severity: 'error'
+      });
+      setSelectedImage(null);
+      setImagePreview('');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const removeImage = () => {
+    setSelectedImage(null);
+    setImagePreview('');
+    setFormData(prev => ({ ...prev, image: '' }));
   };
 
   // Also update the handleMonthlyDateChange function to ensure proper formatting:
@@ -392,6 +493,17 @@ const RasiUpdateForm = () => {
         return false;
       }
     }
+    
+    // Check if image is uploaded for all tabs
+    if (!formData.image) {
+      setNotification({
+        open: true,
+        message: 'Please upload an image',
+        severity: 'error'
+      });
+      return false;
+    }
+    
     return true;
   };
 
@@ -476,7 +588,6 @@ const RasiUpdateForm = () => {
   };
 
   // Update formData when language changes
-  // Update formData when language changes
   useEffect(() => {
     if (activeTab === 2) {
       setFormData(prev => ({
@@ -502,7 +613,6 @@ const RasiUpdateForm = () => {
         if (monthlyLanguage === 'tamil' && newMonth && monthlyDate.year) {
           updatedFormData.tamil_month_name = `${newMonth}-${monthlyDate.year}`;
           console.log(updatedFormData);
-
         }
 
         setFormData(prev => ({ ...prev, ...updatedFormData }));
@@ -625,6 +735,109 @@ const RasiUpdateForm = () => {
         </Grid>
       );
     }
+  };
+
+  // Render image upload section
+  const renderImageUpload = () => {
+    return (
+      <Grid item xs={12}>
+        <Card>
+          <CardContent>
+            <Typography variant="h6" gutterBottom>
+              Upload Image *
+            </Typography>
+            
+            <Box sx={{ mb: 2 }}>
+              <input
+                accept="image/*"
+                style={{ display: 'none' }}
+                id="image-upload"
+                type="file"
+                onChange={handleImageUpload}
+                disabled={uploading}
+              />
+              <label htmlFor="image-upload">
+                <Button
+                  variant="contained"
+                  component="span"
+                  startIcon={<CloudUpload />}
+                  disabled={uploading}
+                >
+                  {uploading ? 'Uploading...' : 'Select Image'}
+                </Button>
+              </label>
+              <Typography variant="caption" display="block" sx={{ mt: 1, color: 'text.secondary' }}>
+                Supported formats: JPEG, PNG, GIF, WebP (Max 5MB)
+              </Typography>
+            </Box>
+
+            {uploading && (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+                <CircularProgress size={24} />
+                <Typography>Uploading image...</Typography>
+              </Box>
+            )}
+
+            {imagePreview && (
+              <Box sx={{ mt: 2 }}>
+                <Typography variant="subtitle2" gutterBottom>
+                  Image Preview:
+                </Typography>
+                <Box sx={{ position: 'relative', display: 'inline-block' }}>
+                  <img
+                    src={imagePreview}
+                    alt="Preview"
+                    style={{ 
+                      maxWidth: '300px', 
+                      maxHeight: '200px',
+                      border: '1px solid #ddd',
+                      borderRadius: '4px'
+                    }}
+                  />
+                  <IconButton
+                    size="small"
+                    onClick={removeImage}
+                    sx={{
+                      position: 'absolute',
+                      top: 5,
+                      right: 5,
+                      backgroundColor: 'rgba(255, 255, 255, 0.8)'
+                    }}
+                    color="error"
+                  >
+                    <Delete fontSize="small" />
+                  </IconButton>
+                </Box>
+              </Box>
+            )}
+
+            {formData.image && !imagePreview && (
+              <Box sx={{ mt: 2 }}>
+                <Typography variant="subtitle2" gutterBottom>
+                  Current Image URL:
+                </Typography>
+                <TextField
+                  fullWidth
+                  size="small"
+                  value={formData.image}
+                  disabled
+                  helperText="Image already uploaded"
+                />
+                <Button
+                  size="small"
+                  onClick={removeImage}
+                  color="error"
+                  startIcon={<Delete />}
+                  sx={{ mt: 1 }}
+                >
+                  Remove Image
+                </Button>
+              </Box>
+            )}
+          </CardContent>
+        </Card>
+      </Grid>
+    );
   };
 
   return (
@@ -1309,16 +1522,8 @@ const RasiUpdateForm = () => {
             </>
           )}
 
-          {/* Common field for all tabs */}
-          <Grid item xs={12}>
-            <TextField
-              fullWidth
-              label="Image URL"
-              name="image"
-              value={formData.image}
-              onChange={handleInputChange}
-            />
-          </Grid>
+          {/* Image Upload Section - for all tabs */}
+          {renderImageUpload()}
 
           {/* Prayers field for Weekly and Monthly */}
           {(activeTab === 0 || activeTab === 1 || activeTab === 2) && (
@@ -1358,8 +1563,9 @@ const RasiUpdateForm = () => {
             startIcon={<Save />}
             onClick={handleSubmit}
             size="large"
+            disabled={uploading}
           >
-            Save {getTabName()} Update
+            {uploading ? 'Uploading...' : `Save ${getTabName()} Update`}
           </Button>
         </Box>
       </Paper>
