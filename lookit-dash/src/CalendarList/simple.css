@@ -1,0 +1,49 @@
+.css-19kzrtu {
+    padding: 0px !important;
+}
+
+.css-1qg4fmi-MuiPaper-root {
+    background-color: #fff;
+    box-shadow: none !important;
+    background-image: var(--Paper-overlay);
+    padding: 24px;
+}
+
+.css-17fpwt7-MuiGrid-root {
+    width: 100% !important;
+    box-sizing: border-box;
+}
+
+.css-1it4a80-MuiTypography-root {
+    text-align: center;
+}
+
+@media (max-width: 740px) {
+    .css-hzcega-MuiTabs-list {
+        display: flex;
+        overflow: scroll;
+    }
+
+    .css-1qg4fmi-MuiPaper-root {
+        background-color: #fff;
+        color: rgba(0, 0, 0, 0.87);
+        -webkit-transition: box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+        transition: box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+        border-radius: 4px;
+        box-shadow: var(--Paper-shadow);
+        background-image: var(--Paper-overlay);
+        padding: 10px !important;
+    }
+
+    .css-1it4a80-MuiTypography-root {
+        margin: 0;
+        font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+        font-weight: 400;
+        font-size: 1.125rem !important;
+        text-align: center;
+    }
+}
+
+.css-p731s8-MuiFormControl-root {
+    width: 100%;
+}

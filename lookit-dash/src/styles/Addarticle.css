@@ -1,0 +1,393 @@
+.alignthem {
+  display: flex;
+  justify-content: center;
+}
+
+/* Word counter styles */
+.word-counter {
+  margin-top: 8px;
+  font-size: 14px;
+  color: #666;
+  text-align: right;
+}
+
+.word-counter.highlight {
+  color: #333;
+  font-weight: 500;
+}
+
+.word-limit {
+  margin-left: 8px;
+  font-weight: 600;
+}
+
+.word-limit.valid {
+  color: #28a745;
+}
+
+.word-limit.invalid {
+  color: #dc3545;
+}
+
+/* Form hint */
+.form-hint {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #666;
+  font-style: italic;
+}
+
+/* Required field indicator */
+.form-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.form-label:after {
+  content: attr(data-required);
+  color: #dc3545;
+  font-size: 12px;
+}
+
+/* Adjust textarea height */
+.form-textarea {
+  min-height: 200px;
+  resize: vertical;
+}
+
+.botons {
+  padding: 10px;
+  border-radius: 5px;
+  text-align: right;
+  display: flex;
+  justify-content: space-between;
+}
+
+.botons1 {
+  padding: 10px;
+  border-radius: 5px;
+  border: none;
+  background-color: rgb(211, 211, 211);
+}
+
+.loader-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100px;
+}
+
+.loader {
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #3498db;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.add-post-container {
+  font-family: sans-serif;
+  width: 100%;
+  padding: 20px;
+}
+
+.form-title {
+  text-align: center;
+  color: #000;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 6px;
+  color: #333;
+}
+
+.form-select,
+.form-input,
+.form-textarea,
+.form-file {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  /* border: 1.5px solid #00bcd4; */
+  border-radius: 10px;
+  outline: none;
+  box-sizing: border-box;
+  background-color: white;
+  color: black;
+  border: 1px solid gray;
+  /* box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19); */
+}
+
+.form-textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.submit-button {
+  background-color: #4361ee;
+  color: white;
+  font-size: 18px;
+  border: none;
+  padding: 14px;
+  border-radius: 12px;
+  width: 100%;
+  cursor: pointer;
+}
+
+.submit-button:hover {
+  background-color: #1a2e45;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.radio-group {
+  display: flex;
+  gap: 20px;
+  margin-top: 8px;
+}
+
+.radio-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+}
+
+.radio-label input[type="radio"] {
+  margin: 0;
+}
+
+.checking {
+  color: red;
+}
+
+/* existing styles kept above... */
+
+/* Loading overlay for full-screen loader */
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(13, 27, 42, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+/* Re-use your loader animation (tweaked size for overlay) */
+.loading-overlay .loader {
+  border: 6px solid #f3f3f3;
+  border-top: 6px solid #3498db;
+  border-radius: 50%;
+  width: 64px;
+  height: 64px;
+  animation: spin 1s linear infinite;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+}
+
+/* Disabled submit button look */
+.submit-button[disabled],
+.submit-button[aria-disabled="true"] {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Inline field error styling */
+.field-error {
+  color: #c0392b;
+  font-size: 0.9rem;
+  margin-top: 6px;
+}
+
+/* server / global messages */
+.server-message {
+  background: #fff3cd;
+  color: #856404;
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* small image preview style */
+.image-preview {
+  margin-top: 8px;
+  display: inline-block;
+}
+
+.image-preview img {
+  max-width: 140px;
+  max-height: 100px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  object-fit: cover;
+  display: block;
+}
+
+/* keep your @media rules — overlay will still be full-screen */
+/* ----------------------- TOAST UI ----------------------- */
+
+.toast-box {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-20px);
+  background: #333;
+  color: white;
+  padding: 14px 25px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  z-index: 9999;
+  opacity: 0;
+  animation: toastSlide 0.4s forwards;
+}
+
+.toast-box.success {
+  background: #4caf50;
+}
+
+.toast-box.error {
+  background: #ff4c4c;
+}
+
+@keyframes toastSlide {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* ----------------------- PROGRESS BAR ----------------------- */
+
+.progress-container {
+  width: 100%;
+  background: #ddd;
+  border-radius: 10px;
+  margin-bottom: 15px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 20px;
+  background: #00bcd4;
+  color: white;
+  text-align: center;
+  font-size: 13px;
+  font-weight: bold;
+  line-height: 20px;
+  transition: width 0.3s ease;
+}
+
+/* (Your existing CSS remains unchanged) */
+/* ----------------------- TOAST UI ----------------------- */
+
+.toast-box {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-20px);
+  background: #333;
+  color: white;
+  padding: 14px 25px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  z-index: 9999;
+  opacity: 0;
+  animation: toastSlide 0.4s forwards;
+}
+
+.toast-box.success {
+  background: #4caf50;
+}
+
+.toast-box.error {
+  background: #ff4c4c;
+}
+
+@keyframes toastSlide {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* ----------------------- PROGRESS BAR ----------------------- */
+
+.progress-container {
+  width: 100%;
+  background: #ddd;
+  border-radius: 10px;
+  margin-bottom: 15px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 20px;
+  background: #00bcd4;
+  color: white;
+  text-align: center;
+  font-size: 13px;
+  font-weight: bold;
+  line-height: 20px;
+  transition: width 0.3s ease;
+}
+
+/* (Your existing CSS remains unchanged) */
+
+
+@media only screen and (max-width: 768px) {
+  .add-post-container {
+    font-family: sans-serif;
+    width: 100%;
+    padding: 10px;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .radio-group {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    margin-top: 8px;
+  }
+}
